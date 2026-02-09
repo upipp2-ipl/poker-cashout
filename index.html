@@ -81,6 +81,12 @@
     .auditHint b{color:rgba(232,238,252,.92)}
     .auditHint .chip{display:inline-flex;align-items:center;gap:6px;margin-right:10px;margin-top:6px}
     .auditHint .sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+    .hl-black{outline:2px solid rgba(90,160,255,.85); box-shadow:0 0 0 3px rgba(90,160,255,.20);}
+    .hl-purple{outline:2px solid rgba(167,139,250,.85); box-shadow:0 0 0 3px rgba(167,139,250,.20);}
+    .hl-yellow{outline:2px solid rgba(250,204,21,.85); box-shadow:0 0 0 3px rgba(250,204,21,.20);}
+    .hl-pink{outline:2px solid rgba(244,114,182,.85); box-shadow:0 0 0 3px rgba(244,114,182,.20);}
+    .hl-orange{outline:2px solid rgba(251,146,60,.85); box-shadow:0 0 0 3px rgba(251,146,60,.20);}
+
 
 
     .players{display:flex;flex-direction:column;gap:12px}
@@ -288,7 +294,7 @@
 
 <script>
 (() => {
-  const KEY = "poker_admin_option1_v6_audit_highlight";
+  const KEY = "poker_admin_option1_v7_color_highlight_map";
   const ROSTER_KEY = "poker_admin_roster_v1";
 
   const COLORS = ["black","purple","yellow","pink","orange"];
@@ -497,10 +503,10 @@
   
   function applyMismatchHighlights(mismatchedColors){
     // clear
-    document.querySelectorAll('.cell.hl').forEach(el=>el.classList.remove('hl'));
+    document.querySelectorAll('.cell').forEach(el=>el.className = el.className.replace(/\bhl-[a-z]+\b/g, ''));
     if(!mismatchedColors || mismatchedColors.length===0) return;
     for(const c of mismatchedColors){
-      document.querySelectorAll('.cell[data-color="'+c+'"]').forEach(el=>el.classList.add('hl'));
+      document.querySelectorAll('.cell[data-color="'+c+'"]').forEach(el=>el.classList.add('hl-'+c));
     }
   }
 
