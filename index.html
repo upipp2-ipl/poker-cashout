@@ -320,9 +320,11 @@
       </div>
     </div>
     <div class="bd">
-      <div class="note">This section appears when the session is locked.</div>
+      <div class="note">This section appears when the session is locked. “Suggested payouts” is the fastest way for the Bank to settle.</div>
       <div class="outblock">
-        <pre id="payoutText"></pre>
+        <pre id="payoutSuggested"></pre>
+      <div class="sep"></div>
+      <pre id="payoutText"></pre>
       </div>
       <div class="note">Rule: everyone pays the Bank their buy-ins. Bank pays players their final payout (after RF tax). RF tax is 30% of winnings above total buy-ins (buy-in + rebuys).</div>
     </div>
@@ -344,7 +346,7 @@
 
 <script>
 (() => {
-  const KEY = "poker_admin_option1_v10_tax_on_winnings";
+  const KEY = "poker_admin_option1_v12_suggested_payouts";
   const ROSTER_KEY = "poker_admin_roster_v1";
 
   const COLORS = ["black","purple","yellow","pink","orange"];
@@ -510,7 +512,7 @@
         </div>
         <input type="number" step="1" inputmode="numeric"
           data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${color}"
-          value="${count||""}" placeholder="count" ${state.locked?"disabled":""}/>
+          value="${(count ?? 0)}" placeholder="count" ${state.locked?"disabled":""}/>
       </div>
     `;
   }
@@ -711,6 +713,50 @@ function renderAuditAndSummary(){
   }
 
   
+  function buildSuggestedPayoutText(){
+    const bankId = state.bankId || state.players[0]?.id;
+    const bank = state.players.find(p=>p.id===bankId);
+    const bankName = bank?.name || "Bank";
+
+    const collect = [];
+    const pay = [];
+    let totalRF = 0;
+
+    for(const p of state.players){
+      const c = calcPlayer(p);
+      totalRF += c.rfTax;
+      if(p.id !== bankId){
+        const buyins = p.buyins.length;
+        const buyAmt = buyins * state.buyinUsd;
+        collect.push({name:p.name, amt: buyAmt, buyins});
+        pay.push({name:p.name, amt: c.finalPayout});
+      }
+    }
+
+    const bankIn = collect.reduce((s,x)=> s + x.amt, 0);
+    const bankOut = pay.reduce((s,x)=> s + x.amt, 0);
+
+    const lines = [];
+    lines.push(`Suggested payouts (fast settle)`);
+    lines.push(`Bank: ${bankName}`);
+    lines.push("");
+    lines.push("Collect (buy-ins):");
+    collect.forEach(x=>{
+      lines.push(`- ${x.name} → ${bankName}: ${fmtUsd(x.amt)} (${x.buyins} × ${fmtUsd(state.buyinUsd)})`);
+    });
+    lines.push(`= Total collect: ${fmtUsd(bankIn)}`);
+    lines.push("");
+    lines.push("Pay (final payouts after RF tax):");
+    pay.forEach(x=>{
+      lines.push(`- ${bankName} → ${x.name}: ${fmtUsd(x.amt)}`);
+    });
+    lines.push(`= Total pay: ${fmtUsd(bankOut)}`);
+    lines.push("");
+    lines.push(`RF fund to set aside: ${fmtUsd(totalRF)}`);
+    lines.push(`Bank check: collect ${fmtUsd(bankIn)} − pay ${fmtUsd(bankOut)} = ${fmtUsd(bankIn-bankOut)} (should ≈ RF fund + any table float)`);
+    return lines.join("\n");
+  }
+
   function buildPayoutText(){
     const bankId = state.bankId || state.players[0]?.id;
     const bank = state.players.find(p=>p.id===bankId);
@@ -765,16 +811,21 @@ function renderAllFull(){
     // Payout card (only when locked)
     const card = document.getElementById("payoutCard");
     if(card) card.style.display = state.locked ? "block" : "none";
+    const preS = document.getElementById("payoutSuggested");
+    if(preS) preS.textContent = state.locked ? buildSuggestedPayoutText() : "";
     const pre = document.getElementById("payoutText");
     if(pre) pre.textContent = state.locked ? buildPayoutText() : "";
     save();
   }
 
   function tap(el, fn){
-    const h=(e)=>{ e.preventDefault?.(); fn(e); };
-    el.addEventListener("pointerup", h, {passive:false});
-    el.addEventListener("touchend", h, {passive:false});
-    el.addEventListener("click", h, {passive:false});
+    const h = (e)=>{ e.preventDefault?.(); fn(e); };
+    // Avoid double-fire on mobile (touchend + click + pointerup). Use Pointer Events when available.
+    if(window.PointerEvent){
+      el.addEventListener("pointerup", h, {passive:false});
+    }else{
+      el.addEventListener("click", h, {passive:false});
+    }
   }
 
   $("sessionName").addEventListener("input", (e)=>{ if(state.locked) return; state.sessionName = e.target.value; save(); });
