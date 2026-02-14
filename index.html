@@ -263,7 +263,7 @@
 
     <div class="card">
       <div class="hd">
-        <h2>Players</h2>
+        <h2>Players (<span id="playerCount">0</span>)</h2>
         <div class="btnbar">
           <button class="btn" id="addPlayer" type="button">+ Add player</button>
         </div>
@@ -464,7 +464,11 @@
     ].join("\n");
   }
 
-  function renderStatic(){
+  
+function renderStatic(){
+    const countEl = document.getElementById("playerCount");
+    if(countEl) countEl.textContent = state.players.length;
+
     $("sessionName").value = state.sessionName;
     $("buyinUsd").value = state.buyinUsd;
     $("taxRate").value = state.taxRate;
@@ -844,7 +848,7 @@ function renderAllFull(){
     });
   }
 
-  tap($("addPlayer"), ()=>{ if(state.locked) return; state.players.push(makePlayer(`Player ${state.players.length+1}`)); renderAllFull(); });
+  tap($("addPlayer"), ()=>{ if(state.locked) return; state.players.unshift(makePlayer(`Player ${state.players.length+1}`)); renderAllFull(); window.scrollTo({ top: 0, behavior: "smooth" }); });
   tap($("resetAll"), ()=>{ if(state.locked) return; if(!confirm("Reset all app data?")) return; localStorage.removeItem(KEY); state = defaultState(); renderAllFull(); });
 
   tap($("lockSession"), ()=>{
