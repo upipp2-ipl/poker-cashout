@@ -848,7 +848,7 @@ function renderAllFull(){
     });
   }
 
-  tap($("addPlayer"), ()=>{ if(state.locked) return; state.players.unshift(makePlayer(`Player ${state.players.length+1}`)); renderAllFull(); window.scrollTo({ top: 0, behavior: "smooth" }); });
+  tap($("addPlayer"), ()=>{ if(state.locked) return; state.players.unshift(makePlayer(`Player ${state.players.length+1}`)); renderAllFull();  });
   tap($("resetAll"), ()=>{ if(state.locked) return; if(!confirm("Reset all app data?")) return; localStorage.removeItem(KEY); state = defaultState(); renderAllFull(); });
 
   tap($("lockSession"), ()=>{
