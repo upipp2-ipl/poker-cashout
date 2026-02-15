@@ -1,99 +1,116 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <title>Poker Cashout – Player</title>
+  <title>IPL – Poker Cashout</title>
   <style>
-    :root{
-      --bg:#0b1220;--text:#e8eefc;--muted:#a9b7d6;--line:rgba(255,255,255,.10);
-      --good:#2bd576;--warn:#ffcc00;--bad:#ff5c7a;--accent:#7aa7ff;
-      --b:#1f2937;--p:#6d28d9;--y:#f59e0b;--pk:#ec4899;--o:#f97316;
-      --r:16px;--sh:0 10px 30px rgba(0,0,0,.40);
+    [data-theme="dark"]{
+      --bg:#1a1f2e;--bg2:#242938;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);
+      --card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);
+      --hover:rgba(255,255,255,.04);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;
+      --b:#3b4557;--p:#7c3aed;--y:#f59e0b;--pk:#ec4899;--o:#f97316;
+      --sh:0 4px 20px rgba(0,0,0,.25);
+    }
+    [data-theme="light"]{
+      --bg:#f0f2f7;--bg2:#ffffff;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);
+      --card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);
+      --hover:rgba(0,0,0,.03);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;
+      --b:#6b7280;--p:#7c3aed;--y:#d97706;--pk:#db2777;--o:#ea580c;
+      --sh:0 2px 12px rgba(0,0,0,.06);
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);
-      background:radial-gradient(1100px 850px at 20% 0%,rgba(122,167,255,.20),transparent 60%),radial-gradient(900px 700px at 90% 10%,rgba(182,140,255,.14),transparent 60%),var(--bg);
-      min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:20px 14px}
+    body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 14px 20px;transition:background .3s,color .3s}
+    .iplHeader{text-align:center;padding:20px 14px 10px}
+    .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:28px;font-weight:800;letter-spacing:1px}
+    .suit{font-size:20px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
+    .iplSub{color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.5px}
     .wrap{max-width:480px;width:100%}
-    .card{border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));box-shadow:var(--sh);overflow:hidden}
-    .hd{padding:16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(122,167,255,.12),rgba(0,0,0,0));text-align:center}
+    .card{border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh);overflow:hidden;transition:background .3s}
+    .hd{padding:16px;border-bottom:1px solid var(--line);text-align:center}
     .hd h1{margin:0;font-size:18px}.hd .sub{color:var(--muted);font-size:12px;margin-top:4px}
     .bd{padding:16px}
-    label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+    label{display:block;color:var(--muted);font-size:11px;margin-bottom:5px;font-weight:500}
     input,select,button{font:inherit}
-    input,select{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);color:var(--text);outline:none;font-size:16px}
-    input:focus,select:focus{border-color:rgba(122,167,255,.55);box-shadow:0 0 0 3px rgba(122,167,255,.12)}
+    input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);outline:none;font-size:16px;transition:border-color .15s}
+    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(122,167,255,.10)}
     input[type="number"]{appearance:textfield}
     input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-    .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(122,167,255,.18);color:var(--text);cursor:pointer;user-select:none;font-size:15px;font-weight:600;touch-action:manipulation;transition:background .15s}
-    .btn:hover{background:rgba(122,167,255,.28)}.btn:active{background:rgba(122,167,255,.35)}
-    .btn.good{background:rgba(43,213,118,.20);border-color:rgba(43,213,118,.30)}
-    .btn.good:hover{background:rgba(43,213,118,.30)}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);cursor:pointer;user-select:none;font-size:15px;font-weight:600;touch-action:manipulation;transition:all .15s}
+    .btn:hover{background:var(--hover)}.btn:active{opacity:.9}
+    .btn.good{border-color:rgba(43,213,118,.25);color:var(--good)}
     .btn[disabled]{opacity:.5;cursor:not-allowed}
     .sep{height:1px;background:var(--line);margin:16px 0}
-    .note{color:var(--muted);font-size:12px;line-height:1.35;margin-top:8px}
+    .note{color:var(--muted);font-size:11px;line-height:1.4;margin-top:8px}
     .muted{color:var(--muted)}.good{color:var(--good)}
     .hidden{display:none!important}
-    .step{margin-bottom:16px}
-    .stepLabel{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:8px;font-weight:600}
-    .infoBanner{padding:10px 12px;border-radius:12px;border:1px solid rgba(122,167,255,.20);background:rgba(122,167,255,.06);margin-bottom:16px;font-size:13px}
-    .infoBanner .k{color:var(--muted);font-size:11px}.infoBanner .v{font-weight:600}
-    .chips{display:flex;flex-direction:column;gap:10px}
-    .cell{border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px}
+    .step{margin-bottom:16px}.stepLabel{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:8px;font-weight:600}
+    .infoBanner{padding:10px 12px;border-radius:10px;border:1px solid rgba(122,167,255,.15);background:rgba(122,167,255,.04);margin-bottom:16px;font-size:13px}
+    .infoBanner .k{color:var(--muted);font-size:10px}.infoBanner .v{font-weight:600}
+    .chips{display:flex;flex-direction:column;gap:8px}
+    .cell{border-radius:10px;padding:12px;display:flex;align-items:center;gap:12px}
     .cell .colorInfo{display:flex;align-items:center;gap:8px;min-width:100px}
-    .sw{width:14px;height:14px;border-radius:4px;flex-shrink:0}
+    .sw{width:12px;height:12px;border-radius:3px;flex-shrink:0}
     .sw.b{background:var(--b)}.sw.p{background:var(--p)}.sw.y{background:var(--y)}.sw.pk{background:var(--pk)}.sw.o{background:var(--o)}
     .cname{font-size:13px;font-weight:600;color:var(--text)}.cval{font-size:11px;color:var(--muted)}
-    .cell[data-color="black"]{background:rgba(31,41,55,.50);border:1px solid rgba(31,41,55,.65)}
-    .cell[data-color="purple"]{background:rgba(109,40,217,.14);border:1px solid rgba(109,40,217,.30)}
-    .cell[data-color="yellow"]{background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.25)}
-    .cell[data-color="pink"]{background:rgba(236,72,153,.10);border:1px solid rgba(236,72,153,.25)}
-    .cell[data-color="orange"]{background:rgba(249,115,22,.10);border:1px solid rgba(249,115,22,.25)}
-    .stepper{display:flex;align-items:stretch;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.18);flex:1;max-width:200px}
+    .cell[data-color="black"]{background:rgba(59,69,87,.25);border:1px solid rgba(59,69,87,.30)}
+    .cell[data-color="purple"]{background:rgba(124,58,237,.10);border:1px solid rgba(124,58,237,.18)}
+    .cell[data-color="yellow"]{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.16)}
+    .cell[data-color="pink"]{background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.16)}
+    .cell[data-color="orange"]{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.16)}
+    [data-theme="light"] .cell[data-color="black"]{background:rgba(59,69,87,.06);border-color:rgba(59,69,87,.12)}
+    [data-theme="light"] .cell[data-color="purple"]{background:rgba(124,58,237,.05);border-color:rgba(124,58,237,.12)}
+    [data-theme="light"] .cell[data-color="yellow"]{background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.12)}
+    [data-theme="light"] .cell[data-color="pink"]{background:rgba(236,72,153,.05);border-color:rgba(236,72,153,.12)}
+    [data-theme="light"] .cell[data-color="orange"]{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.12)}
+    .stepper{display:flex;align-items:stretch;border-radius:8px;overflow:hidden;border:1px solid var(--input-border);background:var(--input-bg);flex:1;max-width:180px}
     .stepper input{border:none;border-radius:0;text-align:center;padding:10px 2px;min-width:0;flex:1;background:transparent;font-size:16px}
     .stepper input:focus{box-shadow:none}
-    .stepper .sbtn{display:flex;align-items:center;justify-content:center;width:44px;min-width:44px;background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer;user-select:none;touch-action:manipulation;font-size:20px;font-weight:700;border:none;transition:background .12s}
-    .stepper .sbtn:hover{background:rgba(255,255,255,.12);color:var(--text)}
-    .stepper .sbtn:active{background:rgba(122,167,255,.20)}
-    .totalBar{padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.20);margin:16px 0;text-align:center}
-    .totalBar .k{font-size:11px;color:var(--muted)}.totalBar .v{font-size:20px;font-weight:800;margin-top:2px}
+    .stepper .sbtn{display:flex;align-items:center;justify-content:center;width:44px;min-width:44px;background:var(--hover);color:var(--muted);cursor:pointer;user-select:none;touch-action:manipulation;font-size:20px;font-weight:700;border:none;transition:all .12s}
+    .stepper .sbtn:hover{color:var(--text)}.stepper .sbtn:active{background:rgba(122,167,255,.15)}
+    .totalBar{padding:12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);margin:16px 0;text-align:center}
+    .totalBar .k{font-size:10px;color:var(--muted)}.totalBar .v{font-size:20px;font-weight:800;margin-top:2px}
     .successCard{text-align:center;padding:32px 16px}
     .successCard .icon{font-size:48px;margin-bottom:12px}
     .successCard h2{margin:0 0 8px;font-size:18px}
     .toastBox{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
-    .toast{padding:10px 18px;border-radius:12px;background:rgba(20,24,36,.92);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);color:var(--text);font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0;transform:translateY(-8px) scale(.96);animation:toastIn .25s ease forwards;pointer-events:auto}
+    .toast{padding:9px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--card-border);color:var(--text);font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(-8px) scale(.96);animation:toastIn .25s ease forwards;pointer-events:auto}
     .toast.out{animation:toastOut .2s ease forwards}
     @keyframes toastIn{to{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.96)}}
     .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .errorBox{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,92,122,.30);background:rgba(255,92,122,.08);color:var(--bad);font-size:13px;margin-top:10px;display:none}
-    /* Debug panel */
-    .debugPanel{position:fixed;bottom:0;left:0;right:0;z-index:999;max-height:35vh;overflow-y:auto;
-      background:rgba(0,0,0,.92);border-top:1px solid rgba(255,255,255,.15);
-      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;padding:8px 10px;display:none}
+    .errorBox{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,92,122,.25);background:rgba(255,92,122,.06);color:var(--bad);font-size:13px;margin-top:10px;display:none}
+    .themeToggle{position:fixed;top:12px;right:12px;z-index:100;width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:var(--sh)}
+    .debugPanel{position:fixed;bottom:0;left:0;right:0;z-index:999;max-height:30vh;overflow-y:auto;background:rgba(0,0,0,.92);border-top:1px solid rgba(255,255,255,.15);font-family:ui-monospace,monospace;font-size:10px;padding:8px;display:none}
     .debugPanel.open{display:block}
-    .debugToggle{position:fixed;bottom:8px;right:8px;z-index:1000;width:36px;height:36px;border-radius:50%;
-      background:rgba(122,167,255,.25);border:1px solid rgba(122,167,255,.40);color:var(--accent);
-      display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;touch-action:manipulation}
-    .debugToggle.has-error{background:rgba(255,92,122,.25);border-color:rgba(255,92,122,.40);color:var(--bad)}
-    .dline{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06);word-break:break-all}
-    .dline.ok{color:var(--good)}.dline.err{color:var(--bad)}.dline.info{color:var(--accent)}.dline.data{color:var(--muted)}
+    .debugToggle{position:fixed;bottom:8px;right:8px;z-index:1000;width:32px;height:32px;border-radius:50%;background:var(--bg2);border:1px solid var(--card-border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;box-shadow:var(--sh)}
+    .debugToggle.has-error{color:var(--bad);border-color:rgba(255,92,122,.30)}
+    .dline{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);word-break:break-all;color:#ccc}
+    .dline.ok{color:var(--good)}.dline.err{color:var(--bad)}.dline.info{color:var(--accent)}.dline.data{color:#888}
   </style>
 </head>
 <body>
 <div class="toastBox" id="toastBox"></div>
-<div class="debugToggle" id="debugToggle" title="Debug log">🐛</div>
+<button class="themeToggle" id="themeToggle" type="button">🌙</button>
+<div class="debugToggle" id="debugToggle">🐛</div>
 <div class="debugPanel" id="debugPanel"></div>
+
+<div class="iplHeader">
+  <div class="iplLogo">
+    <span class="suit blk">♠</span><span class="suit red">♥</span>
+    IPL
+    <span class="suit red">♦</span><span class="suit blk">♣</span>
+  </div>
+  <div class="iplSub">Innovation Poker League</div>
+</div>
+
 <div class="wrap">
   <div class="card">
     <div class="hd">
       <h1>Poker Cashout</h1>
       <div class="sub">Enter your chip count at the end of the game</div>
     </div>
-
-    <!-- Screen 1: Join -->
     <div class="bd" id="joinScreen">
       <div class="step">
         <div class="stepLabel">Step 1 — Join Session</div>
@@ -102,10 +119,8 @@
       </div>
       <button class="btn" id="joinBtn" type="button">Join Session</button>
       <div id="joinError" class="errorBox"></div>
-      <div class="note" style="text-align:center;margin-top:10px">Ask the host for the session code</div>
+      <div class="note" style="text-align:center">Ask the host for the session code</div>
     </div>
-
-    <!-- Screen 2: Pick name -->
     <div class="bd hidden" id="nameScreen">
       <div id="sessionInfo" class="infoBanner"></div>
       <div class="step">
@@ -115,22 +130,15 @@
       </div>
       <button class="btn" id="confirmName" type="button" disabled>Continue</button>
     </div>
-
-    <!-- Screen 3: Chip entry -->
     <div class="bd hidden" id="chipScreen">
       <div id="chipPlayerName" style="font-size:15px;font-weight:700;margin-bottom:4px"></div>
-      <div class="note" style="margin-top:0;margin-bottom:14px">Count your chips by color and enter the totals below</div>
+      <div class="note" style="margin-top:0;margin-bottom:14px">Count your chips by color and enter the totals</div>
       <div class="chips" id="chipInputs"></div>
-      <div class="totalBar">
-        <div class="k">Your cashout value</div>
-        <div class="v" id="chipTotal">$0.00</div>
-      </div>
+      <div class="totalBar"><div class="k">Your cashout value</div><div class="v" id="chipTotal">$0.00</div></div>
       <button class="btn good" id="submitChips" type="button">Submit Cashout</button>
       <div id="submitError" class="errorBox"></div>
-      <div class="note" style="text-align:center;margin-top:10px">You can re-submit if you made a mistake</div>
+      <div class="note" style="text-align:center">You can re-submit if you made a mistake</div>
     </div>
-
-    <!-- Screen 4: Success -->
     <div class="bd hidden" id="successScreen">
       <div class="successCard">
         <div class="icon">✅</div>
@@ -143,281 +151,93 @@
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-
 <script>
 (()=>{
-  // ─── Debug logger ───
-  const debugEl = document.getElementById("debugPanel");
-  const debugBtn = document.getElementById("debugToggle");
-  let debugOpen = false;
-  debugBtn.addEventListener("click", () => {
-    debugOpen = !debugOpen;
-    debugEl.classList.toggle("open", debugOpen);
-  });
-  function dlog(msg, type="info"){
-    const d = document.createElement("div");
-    d.className = "dline " + type;
-    const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    d.textContent = `[${ts}] ${msg}`;
-    debugEl.appendChild(d);
-    debugEl.scrollTop = debugEl.scrollHeight;
-    if(type === "err") debugBtn.classList.add("has-error");
-    console.log(`[DEBUG ${type}]`, msg);
-  }
+  // Theme
+  const THEME_KEY="poker_theme";
+  let theme=localStorage.getItem(THEME_KEY)||"dark";
+  function applyTheme(){document.documentElement.setAttribute("data-theme",theme);document.getElementById("themeToggle").textContent=theme==="dark"?"☀️":"🌙";localStorage.setItem(THEME_KEY,theme)}
+  applyTheme();
+  document.getElementById("themeToggle").addEventListener("click",()=>{theme=theme==="dark"?"light":"dark";applyTheme()});
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",
-    authDomain: "poker-cashout-bde23.firebaseapp.com",
-    databaseURL: "https://poker-cashout-bde23-default-rtdb.firebaseio.com",
-    projectId: "poker-cashout-bde23",
-    storageBucket: "poker-cashout-bde23.firebasestorage.app",
-    messagingSenderId: "1054875878552",
-    appId: "1:1054875878552:web:94d610f9d20a18bed07ced"
-  };
+  // Debug
+  const debugEl=document.getElementById("debugPanel"),debugBtn=document.getElementById("debugToggle");
+  let debugOpen=false;
+  debugBtn.addEventListener("click",()=>{debugOpen=!debugOpen;debugEl.classList.toggle("open",debugOpen)});
+  function dlog(msg,type="info"){const d=document.createElement("div");d.className="dline "+type;d.textContent=`[${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}] ${msg}`;debugEl.appendChild(d);debugEl.scrollTop=debugEl.scrollHeight;if(type==="err")debugBtn.classList.add("has-error");console.log(`[${type}]`,msg)}
 
-  let app, db;
-  try {
-    app = firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-    dlog("Firebase initialized OK", "ok");
-    dlog("DB URL: " + firebaseConfig.databaseURL, "data");
-  } catch(err) {
-    dlog("Firebase init FAILED: " + err.message, "err");
-    return;
-  }
+  let app,db;
+  try{app=firebase.initializeApp({apiKey:"AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",authDomain:"poker-cashout-bde23.firebaseapp.com",databaseURL:"https://poker-cashout-bde23-default-rtdb.firebaseio.com",projectId:"poker-cashout-bde23",storageBucket:"poker-cashout-bde23.firebasestorage.app",messagingSenderId:"1054875878552",appId:"1:1054875878552:web:94d610f9d20a18bed07ced"});db=firebase.database();dlog("Firebase OK","ok")}catch(err){dlog("Firebase FAILED: "+err.message,"err");return}
 
-  const COLORS = ["black","purple","yellow","pink","orange"];
-  const SW = {black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
-  const $ = id => document.getElementById(id);
-  const clamp = v => Number.isFinite(v)?v:0;
-  const fmtUsd = x => clamp(x).toLocaleString(undefined,{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+  const COLORS=["black","purple","yellow","pink","orange"],SW={black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
+  const $=id=>document.getElementById(id),clamp=v=>Number.isFinite(v)?v:0;
+  const fmtUsd=x=>clamp(x).toLocaleString(undefined,{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+  function toast(msg,dur=2200){const box=$("toastBox"),el=document.createElement("div");el.className="toast";el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},dur)}
+  function showError(id,msg){const el=$(id);el.textContent=msg;el.style.display=msg?"block":"none"}
 
-  function toast(msg,dur=2200){
-    const box=$("toastBox"),el=document.createElement("div");
-    el.className="toast";el.textContent=msg;box.appendChild(el);
-    setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},dur);
-  }
-  function showError(id, msg){ const el=$(id); el.textContent=msg; el.style.display=msg?"block":"none"; }
+  let sessionCode="",sessionData=null,selectedPlayer="",chipCounts={black:0,purple:0,yellow:0,pink:0,orange:0};
+  function showScreen(id){["joinScreen","nameScreen","chipScreen","successScreen"].forEach(s=>$(s).classList.toggle("hidden",s!==id));dlog("Screen: "+id,"info")}
 
-  let sessionCode = "";
-  let sessionData = null;
-  let selectedPlayer = "";
-  let chipCounts = {black:0,purple:0,yellow:0,pink:0,orange:0};
-
-  function showScreen(id){
-    ["joinScreen","nameScreen","chipScreen","successScreen"].forEach(s=>{
-      $(s).classList.toggle("hidden",s!==id);
-    });
-    dlog("Screen: " + id, "info");
-  }
-
-  // ─── Step 1: Join ───
-  $("joinBtn").addEventListener("click", async ()=>{
+  $("joinBtn").addEventListener("click",async()=>{
     showError("joinError","");
-    const raw = $("codeInput").value.trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
-    if(!raw){ showError("joinError","Please enter a session code"); return; }
+    const raw=$("codeInput").value.trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
+    if(!raw){showError("joinError","Enter a session code");return}
+    dlog("Joining: "+raw,"info");$("joinBtn").innerHTML='<span class="spinner"></span> Joining…';$("joinBtn").disabled=true;
+    try{
+      const snap=await db.ref("sessions/"+raw+"/config").once("value"),data=snap.val();
+      dlog("Response: "+(data?"found":"null"),data?"ok":"err");
+      if(!data||!data.playerNames||!Array.isArray(data.playerNames)){dlog("Not found","err");showError("joinError","Session not found. Check the code.");$("joinBtn").innerHTML="Join Session";$("joinBtn").disabled=false;return}
+      sessionCode=raw;sessionData=data;
+      $("sessionInfo").innerHTML=`<div class="k">Session</div><div class="v">${data.sessionName||raw}</div><div style="margin-top:6px;font-size:12px;color:var(--muted)">Buy-in: ${fmtUsd(data.buyinUsd||50)} · Players: ${data.playerNames.length}</div>`;
+      let submittedNames=[];
+      try{const cs=await db.ref("sessions/"+raw+"/cashouts").once("value"),cd=cs.val();if(cd)submittedNames=Object.keys(cd).filter(n=>cd[n]&&cd[n].submitted);dlog("Submitted: "+submittedNames.join(", "),"data")}catch(e){dlog("Check err: "+e.message,"err")}
+      const sel=$("nameSelect");sel.innerHTML='<option value="">Choose your name…</option>';
+      data.playerNames.forEach(n=>{const opt=document.createElement("option");opt.value=n;const taken=submittedNames.includes(n);opt.textContent=taken?n+" ✓ (submitted)":n;opt.disabled=taken;sel.appendChild(opt)});
+      showScreen("nameScreen");toast("Session found ✓");
+    }catch(err){dlog("Error: "+err.message,"err");showError("joinError","Connection error: "+err.message)}
+    $("joinBtn").innerHTML="Join Session";$("joinBtn").disabled=false;
+  });
+  $("codeInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("joinBtn").click()});
 
-    dlog("Joining session: " + raw, "info");
-    $("joinBtn").innerHTML = '<span class="spinner"></span> Joining…';
-    $("joinBtn").disabled = true;
-
-    try {
-      const path = "sessions/" + raw + "/config";
-      dlog("Reading: " + path, "data");
-      const snap = await db.ref(path).once("value");
-      const data = snap.val();
-      dlog("Response: " + (data ? "found" : "null"), data ? "ok" : "err");
-
-      if(data) {
-        dlog("Session name: " + (data.sessionName || "none"), "data");
-        dlog("Players: " + JSON.stringify(data.playerNames || []), "data");
-        dlog("Chip values: " + JSON.stringify(data.chipValues || {}), "data");
-      }
-
-      if(!data || !data.playerNames || !Array.isArray(data.playerNames)){
-        const reason = !data ? "No data at path" : (!data.playerNames ? "No playerNames field" : "playerNames not array");
-        dlog("Join failed: " + reason, "err");
-        showError("joinError", "Session not found. Check the code and make sure the host started the session.");
-        $("joinBtn").innerHTML = "Join Session";
-        $("joinBtn").disabled = false;
-        return;
-      }
-
-      sessionCode = raw;
-      sessionData = data;
-
-      $("sessionInfo").innerHTML = `
-        <div class="k">Session</div>
-        <div class="v">${data.sessionName || raw}</div>
-        <div style="margin-top:6px;font-size:12px;color:var(--muted)">
-          Buy-in: ${fmtUsd(data.buyinUsd || 50)} · Players: ${data.playerNames.length}
-        </div>
-      `;
-
-      const sel = $("nameSelect");
-      sel.innerHTML = '<option value="">Choose your name…</option>';
-      data.playerNames.forEach(n => {
-        const opt = document.createElement("option");
-        opt.value = n;
-        opt.textContent = n;
-        sel.appendChild(opt);
-      });
-
-      showScreen("nameScreen");
-      toast("Session found ✓");
-    } catch(err) {
-      dlog("Join ERROR: " + err.message, "err");
-      dlog("Error code: " + (err.code || "none"), "err");
-      showError("joinError", "Connection error: " + err.message);
-    }
-    $("joinBtn").innerHTML = "Join Session";
-    $("joinBtn").disabled = false;
+  $("nameSelect").addEventListener("change",()=>{$("confirmName").disabled=!$("nameSelect").value});
+  $("confirmName").addEventListener("click",async()=>{
+    selectedPlayer=$("nameSelect").value;if(!selectedPlayer)return;
+    dlog("Player: "+selectedPlayer,"info");$("chipPlayerName").textContent=selectedPlayer;chipCounts={black:0,purple:0,yellow:0,pink:0,orange:0};
+    try{const snap=await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).once("value"),ex=snap.val();if(ex&&ex.submitted){COLORS.forEach(c=>{chipCounts[c]=clamp(ex[c]||0)});dlog("Pre-filled","ok");toast("Previous submission loaded")}}catch(e){dlog("No prev: "+e.message,"data")}
+    renderChipInputs();showScreen("chipScreen");
   });
 
-  $("codeInput").addEventListener("keydown", e => { if(e.key==="Enter") $("joinBtn").click(); });
-
-  // ─── Step 2: Pick name ───
-  $("nameSelect").addEventListener("change", () => {
-    $("confirmName").disabled = !$("nameSelect").value;
-  });
-
-  $("confirmName").addEventListener("click", async () => {
-    selectedPlayer = $("nameSelect").value;
-    if(!selectedPlayer) return;
-    dlog("Selected player: " + selectedPlayer, "info");
-
-    $("chipPlayerName").textContent = selectedPlayer;
-    chipCounts = {black:0,purple:0,yellow:0,pink:0,orange:0};
-
-    try {
-      const path = "sessions/" + sessionCode + "/cashouts/" + selectedPlayer;
-      dlog("Checking existing: " + path, "data");
-      const snap = await db.ref(path).once("value");
-      const existing = snap.val();
-      if(existing && existing.submitted){
-        COLORS.forEach(c => { chipCounts[c] = clamp(existing[c] || 0); });
-        dlog("Pre-filled from previous submission", "ok");
-        toast("Previous submission loaded");
-      } else {
-        dlog("No previous submission", "data");
-      }
-    } catch(err) {
-      dlog("Check existing error: " + err.message, "err");
-    }
-
-    renderChipInputs();
-    showScreen("chipScreen");
-  });
-
-  // ─── Step 3: Chip entry ───
   function renderChipInputs(){
-    const cv = (sessionData && sessionData.chipValues) ? sessionData.chipValues : {};
-    $("chipInputs").innerHTML = COLORS.map(c => {
-      const val = cv[c] || 0;
-      return `
-        <div class="cell" data-color="${c}">
-          <div class="colorInfo">
-            <span class="sw ${SW[c]}"></span>
-            <div>
-              <div class="cname">${c[0].toUpperCase()+c.slice(1)}</div>
-              <div class="cval">${val.toLocaleString()} units</div>
-            </div>
-          </div>
-          <div class="stepper">
-            <button class="sbtn" type="button" data-step="-1" data-c="${c}">−</button>
-            <input type="number" step="1" inputmode="numeric" data-c="${c}" value="${chipCounts[c]}" placeholder="0"/>
-            <button class="sbtn" type="button" data-step="1" data-c="${c}">+</button>
-          </div>
-        </div>
-      `;
-    }).join("");
+    const cv=sessionData?.chipValues||{};
+    $("chipInputs").innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="colorInfo"><span class="sw ${SW[c]}"></span><div><div class="cname">${c[0].toUpperCase()+c.slice(1)}</div><div class="cval">${(cv[c]||0).toLocaleString()} units</div></div></div><div class="stepper"><button class="sbtn" type="button" data-step="-1" data-c="${c}">−</button><input type="number" step="1" inputmode="numeric" data-c="${c}" value="${chipCounts[c]}" placeholder="0"/><button class="sbtn" type="button" data-step="1" data-c="${c}">+</button></div></div>`).join("");
     updateTotal();
   }
+  function updateTotal(){const cv=sessionData?.chipValues||{};$("chipTotal").textContent=fmtUsd(COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0)/1000)}
 
-  function updateTotal(){
-    const cv = (sessionData && sessionData.chipValues) ? sessionData.chipValues : {};
-    const units = COLORS.reduce((s,c) => s + clamp(chipCounts[c]) * clamp(cv[c]), 0);
-    $("chipTotal").textContent = fmtUsd(units / 1000);
-  }
+  document.addEventListener("click",e=>{const btn=e.target.closest(".sbtn");if(!btn)return;e.preventDefault();const step=Number(btn.getAttribute("data-step"))||0,c=btn.getAttribute("data-c");if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.max(0,(chipCounts[c]||0)+step);const inp=btn.parentElement.querySelector("input");if(inp)inp.value=chipCounts[c];updateTotal()});
+  document.addEventListener("input",e=>{const c=e.target?.getAttribute?.("data-c");if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.max(0,parseInt(e.target.value,10)||0);updateTotal()});
 
-  document.addEventListener("click", e => {
-    const btn = e.target.closest(".sbtn");
-    if(!btn) return;
-    e.preventDefault();
-    const step = Number(btn.getAttribute("data-step")) || 0;
-    const c = btn.getAttribute("data-c");
-    if(!c || !COLORS.includes(c)) return;
-    chipCounts[c] = Math.max(0, (chipCounts[c] || 0) + step);
-    const inp = btn.parentElement.querySelector("input");
-    if(inp) inp.value = chipCounts[c];
-    updateTotal();
+  $("submitChips").addEventListener("click",async()=>{
+    showError("submitError","");$("submitChips").innerHTML='<span class="spinner"></span> Submitting…';$("submitChips").disabled=true;
+    try{
+      const payload={submitted:true,timestamp:Date.now()};COLORS.forEach(c=>{payload[c]=chipCounts[c]});
+      dlog("Submitting: "+JSON.stringify(payload),"data");
+      await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).set(payload);
+      dlog("Submit OK","ok");
+      const cv=sessionData?.chipValues||{},units=COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0);
+      $("successDetail").innerHTML=`<b>${selectedPlayer}</b><br>Cashout: ${fmtUsd(units/1000)}<br><span style="font-size:11px;display:block;margin-top:4px">The host sees this in real-time</span>`;
+      showScreen("successScreen");toast("Submitted ✓");
+    }catch(err){dlog("Submit FAIL: "+err.message,"err");showError("submitError","Error: "+err.message)}
+    $("submitChips").innerHTML="Submit Cashout";$("submitChips").disabled=false;
   });
 
-  document.addEventListener("input", e => {
-    const inp = e.target;
-    if(!inp || !inp.getAttribute) return;
-    const c = inp.getAttribute("data-c");
-    if(!c || !COLORS.includes(c)) return;
-    chipCounts[c] = Math.max(0, parseInt(inp.value, 10) || 0);
-    updateTotal();
-  });
+  $("resubmitBtn").addEventListener("click",()=>{renderChipInputs();showScreen("chipScreen")});
 
-  // ─── Submit ───
-  $("submitChips").addEventListener("click", async () => {
-    showError("submitError","");
-    $("submitChips").innerHTML = '<span class="spinner"></span> Submitting…';
-    $("submitChips").disabled = true;
-
-    try {
-      const payload = { submitted: true, timestamp: Date.now() };
-      COLORS.forEach(c => { payload[c] = chipCounts[c]; });
-
-      const path = "sessions/" + sessionCode + "/cashouts/" + selectedPlayer;
-      dlog("Submitting to: " + path, "info");
-      dlog("Payload: " + JSON.stringify(payload), "data");
-
-      await db.ref(path).set(payload);
-
-      dlog("Submit SUCCESS", "ok");
-
-      const cv = (sessionData && sessionData.chipValues) ? sessionData.chipValues : {};
-      const units = COLORS.reduce((s,c) => s + clamp(chipCounts[c]) * clamp(cv[c]), 0);
-
-      $("successDetail").innerHTML = `
-        <b>${selectedPlayer}</b><br>
-        Cashout value: ${fmtUsd(units / 1000)}<br>
-        <span style="font-size:11px;margin-top:4px;display:block">The host will see your submission in real-time</span>
-      `;
-
-      showScreen("successScreen");
-      toast("Submitted ✓");
-    } catch(err) {
-      dlog("Submit FAILED: " + err.message, "err");
-      dlog("Error code: " + (err.code || "none"), "err");
-      showError("submitError", "Error: " + err.message);
-    }
-    $("submitChips").innerHTML = "Submit Cashout";
-    $("submitChips").disabled = false;
-  });
-
-  $("resubmitBtn").addEventListener("click", () => {
-    renderChipInputs();
-    showScreen("chipScreen");
-  });
-
-  // ─── Auto-fill code from URL ───
-  const params = new URLSearchParams(window.location.search);
-  const urlCode = (params.get("code") || params.get("session") || "").trim().toUpperCase();
-  if(urlCode){
-    $("codeInput").value = urlCode;
-    dlog("Auto-fill code from URL: " + urlCode, "info");
-    setTimeout(() => $("joinBtn").click(), 500);
-  }
-
-  dlog("Player page ready", "ok");
+  const params=new URLSearchParams(window.location.search),urlCode=(params.get("code")||params.get("session")||"").trim().toUpperCase();
+  if(urlCode){$("codeInput").value=urlCode;dlog("Auto-code: "+urlCode,"info");setTimeout(()=>$("joinBtn").click(),500)}
+  dlog("Player page ready","ok");
 })();
 </script>
 </body>
