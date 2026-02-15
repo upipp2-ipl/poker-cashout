@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Poker Cashout – Player</title>
+  <style>
+    :root{
+      --bg:#0b1220;--text:#e8eefc;--muted:#a9b7d6;--line:rgba(255,255,255,.10);
+      --good:#2bd576;--warn:#ffcc00;--bad:#ff5c7a;--accent:#7aa7ff;
+      --b:#1f2937;--p:#6d28d9;--y:#f59e0b;--pk:#ec4899;--o:#f97316;
+      --r:16px;--sh:0 10px 30px rgba(0,0,0,.40);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);
+      background:radial-gradient(1100px 850px at 20% 0%,rgba(122,167,255,.20),transparent 60%),radial-gradient(900px 700px at 90% 10%,rgba(182,140,255,.14),transparent 60%),var(--bg);
+      min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:20px 14px}
+    .wrap{max-width:480px;width:100%}
+    .card{border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));box-shadow:var(--sh);overflow:hidden}
+    .hd{padding:16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(122,167,255,.12),rgba(0,0,0,0));text-align:center}
+    .hd h1{margin:0;font-size:18px}.hd .sub{color:var(--muted);font-size:12px;margin-top:4px}
+    .bd{padding:16px}
+    label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+    input,select,button{font:inherit}
+    input,select{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);color:var(--text);outline:none;font-size:16px}
+    input:focus,select:focus{border-color:rgba(122,167,255,.55);box-shadow:0 0 0 3px rgba(122,167,255,.12)}
+    input[type="number"]{appearance:textfield}
+    input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(122,167,255,.18);color:var(--text);cursor:pointer;user-select:none;font-size:15px;font-weight:600;touch-action:manipulation;transition:background .15s}
+    .btn:hover{background:rgba(122,167,255,.28)}.btn:active{background:rgba(122,167,255,.35)}
+    .btn.good{background:rgba(43,213,118,.20);border-color:rgba(43,213,118,.30)}
+    .btn.good:hover{background:rgba(43,213,118,.30)}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .sep{height:1px;background:var(--line);margin:16px 0}
+    .note{color:var(--muted);font-size:12px;line-height:1.35;margin-top:8px}
+    .muted{color:var(--muted)}
+    .good{color:var(--good)}
+    .hidden{display:none!important}
+
+    /* Steps */
+    .step{margin-bottom:16px}
+    .stepLabel{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:8px;font-weight:600}
+
+    /* Session info banner */
+    .infoBanner{padding:10px 12px;border-radius:12px;border:1px solid rgba(122,167,255,.20);background:rgba(122,167,255,.06);margin-bottom:16px;font-size:13px}
+    .infoBanner .k{color:var(--muted);font-size:11px}.infoBanner .v{font-weight:600}
+
+    /* Chips */
+    .chips{display:flex;flex-direction:column;gap:10px}
+    .cell{border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px}
+    .cell .colorInfo{display:flex;align-items:center;gap:8px;min-width:100px}
+    .sw{width:14px;height:14px;border-radius:4px;flex-shrink:0}
+    .sw.b{background:var(--b)}.sw.p{background:var(--p)}.sw.y{background:var(--y)}.sw.pk{background:var(--pk)}.sw.o{background:var(--o)}
+    .cname{font-size:13px;font-weight:600;color:var(--text)}.cval{font-size:11px;color:var(--muted)}
+    .cell[data-color="black"]{background:rgba(31,41,55,.50);border:1px solid rgba(31,41,55,.65)}
+    .cell[data-color="purple"]{background:rgba(109,40,217,.14);border:1px solid rgba(109,40,217,.30)}
+    .cell[data-color="yellow"]{background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.25)}
+    .cell[data-color="pink"]{background:rgba(236,72,153,.10);border:1px solid rgba(236,72,153,.25)}
+    .cell[data-color="orange"]{background:rgba(249,115,22,.10);border:1px solid rgba(249,115,22,.25)}
+    .stepper{display:flex;align-items:stretch;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.18);flex:1;max-width:200px}
+    .stepper input{border:none;border-radius:0;text-align:center;padding:10px 2px;min-width:0;flex:1;background:transparent;font-size:16px}
+    .stepper input:focus{box-shadow:none}
+    .stepper .sbtn{display:flex;align-items:center;justify-content:center;width:44px;min-width:44px;background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer;user-select:none;touch-action:manipulation;font-size:20px;font-weight:700;border:none;transition:background .12s}
+    .stepper .sbtn:hover{background:rgba(255,255,255,.12);color:var(--text)}
+    .stepper .sbtn:active{background:rgba(122,167,255,.20)}
+
+    /* Total display */
+    .totalBar{padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.20);margin:16px 0;text-align:center}
+    .totalBar .k{font-size:11px;color:var(--muted)}.totalBar .v{font-size:20px;font-weight:800;margin-top:2px}
+
+    /* Success state */
+    .successCard{text-align:center;padding:32px 16px}
+    .successCard .icon{font-size:48px;margin-bottom:12px}
+    .successCard h2{margin:0 0 8px;font-size:18px}
+
+    /* Toast */
+    .toastBox{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+    .toast{padding:10px 18px;border-radius:12px;background:rgba(20,24,36,.92);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);color:var(--text);font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0;transform:translateY(-8px) scale(.96);animation:toastIn .25s ease forwards;pointer-events:auto}
+    .toast.out{animation:toastOut .2s ease forwards}
+    @keyframes toastIn{to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.96)}}
+
+    /* Loading spinner */
+    .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+<div class="toastBox" id="toastBox"></div>
+<div class="wrap">
+  <div class="card">
+    <div class="hd">
+      <h1>Poker Cashout</h1>
+      <div class="sub">Enter your chip count at the end of the game</div>
+    </div>
+
+    <!-- Screen 1: Join -->
+    <div class="bd" id="joinScreen">
+      <div class="step">
+        <div class="stepLabel">Step 1 — Join Session</div>
+        <label>Session code (from the host)</label>
+        <input id="codeInput" type="text" placeholder="e.g. POKER-7F2A" autocapitalize="characters" maxlength="12" style="text-transform:uppercase;letter-spacing:2px;text-align:center;font-size:20px;font-weight:700"/>
+      </div>
+      <button class="btn" id="joinBtn">Join Session</button>
+      <div class="note" style="text-align:center;margin-top:10px">Ask the host for the session code</div>
+    </div>
+
+    <!-- Screen 2: Pick name -->
+    <div class="bd hidden" id="nameScreen">
+      <div id="sessionInfo" class="infoBanner"></div>
+      <div class="step">
+        <div class="stepLabel">Step 2 — Who are you?</div>
+        <label>Pick your name</label>
+        <select id="nameSelect" style="font-size:16px"><option value="">Choose your name…</option></select>
+      </div>
+      <button class="btn" id="confirmName" disabled>Continue</button>
+    </div>
+
+    <!-- Screen 3: Chip entry -->
+    <div class="bd hidden" id="chipScreen">
+      <div id="chipPlayerName" style="font-size:15px;font-weight:700;margin-bottom:4px"></div>
+      <div class="note" style="margin-top:0;margin-bottom:14px">Count your chips by color and enter the totals below</div>
+      <div class="chips" id="chipInputs"></div>
+      <div class="totalBar">
+        <div class="k">Your cashout value</div>
+        <div class="v" id="chipTotal">$0.00</div>
+      </div>
+      <button class="btn good" id="submitChips">Submit Cashout</button>
+      <div class="note" style="text-align:center;margin-top:10px">You can re-submit if you made a mistake</div>
+    </div>
+
+    <!-- Screen 4: Success -->
+    <div class="bd hidden" id="successScreen">
+      <div class="successCard">
+        <div class="icon">✅</div>
+        <h2>Cashout Submitted!</h2>
+        <div class="muted" id="successDetail"></div>
+        <div class="sep"></div>
+        <button class="btn" id="resubmitBtn" style="max-width:240px;margin:0 auto">Edit & Resubmit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK (compat for simple script usage) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+<script>
+(()=>{
+  // ─── Firebase Config ───
+  const firebaseConfig = {
+    apiKey: "AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",
+    authDomain: "poker-cashout-bde23.firebaseapp.com",
+    databaseURL: "https://poker-cashout-bde23-default-rtdb.firebaseio.com",
+    projectId: "poker-cashout-bde23",
+    storageBucket: "poker-cashout-bde23.firebasestorage.app",
+    messagingSenderId: "1054875878552",
+    appId: "1:1054875878552:web:94d610f9d20a18bed07ced"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const COLORS = ["black","purple","yellow","pink","orange"];
+  const SW = {black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
+  const $ = id => document.getElementById(id);
+  const clamp = v => Number.isFinite(v)?v:0;
+  const fmtUsd = x => clamp(x).toLocaleString(undefined,{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+
+  function toast(msg,dur=2200){
+    const box=$("toastBox"),el=document.createElement("div");
+    el.className="toast";el.textContent=msg;box.appendChild(el);
+    setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},dur);
+  }
+
+  let sessionCode = "";
+  let sessionData = null;
+  let selectedPlayer = "";
+  let chipCounts = {black:0,purple:0,yellow:0,pink:0,orange:0};
+
+  function showScreen(id){
+    ["joinScreen","nameScreen","chipScreen","successScreen"].forEach(s=>{
+      $(s).classList.toggle("hidden",s!==id);
+    });
+  }
+
+  // ─── Step 1: Join session ───
+  $("joinBtn").addEventListener("click", async ()=>{
+    const code = $("codeInput").value.trim().toUpperCase();
+    if(!code){toast("Enter a session code");return}
+
+    $("joinBtn").innerHTML = '<span class="spinner"></span> Joining…';
+    $("joinBtn").disabled = true;
+
+    try{
+      const snap = await db.ref("sessions/"+code+"/config").once("value");
+      const data = snap.val();
+      if(!data){
+        toast("Session not found — check the code");
+        $("joinBtn").innerHTML = "Join Session";
+        $("joinBtn").disabled = false;
+        return;
+      }
+
+      sessionCode = code;
+      sessionData = data;
+
+      // Show session info
+      $("sessionInfo").innerHTML = `
+        <div class="k">Session</div>
+        <div class="v">${data.sessionName || code}</div>
+        <div style="margin-top:6px;font-size:12px;color:var(--muted)">
+          Buy-in: ${fmtUsd(data.buyinUsd)} · Players: ${data.playerNames.length}
+        </div>
+      `;
+
+      // Populate name dropdown
+      const sel = $("nameSelect");
+      sel.innerHTML = '<option value="">Choose your name…</option>';
+      data.playerNames.forEach(n=>{
+        const opt = document.createElement("option");
+        opt.value = n; opt.textContent = n;
+        sel.appendChild(opt);
+      });
+
+      showScreen("nameScreen");
+    }catch(err){
+      toast("Connection error — try again");
+      console.error(err);
+    }
+    $("joinBtn").innerHTML = "Join Session";
+    $("joinBtn").disabled = false;
+  });
+
+  // Allow Enter key on code input
+  $("codeInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("joinBtn").click()});
+
+  // ─── Step 2: Pick name ───
+  $("nameSelect").addEventListener("change",()=>{
+    $("confirmName").disabled = !$("nameSelect").value;
+  });
+
+  $("confirmName").addEventListener("click",()=>{
+    selectedPlayer = $("nameSelect").value;
+    if(!selectedPlayer) return;
+
+    $("chipPlayerName").textContent = selectedPlayer;
+    chipCounts = {black:0,purple:0,yellow:0,pink:0,orange:0};
+
+    // Check if already submitted — pre-fill
+    db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).once("value").then(snap=>{
+      const existing = snap.val();
+      if(existing && existing.submitted){
+        COLORS.forEach(c=>{ chipCounts[c] = clamp(existing[c]||0) });
+      }
+      renderChipInputs();
+      showScreen("chipScreen");
+    });
+  });
+
+  // ─── Step 3: Chip entry ───
+  function renderChipInputs(){
+    const cv = sessionData.chipValues || {};
+    $("chipInputs").innerHTML = COLORS.map(c=>{
+      const val = cv[c] || 0;
+      return `
+        <div class="cell" data-color="${c}">
+          <div class="colorInfo">
+            <span class="sw ${SW[c]}"></span>
+            <div>
+              <div class="cname">${c[0].toUpperCase()+c.slice(1)}</div>
+              <div class="cval">${val.toLocaleString()} units</div>
+            </div>
+          </div>
+          <div class="stepper">
+            <button class="sbtn" data-step="-1" data-c="${c}">−</button>
+            <input type="number" step="1" inputmode="numeric" data-c="${c}" value="${chipCounts[c]}" placeholder="0"/>
+            <button class="sbtn" data-step="1" data-c="${c}">+</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+    updateTotal();
+  }
+
+  function updateTotal(){
+    const cv = sessionData.chipValues || {};
+    const units = COLORS.reduce((s,c)=> s + clamp(chipCounts[c]) * clamp(cv[c]), 0);
+    $("chipTotal").textContent = fmtUsd(units/1000);
+  }
+
+  // Stepper buttons
+  document.addEventListener("click",e=>{
+    const btn = e.target.closest(".sbtn");
+    if(!btn) return;
+    const step = Number(btn.getAttribute("data-step"))||0;
+    const c = btn.getAttribute("data-c");
+    chipCounts[c] = Math.max(0, (chipCounts[c]||0) + step);
+    const inp = btn.parentElement.querySelector("input");
+    if(inp) inp.value = chipCounts[c];
+    updateTotal();
+  });
+
+  // Manual input
+  document.addEventListener("input",e=>{
+    const inp = e.target;
+    const c = inp.getAttribute?.("data-c");
+    if(!c || !COLORS.includes(c)) return;
+    chipCounts[c] = Math.max(0, Number(inp.value)||0);
+    updateTotal();
+  });
+
+  // ─── Submit ───
+  $("submitChips").addEventListener("click", async ()=>{
+    $("submitChips").innerHTML = '<span class="spinner"></span> Submitting…';
+    $("submitChips").disabled = true;
+
+    try{
+      const payload = {submitted:true, timestamp: Date.now()};
+      COLORS.forEach(c=> payload[c] = chipCounts[c]);
+
+      await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).set(payload);
+
+      const cv = sessionData.chipValues || {};
+      const units = COLORS.reduce((s,c)=> s + clamp(chipCounts[c]) * clamp(cv[c]), 0);
+
+      $("successDetail").innerHTML = `
+        <b>${selectedPlayer}</b><br>
+        Cashout value: ${fmtUsd(units/1000)}<br>
+        <span style="font-size:11px;margin-top:4px;display:block">The host will see your submission in real-time</span>
+      `;
+
+      showScreen("successScreen");
+      toast("Submitted ✓");
+    }catch(err){
+      toast("Error submitting — try again");
+      console.error(err);
+    }
+    $("submitChips").innerHTML = "Submit Cashout";
+    $("submitChips").disabled = false;
+  });
+
+  // ─── Resubmit ───
+  $("resubmitBtn").addEventListener("click",()=>{
+    renderChipInputs();
+    showScreen("chipScreen");
+  });
+
+  // ─── Auto-fill code from URL param ───
+  const params = new URLSearchParams(window.location.search);
+  const urlCode = params.get("code") || params.get("session");
+  if(urlCode){
+    $("codeInput").value = urlCode.toUpperCase();
+  }
+})();
+</script>
+</body>
+</html>
