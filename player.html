@@ -33,19 +33,12 @@
     .btn[disabled]{opacity:.5;cursor:not-allowed}
     .sep{height:1px;background:var(--line);margin:16px 0}
     .note{color:var(--muted);font-size:12px;line-height:1.35;margin-top:8px}
-    .muted{color:var(--muted)}
-    .good{color:var(--good)}
+    .muted{color:var(--muted)}.good{color:var(--good)}
     .hidden{display:none!important}
-
-    /* Steps */
     .step{margin-bottom:16px}
     .stepLabel{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:8px;font-weight:600}
-
-    /* Session info banner */
     .infoBanner{padding:10px 12px;border-radius:12px;border:1px solid rgba(122,167,255,.20);background:rgba(122,167,255,.06);margin-bottom:16px;font-size:13px}
     .infoBanner .k{color:var(--muted);font-size:11px}.infoBanner .v{font-weight:600}
-
-    /* Chips */
     .chips{display:flex;flex-direction:column;gap:10px}
     .cell{border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px}
     .cell .colorInfo{display:flex;align-items:center;gap:8px;min-width:100px}
@@ -63,30 +56,36 @@
     .stepper .sbtn{display:flex;align-items:center;justify-content:center;width:44px;min-width:44px;background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer;user-select:none;touch-action:manipulation;font-size:20px;font-weight:700;border:none;transition:background .12s}
     .stepper .sbtn:hover{background:rgba(255,255,255,.12);color:var(--text)}
     .stepper .sbtn:active{background:rgba(122,167,255,.20)}
-
-    /* Total display */
     .totalBar{padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.20);margin:16px 0;text-align:center}
     .totalBar .k{font-size:11px;color:var(--muted)}.totalBar .v{font-size:20px;font-weight:800;margin-top:2px}
-
-    /* Success state */
     .successCard{text-align:center;padding:32px 16px}
     .successCard .icon{font-size:48px;margin-bottom:12px}
     .successCard h2{margin:0 0 8px;font-size:18px}
-
-    /* Toast */
     .toastBox{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
     .toast{padding:10px 18px;border-radius:12px;background:rgba(20,24,36,.92);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);color:var(--text);font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0;transform:translateY(-8px) scale(.96);animation:toastIn .25s ease forwards;pointer-events:auto}
     .toast.out{animation:toastOut .2s ease forwards}
     @keyframes toastIn{to{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.96)}}
-
-    /* Loading spinner */
     .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
+    .errorBox{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,92,122,.30);background:rgba(255,92,122,.08);color:var(--bad);font-size:13px;margin-top:10px;display:none}
+    /* Debug panel */
+    .debugPanel{position:fixed;bottom:0;left:0;right:0;z-index:999;max-height:35vh;overflow-y:auto;
+      background:rgba(0,0,0,.92);border-top:1px solid rgba(255,255,255,.15);
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;padding:8px 10px;display:none}
+    .debugPanel.open{display:block}
+    .debugToggle{position:fixed;bottom:8px;right:8px;z-index:1000;width:36px;height:36px;border-radius:50%;
+      background:rgba(122,167,255,.25);border:1px solid rgba(122,167,255,.40);color:var(--accent);
+      display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;touch-action:manipulation}
+    .debugToggle.has-error{background:rgba(255,92,122,.25);border-color:rgba(255,92,122,.40);color:var(--bad)}
+    .dline{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06);word-break:break-all}
+    .dline.ok{color:var(--good)}.dline.err{color:var(--bad)}.dline.info{color:var(--accent)}.dline.data{color:var(--muted)}
   </style>
 </head>
 <body>
 <div class="toastBox" id="toastBox"></div>
+<div class="debugToggle" id="debugToggle" title="Debug log">🐛</div>
+<div class="debugPanel" id="debugPanel"></div>
 <div class="wrap">
   <div class="card">
     <div class="hd">
@@ -99,9 +98,10 @@
       <div class="step">
         <div class="stepLabel">Step 1 — Join Session</div>
         <label>Session code (from the host)</label>
-        <input id="codeInput" type="text" placeholder="e.g. POKER-7F2A" autocapitalize="characters" maxlength="12" style="text-transform:uppercase;letter-spacing:2px;text-align:center;font-size:20px;font-weight:700"/>
+        <input id="codeInput" type="text" placeholder="e.g. WUUV" autocapitalize="characters" maxlength="12" style="text-transform:uppercase;letter-spacing:2px;text-align:center;font-size:20px;font-weight:700"/>
       </div>
-      <button class="btn" id="joinBtn">Join Session</button>
+      <button class="btn" id="joinBtn" type="button">Join Session</button>
+      <div id="joinError" class="errorBox"></div>
       <div class="note" style="text-align:center;margin-top:10px">Ask the host for the session code</div>
     </div>
 
@@ -113,7 +113,7 @@
         <label>Pick your name</label>
         <select id="nameSelect" style="font-size:16px"><option value="">Choose your name…</option></select>
       </div>
-      <button class="btn" id="confirmName" disabled>Continue</button>
+      <button class="btn" id="confirmName" type="button" disabled>Continue</button>
     </div>
 
     <!-- Screen 3: Chip entry -->
@@ -125,7 +125,8 @@
         <div class="k">Your cashout value</div>
         <div class="v" id="chipTotal">$0.00</div>
       </div>
-      <button class="btn good" id="submitChips">Submit Cashout</button>
+      <button class="btn good" id="submitChips" type="button">Submit Cashout</button>
+      <div id="submitError" class="errorBox"></div>
       <div class="note" style="text-align:center;margin-top:10px">You can re-submit if you made a mistake</div>
     </div>
 
@@ -136,19 +137,37 @@
         <h2>Cashout Submitted!</h2>
         <div class="muted" id="successDetail"></div>
         <div class="sep"></div>
-        <button class="btn" id="resubmitBtn" style="max-width:240px;margin:0 auto">Edit & Resubmit</button>
+        <button class="btn" id="resubmitBtn" type="button" style="max-width:240px;margin:0 auto">Edit & Resubmit</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Firebase SDK (compat for simple script usage) -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <script>
 (()=>{
-  // ─── Firebase Config ───
+  // ─── Debug logger ───
+  const debugEl = document.getElementById("debugPanel");
+  const debugBtn = document.getElementById("debugToggle");
+  let debugOpen = false;
+  debugBtn.addEventListener("click", () => {
+    debugOpen = !debugOpen;
+    debugEl.classList.toggle("open", debugOpen);
+  });
+  function dlog(msg, type="info"){
+    const d = document.createElement("div");
+    d.className = "dline " + type;
+    const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    d.textContent = `[${ts}] ${msg}`;
+    debugEl.appendChild(d);
+    debugEl.scrollTop = debugEl.scrollHeight;
+    if(type === "err") debugBtn.classList.add("has-error");
+    console.log(`[DEBUG ${type}]`, msg);
+  }
+
   const firebaseConfig = {
     apiKey: "AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",
     authDomain: "poker-cashout-bde23.firebaseapp.com",
@@ -158,8 +177,17 @@
     messagingSenderId: "1054875878552",
     appId: "1:1054875878552:web:94d610f9d20a18bed07ced"
   };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+
+  let app, db;
+  try {
+    app = firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    dlog("Firebase initialized OK", "ok");
+    dlog("DB URL: " + firebaseConfig.databaseURL, "data");
+  } catch(err) {
+    dlog("Firebase init FAILED: " + err.message, "err");
+    return;
+  }
 
   const COLORS = ["black","purple","yellow","pink","orange"];
   const SW = {black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
@@ -172,6 +200,7 @@
     el.className="toast";el.textContent=msg;box.appendChild(el);
     setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},dur);
   }
+  function showError(id, msg){ const el=$(id); el.textContent=msg; el.style.display=msg?"block":"none"; }
 
   let sessionCode = "";
   let sessionData = null;
@@ -182,86 +211,111 @@
     ["joinScreen","nameScreen","chipScreen","successScreen"].forEach(s=>{
       $(s).classList.toggle("hidden",s!==id);
     });
+    dlog("Screen: " + id, "info");
   }
 
-  // ─── Step 1: Join session ───
+  // ─── Step 1: Join ───
   $("joinBtn").addEventListener("click", async ()=>{
-    const code = $("codeInput").value.trim().toUpperCase();
-    if(!code){toast("Enter a session code");return}
+    showError("joinError","");
+    const raw = $("codeInput").value.trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
+    if(!raw){ showError("joinError","Please enter a session code"); return; }
 
+    dlog("Joining session: " + raw, "info");
     $("joinBtn").innerHTML = '<span class="spinner"></span> Joining…';
     $("joinBtn").disabled = true;
 
-    try{
-      const snap = await db.ref("sessions/"+code+"/config").once("value");
+    try {
+      const path = "sessions/" + raw + "/config";
+      dlog("Reading: " + path, "data");
+      const snap = await db.ref(path).once("value");
       const data = snap.val();
-      if(!data){
-        toast("Session not found — check the code");
+      dlog("Response: " + (data ? "found" : "null"), data ? "ok" : "err");
+
+      if(data) {
+        dlog("Session name: " + (data.sessionName || "none"), "data");
+        dlog("Players: " + JSON.stringify(data.playerNames || []), "data");
+        dlog("Chip values: " + JSON.stringify(data.chipValues || {}), "data");
+      }
+
+      if(!data || !data.playerNames || !Array.isArray(data.playerNames)){
+        const reason = !data ? "No data at path" : (!data.playerNames ? "No playerNames field" : "playerNames not array");
+        dlog("Join failed: " + reason, "err");
+        showError("joinError", "Session not found. Check the code and make sure the host started the session.");
         $("joinBtn").innerHTML = "Join Session";
         $("joinBtn").disabled = false;
         return;
       }
 
-      sessionCode = code;
+      sessionCode = raw;
       sessionData = data;
 
-      // Show session info
       $("sessionInfo").innerHTML = `
         <div class="k">Session</div>
-        <div class="v">${data.sessionName || code}</div>
+        <div class="v">${data.sessionName || raw}</div>
         <div style="margin-top:6px;font-size:12px;color:var(--muted)">
-          Buy-in: ${fmtUsd(data.buyinUsd)} · Players: ${data.playerNames.length}
+          Buy-in: ${fmtUsd(data.buyinUsd || 50)} · Players: ${data.playerNames.length}
         </div>
       `;
 
-      // Populate name dropdown
       const sel = $("nameSelect");
       sel.innerHTML = '<option value="">Choose your name…</option>';
-      data.playerNames.forEach(n=>{
+      data.playerNames.forEach(n => {
         const opt = document.createElement("option");
-        opt.value = n; opt.textContent = n;
+        opt.value = n;
+        opt.textContent = n;
         sel.appendChild(opt);
       });
 
       showScreen("nameScreen");
-    }catch(err){
-      toast("Connection error — try again");
-      console.error(err);
+      toast("Session found ✓");
+    } catch(err) {
+      dlog("Join ERROR: " + err.message, "err");
+      dlog("Error code: " + (err.code || "none"), "err");
+      showError("joinError", "Connection error: " + err.message);
     }
     $("joinBtn").innerHTML = "Join Session";
     $("joinBtn").disabled = false;
   });
 
-  // Allow Enter key on code input
-  $("codeInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("joinBtn").click()});
+  $("codeInput").addEventListener("keydown", e => { if(e.key==="Enter") $("joinBtn").click(); });
 
   // ─── Step 2: Pick name ───
-  $("nameSelect").addEventListener("change",()=>{
+  $("nameSelect").addEventListener("change", () => {
     $("confirmName").disabled = !$("nameSelect").value;
   });
 
-  $("confirmName").addEventListener("click",()=>{
+  $("confirmName").addEventListener("click", async () => {
     selectedPlayer = $("nameSelect").value;
     if(!selectedPlayer) return;
+    dlog("Selected player: " + selectedPlayer, "info");
 
     $("chipPlayerName").textContent = selectedPlayer;
     chipCounts = {black:0,purple:0,yellow:0,pink:0,orange:0};
 
-    // Check if already submitted — pre-fill
-    db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).once("value").then(snap=>{
+    try {
+      const path = "sessions/" + sessionCode + "/cashouts/" + selectedPlayer;
+      dlog("Checking existing: " + path, "data");
+      const snap = await db.ref(path).once("value");
       const existing = snap.val();
       if(existing && existing.submitted){
-        COLORS.forEach(c=>{ chipCounts[c] = clamp(existing[c]||0) });
+        COLORS.forEach(c => { chipCounts[c] = clamp(existing[c] || 0); });
+        dlog("Pre-filled from previous submission", "ok");
+        toast("Previous submission loaded");
+      } else {
+        dlog("No previous submission", "data");
       }
-      renderChipInputs();
-      showScreen("chipScreen");
-    });
+    } catch(err) {
+      dlog("Check existing error: " + err.message, "err");
+    }
+
+    renderChipInputs();
+    showScreen("chipScreen");
   });
 
   // ─── Step 3: Chip entry ───
   function renderChipInputs(){
-    const cv = sessionData.chipValues || {};
-    $("chipInputs").innerHTML = COLORS.map(c=>{
+    const cv = (sessionData && sessionData.chipValues) ? sessionData.chipValues : {};
+    $("chipInputs").innerHTML = COLORS.map(c => {
       const val = cv[c] || 0;
       return `
         <div class="cell" data-color="${c}">
@@ -273,9 +327,9 @@
             </div>
           </div>
           <div class="stepper">
-            <button class="sbtn" data-step="-1" data-c="${c}">−</button>
+            <button class="sbtn" type="button" data-step="-1" data-c="${c}">−</button>
             <input type="number" step="1" inputmode="numeric" data-c="${c}" value="${chipCounts[c]}" placeholder="0"/>
-            <button class="sbtn" data-step="1" data-c="${c}">+</button>
+            <button class="sbtn" type="button" data-step="1" data-c="${c}">+</button>
           </div>
         </div>
       `;
@@ -284,74 +338,86 @@
   }
 
   function updateTotal(){
-    const cv = sessionData.chipValues || {};
-    const units = COLORS.reduce((s,c)=> s + clamp(chipCounts[c]) * clamp(cv[c]), 0);
-    $("chipTotal").textContent = fmtUsd(units/1000);
+    const cv = (sessionData && sessionData.chipValues) ? sessionData.chipValues : {};
+    const units = COLORS.reduce((s,c) => s + clamp(chipCounts[c]) * clamp(cv[c]), 0);
+    $("chipTotal").textContent = fmtUsd(units / 1000);
   }
 
-  // Stepper buttons
-  document.addEventListener("click",e=>{
+  document.addEventListener("click", e => {
     const btn = e.target.closest(".sbtn");
     if(!btn) return;
-    const step = Number(btn.getAttribute("data-step"))||0;
+    e.preventDefault();
+    const step = Number(btn.getAttribute("data-step")) || 0;
     const c = btn.getAttribute("data-c");
-    chipCounts[c] = Math.max(0, (chipCounts[c]||0) + step);
+    if(!c || !COLORS.includes(c)) return;
+    chipCounts[c] = Math.max(0, (chipCounts[c] || 0) + step);
     const inp = btn.parentElement.querySelector("input");
     if(inp) inp.value = chipCounts[c];
     updateTotal();
   });
 
-  // Manual input
-  document.addEventListener("input",e=>{
+  document.addEventListener("input", e => {
     const inp = e.target;
-    const c = inp.getAttribute?.("data-c");
+    if(!inp || !inp.getAttribute) return;
+    const c = inp.getAttribute("data-c");
     if(!c || !COLORS.includes(c)) return;
-    chipCounts[c] = Math.max(0, Number(inp.value)||0);
+    chipCounts[c] = Math.max(0, parseInt(inp.value, 10) || 0);
     updateTotal();
   });
 
   // ─── Submit ───
-  $("submitChips").addEventListener("click", async ()=>{
+  $("submitChips").addEventListener("click", async () => {
+    showError("submitError","");
     $("submitChips").innerHTML = '<span class="spinner"></span> Submitting…';
     $("submitChips").disabled = true;
 
-    try{
-      const payload = {submitted:true, timestamp: Date.now()};
-      COLORS.forEach(c=> payload[c] = chipCounts[c]);
+    try {
+      const payload = { submitted: true, timestamp: Date.now() };
+      COLORS.forEach(c => { payload[c] = chipCounts[c]; });
 
-      await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).set(payload);
+      const path = "sessions/" + sessionCode + "/cashouts/" + selectedPlayer;
+      dlog("Submitting to: " + path, "info");
+      dlog("Payload: " + JSON.stringify(payload), "data");
 
-      const cv = sessionData.chipValues || {};
-      const units = COLORS.reduce((s,c)=> s + clamp(chipCounts[c]) * clamp(cv[c]), 0);
+      await db.ref(path).set(payload);
+
+      dlog("Submit SUCCESS", "ok");
+
+      const cv = (sessionData && sessionData.chipValues) ? sessionData.chipValues : {};
+      const units = COLORS.reduce((s,c) => s + clamp(chipCounts[c]) * clamp(cv[c]), 0);
 
       $("successDetail").innerHTML = `
         <b>${selectedPlayer}</b><br>
-        Cashout value: ${fmtUsd(units/1000)}<br>
+        Cashout value: ${fmtUsd(units / 1000)}<br>
         <span style="font-size:11px;margin-top:4px;display:block">The host will see your submission in real-time</span>
       `;
 
       showScreen("successScreen");
       toast("Submitted ✓");
-    }catch(err){
-      toast("Error submitting — try again");
-      console.error(err);
+    } catch(err) {
+      dlog("Submit FAILED: " + err.message, "err");
+      dlog("Error code: " + (err.code || "none"), "err");
+      showError("submitError", "Error: " + err.message);
     }
     $("submitChips").innerHTML = "Submit Cashout";
     $("submitChips").disabled = false;
   });
 
-  // ─── Resubmit ───
-  $("resubmitBtn").addEventListener("click",()=>{
+  $("resubmitBtn").addEventListener("click", () => {
     renderChipInputs();
     showScreen("chipScreen");
   });
 
-  // ─── Auto-fill code from URL param ───
+  // ─── Auto-fill code from URL ───
   const params = new URLSearchParams(window.location.search);
-  const urlCode = params.get("code") || params.get("session");
+  const urlCode = (params.get("code") || params.get("session") || "").trim().toUpperCase();
   if(urlCode){
-    $("codeInput").value = urlCode.toUpperCase();
+    $("codeInput").value = urlCode;
+    dlog("Auto-fill code from URL: " + urlCode, "info");
+    setTimeout(() => $("joinBtn").click(), 500);
   }
+
+  dlog("Player page ready", "ok");
 })();
 </script>
 </body>

@@ -15,12 +15,14 @@
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);
       background:radial-gradient(1100px 850px at 20% 0%,rgba(122,167,255,.20),transparent 60%),radial-gradient(900px 700px at 90% 10%,rgba(182,140,255,.14),transparent 60%),var(--bg)}
     .wrap{max-width:1050px;margin:0 auto;padding:18px 14px 28px}
-    .top{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;gap:10px;align-items:center;
+    .top{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;
       padding:12px;border:1px solid var(--line);border-radius:var(--r);
       background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));box-shadow:var(--sh);backdrop-filter:blur(8px)}
+    .topPills{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
     h1{margin:0;font-size:16px}
     .sub{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.35}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--muted);font-size:12px;white-space:nowrap}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--muted);font-size:12px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+    @media(max-width:480px){.pill{max-width:140px;font-size:11px;padding:6px 8px}}
     .dot{width:8px;height:8px;border-radius:50%}
     .pill.good .dot{background:var(--good)}.pill.warn .dot{background:var(--warn)}.pill.bad .dot{background:var(--bad)}
     .pill.secondary{background:rgba(0,0,0,.18);color:rgba(232,238,252,.75)}
@@ -157,8 +159,10 @@
       <div class="sub">$1 = 1000 value units • Buy-in $50 • RF tax 30% of (Winnings above total buy-ins)</div>
     </div>
     <div id="liveBadge" class="pill live" style="display:none"><span class="dot"></span><span id="liveText">LIVE</span></div>
-    <div id="lockBadge" class="pill secondary" style="display:none"><span class="dot" style="background:var(--accent)"></span><span>LOCKED</span></div>
-    <div id="pill" class="pill warn"><span class="dot"></span><span id="pillText">Audit: pending</span></div>
+    <div class="topPills">
+      <div id="lockBadge" class="pill secondary" style="display:none"><span class="dot" style="background:var(--accent)"></span><span>LOCKED</span></div>
+      <div id="pill" class="pill warn"><span class="dot"></span><span id="pillText">Audit: pending</span></div>
+    </div>
   </div>
 
   <!-- Online Session Card -->
@@ -172,7 +176,7 @@
     </div>
     <div class="bd">
       <div id="onlineOff">
-        <div class="note" style="margin:0;text-align:center;padding:8px 0">Start an online session so players can submit their cashout chip counts from their phones.</div>
+        <div class="note" style="margin:0;text-align:center;padding:8px 0">Start an online session so players can submit their cashout chip counts from their phones.<br><b style="color:var(--warn)">Set up player names below BEFORE starting.</b></div>
       </div>
       <div id="onlineOn" style="display:none">
         <div class="note" style="margin:0;text-align:center">Share this code with your players:</div>
@@ -368,6 +372,24 @@
   }
 
   function startOnlineSession(){
+    // Validate: check for default/duplicate names
+    const names = state.players.map(p=>p.name.trim()).filter(Boolean);
+    const hasDefaults = names.some(n => /^Player \d+$/i.test(n));
+    if(hasDefaults){
+      if(!confirm("Some players still have default names (e.g. 'Player 1').\n\nRename them first so your players can find themselves in the list.\n\nContinue anyway?")){
+        return;
+      }
+    }
+    const dupes = names.filter((n,i) => names.indexOf(n) !== i);
+    if(dupes.length > 0){
+      toast("Fix duplicate player names first: " + dupes.join(", "));
+      return;
+    }
+    if(names.length === 0){
+      toast("Add at least one player first");
+      return;
+    }
+
     const code=generateCode();
     onlineSessionCode=code;
     const config={
@@ -375,12 +397,11 @@
       buyinUsd:state.buyinUsd,
       taxRate:state.taxRate,
       chipValues:clone(state.chipValues),
-      playerNames:state.players.map(p=>p.name.trim()).filter(Boolean),
+      playerNames:names,
       createdAt:Date.now()
     };
-    // Initialize cashout slots
     const cashouts={};
-    config.playerNames.forEach(n=>{cashouts[n]={submitted:false,black:0,purple:0,yellow:0,pink:0,orange:0}});
+    names.forEach(n=>{cashouts[n]={submitted:false,black:0,purple:0,yellow:0,pink:0,orange:0}});
 
     db.ref("sessions/"+code).set({config,cashouts}).then(()=>{
       $("onlineOff").style.display="none";
@@ -411,12 +432,13 @@
   }
 
   function listenForCashouts(code){
+    console.log("Listening for cashouts on:", "sessions/"+code+"/cashouts");
     firebaseListener=db.ref("sessions/"+code+"/cashouts").on("value",snap=>{
       const data=snap.val();
+      console.log("Cashout update received:", data);
       if(!data)return;
       const names=Object.keys(data);
       let submitted=0;
-      // Update status grid
       const grid=$("statusGrid");
       grid.innerHTML=names.map(n=>{
         const d=data[n];
@@ -427,16 +449,27 @@
       $("submitCount").textContent=submitted;
       $("submitTotal").textContent=names.length;
 
-      // Auto-fill cashout into state
+      // Auto-fill cashout into admin state
+      let changed = false;
       for(const p of state.players){
         const pName=p.name.trim();
         if(data[pName]&&data[pName].submitted){
-          COLORS.forEach(c=>{p.cashout[c]=clamp(data[pName][c]||0)});
+          COLORS.forEach(c=>{
+            const newVal = clamp(data[pName][c]||0);
+            if(p.cashout[c] !== newVal){ p.cashout[c] = newVal; changed = true; }
+          });
         }
       }
-      save();
-      renderPlayersFull();
-      renderAuditAndSummary();
+      if(changed){
+        console.log("Cashout data synced from players");
+        toast("Player cashout received ✓");
+        save();
+        renderPlayersFull();
+        renderAuditAndSummary();
+      }
+    }, err => {
+      console.error("Firebase listener error:", err);
+      toast("Firebase sync error — check console");
     });
   }
 
@@ -490,7 +523,7 @@
     applyMismatchHighlights(mm.map(m=>m.color));setAuditHint(mm);
     const pill=$("pill"),pt=$("pillText"),haveData=COLORS.some(c=>IN[c]!==0)||COLORS.some(c=>OUT[c]!==0);
     if(!haveData){pill.className="pill warn";pt.textContent="Audit: pending"}
-    else if(mm.length>0){pill.className="pill bad";const sh=mm.slice(0,2).map(m=>`${m.color[0].toUpperCase()+m.color.slice(1)} ${m.diff>0?"+":""}${m.diff}`).join(", ");pt.textContent=`Audit: MISMATCH (${sh}${mm.length>2?"…":""})`}
+    else if(mm.length>0){pill.className="pill bad";pt.textContent=mm.length===1?`Mismatch: ${mm[0].color[0].toUpperCase()+mm[0].color.slice(1)}`:`Mismatch ×${mm.length}`}
     else{pill.className="pill good";pt.textContent="Audit: OK ✓"}
   }
 
