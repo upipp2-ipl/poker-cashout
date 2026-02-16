@@ -70,6 +70,8 @@
     .stepper .sbtn:hover{color:var(--text)}.stepper .sbtn:active{background:rgba(122,167,255,.15)}
     .totalBar{padding:12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);margin:16px 0;text-align:center}
     .totalBar .k{font-size:10px;color:var(--muted)}.totalBar .v{font-size:20px;font-weight:800;margin-top:2px}
+    .netProfit{font-size:12px;margin-top:2px;font-weight:600}
+    .netProfit.good{color:var(--good)}.netProfit.bad{color:var(--bad)}
     .successCard{text-align:center;padding:32px 16px}
     .successCard .icon{font-size:48px;margin-bottom:12px}
     .successCard h2{margin:0 0 8px;font-size:18px}
@@ -134,7 +136,11 @@
       <div id="chipPlayerName" style="font-size:15px;font-weight:700;margin-bottom:4px"></div>
       <div class="note" style="margin-top:0;margin-bottom:14px">Count your chips by color and enter the totals</div>
       <div class="chips" id="chipInputs"></div>
-      <div class="totalBar"><div class="k">Your cashout value</div><div class="v" id="chipTotal">$0.00</div></div>
+      <div class="totalBar">
+        <div class="k">Your cashout value</div>
+        <div class="v" id="chipTotal">$0.00</div>
+        <div class="netProfit" id="netProfitDisplay" style="display:none"></div>
+      </div>
       <button class="btn good" id="submitChips" type="button">Submit Cashout</button>
       <div id="submitError" class="errorBox"></div>
       <div class="note" style="text-align:center">You can re-submit if you made a mistake</div>
@@ -162,6 +168,17 @@
   applyTheme();
   document.getElementById("themeToggle").addEventListener("click",()=>{theme=theme==="dark"?"light":"dark";applyTheme()});
 
+  // Unique Device ID for name locking
+  function getDeviceId(){
+    let id = localStorage.getItem("poker_device_id");
+    if(!id){
+       id = Math.random().toString(36).substring(2) + Date.now().toString(36);
+       localStorage.setItem("poker_device_id", id);
+    }
+    return id;
+  }
+  const DEVICE_ID = getDeviceId();
+
   // Debug
   const debugEl=document.getElementById("debugPanel"),debugBtn=document.getElementById("debugToggle");
   let debugOpen=false;
@@ -178,6 +195,8 @@
   function showError(id,msg){const el=$(id);el.textContent=msg;el.style.display=msg?"block":"none"}
 
   let sessionCode="",sessionData=null,selectedPlayer="",chipCounts={black:0,purple:0,yellow:0,pink:0,orange:0};
+  let currentBuyins = {}; // Map of PlayerName -> BuyinAmount
+
   function showScreen(id){["joinScreen","nameScreen","chipScreen","successScreen"].forEach(s=>$(s).classList.toggle("hidden",s!==id));dlog("Screen: "+id,"info")}
 
   $("joinBtn").addEventListener("click",async()=>{
@@ -190,11 +209,43 @@
       dlog("Response: "+(data?"found":"null"),data?"ok":"err");
       if(!data||!data.playerNames||!Array.isArray(data.playerNames)){dlog("Not found","err");showError("joinError","Session not found. Check the code.");$("joinBtn").innerHTML="Join Session";$("joinBtn").disabled=false;return}
       sessionCode=raw;sessionData=data;
+      
+      // Listen for buyin updates
+      db.ref("sessions/"+raw+"/config/buyins").on("value", bSnap => {
+          currentBuyins = bSnap.val() || {};
+          updateTotal(); // Update display if we are already on chip screen
+      });
+
       $("sessionInfo").innerHTML=`<div class="k">Session</div><div class="v">${data.sessionName||raw}</div><div style="margin-top:6px;font-size:12px;color:var(--muted)">Buy-in: ${fmtUsd(data.buyinUsd||50)} · Players: ${data.playerNames.length}</div>`;
-      let submittedNames=[];
-      try{const cs=await db.ref("sessions/"+raw+"/cashouts").once("value"),cd=cs.val();if(cd)submittedNames=Object.keys(cd).filter(n=>cd[n]&&cd[n].submitted);dlog("Submitted: "+submittedNames.join(", "),"data")}catch(e){dlog("Check err: "+e.message,"err")}
+      
+      // Check existing cashouts to see if names are claimed
+      let submittedMap={};
+      try{
+        const cs=await db.ref("sessions/"+raw+"/cashouts").once("value"),cd=cs.val();
+        if(cd) submittedMap = cd;
+      }catch(e){}
+
       const sel=$("nameSelect");sel.innerHTML='<option value="">Choose your name…</option>';
-      data.playerNames.forEach(n=>{const opt=document.createElement("option");opt.value=n;const taken=submittedNames.includes(n);opt.textContent=taken?n+" ✓ (submitted)":n;opt.disabled=taken;sel.appendChild(opt)});
+      data.playerNames.forEach(n=>{
+        const opt=document.createElement("option");
+        opt.value=n;
+        
+        const entry = submittedMap[n];
+        const isSubmitted = entry && entry.submitted;
+        const isClaimed = entry && entry.claimed;
+        const ownerId = entry && entry.deviceId;
+        
+        // Lock logic: If claimed by someone else, disable it
+        if(isClaimed && ownerId && ownerId !== DEVICE_ID) {
+            opt.textContent = n + " (Locked)";
+            opt.disabled = true;
+        } else if (isSubmitted) {
+            opt.textContent = n + " ✓ (submitted)";
+        } else {
+            opt.textContent = n;
+        }
+        sel.appendChild(opt);
+      });
       showScreen("nameScreen");toast("Session found ✓");
     }catch(err){dlog("Error: "+err.message,"err");showError("joinError","Connection error: "+err.message)}
     $("joinBtn").innerHTML="Join Session";$("joinBtn").disabled=false;
@@ -214,7 +265,26 @@
     $("chipInputs").innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="colorInfo"><span class="sw ${SW[c]}"></span><div><div class="cname">${c[0].toUpperCase()+c.slice(1)}</div><div class="cval">${(cv[c]||0).toLocaleString()} units</div></div></div><div class="stepper"><button class="sbtn" type="button" data-step="-1" data-c="${c}">−</button><input type="number" step="1" inputmode="numeric" data-c="${c}" value="${chipCounts[c]}" placeholder="0"/><button class="sbtn" type="button" data-step="1" data-c="${c}">+</button></div></div>`).join("");
     updateTotal();
   }
-  function updateTotal(){const cv=sessionData?.chipValues||{};$("chipTotal").textContent=fmtUsd(COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0)/1000)}
+  
+  function updateTotal(){
+    const cv=sessionData?.chipValues||{};
+    const units = COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0);
+    const gross = units/1000;
+    $("chipTotal").textContent=fmtUsd(gross);
+    
+    // Calculate Net Profit
+    const buyinAmt = currentBuyins[selectedPlayer] || 0;
+    const net = gross - buyinAmt;
+    const netEl = $("netProfitDisplay");
+    
+    if(buyinAmt > 0) {
+        netEl.style.display = "block";
+        netEl.className = "netProfit " + (net >= 0 ? "good" : "bad");
+        netEl.textContent = `Buy-in: ${fmtUsd(buyinAmt)} · Net: ${net>=0?"+":""}${fmtUsd(net)}`;
+    } else {
+        netEl.style.display = "none";
+    }
+  }
 
   document.addEventListener("click",e=>{const btn=e.target.closest(".sbtn");if(!btn)return;e.preventDefault();const step=Number(btn.getAttribute("data-step"))||0,c=btn.getAttribute("data-c");if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.max(0,(chipCounts[c]||0)+step);const inp=btn.parentElement.querySelector("input");if(inp)inp.value=chipCounts[c];updateTotal()});
   document.addEventListener("input",e=>{const c=e.target?.getAttribute?.("data-c");if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.max(0,parseInt(e.target.value,10)||0);updateTotal()});
@@ -222,12 +292,25 @@
   $("submitChips").addEventListener("click",async()=>{
     showError("submitError","");$("submitChips").innerHTML='<span class="spinner"></span> Submitting…';$("submitChips").disabled=true;
     try{
-      const payload={submitted:true,timestamp:Date.now()};COLORS.forEach(c=>{payload[c]=chipCounts[c]});
+      // Add Device ID and Claimed status
+      const payload={
+        submitted:true, 
+        timestamp:Date.now(),
+        claimed: true,
+        deviceId: DEVICE_ID
+      };
+      COLORS.forEach(c=>{payload[c]=chipCounts[c]});
+      
       dlog("Submitting: "+JSON.stringify(payload),"data");
       await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).set(payload);
       dlog("Submit OK","ok");
+      
       const cv=sessionData?.chipValues||{},units=COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0);
-      $("successDetail").innerHTML=`<b>${selectedPlayer}</b><br>Cashout: ${fmtUsd(units/1000)}<br><span style="font-size:11px;display:block;margin-top:4px">The host sees this in real-time</span>`;
+      const gross = units/1000;
+      const buyinAmt = currentBuyins[selectedPlayer] || 0;
+      const net = gross - buyinAmt;
+      
+      $("successDetail").innerHTML=`<b>${selectedPlayer}</b><br>Cashout: ${fmtUsd(gross)}<br>Net: <span class="${net>=0?'good':'bad'}">${net>=0?"+":""}${fmtUsd(net)}</span><br><span style="font-size:11px;display:block;margin-top:4px">The host sees this in real-time</span>`;
       showScreen("successScreen");toast("Submitted ✓");
     }catch(err){dlog("Submit FAIL: "+err.message,"err");showError("submitError","Error: "+err.message)}
     $("submitChips").innerHTML="Submit Cashout";$("submitChips").disabled=false;

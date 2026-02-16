@@ -171,7 +171,6 @@
   <div class="iplSub">Innovation Poker League</div>
 </div>
 <div class="wrap">
-  <!-- Mode Toggle -->
   <div class="modeToggle" id="modeToggle">
     <button class="modeBtn active" data-mode="cash" type="button">♠ Cash Game</button>
     <button class="modeBtn" data-mode="tournament" type="button">🏆 Tournament</button>
@@ -187,7 +186,6 @@
     </div>
   </div>
 
-  <!-- Timer (tournament only) -->
   <div class="card timerCard hidden" id="timerCard" style="margin-bottom:14px">
     <div class="hd"><h2>⏱ Blinds Timer</h2>
       <div class="btnbar">
@@ -204,7 +202,6 @@
     </div>
   </div>
 
-  <!-- Online Session -->
   <div class="card onlineCard hidden" id="onlineCard">
     <div class="hd"><h2>Online Session</h2><div class="btnbar">
       <button class="btn small live" id="startOnline" type="button">Start Online</button>
@@ -228,7 +225,6 @@
     </div>
   </div>
 
-  <!-- Session & Rules -->
   <div class="grid" style="margin-top:14px">
     <div class="card">
       <div class="hd"><h2>Session & Rules</h2><div class="btnbar">
@@ -244,7 +240,6 @@
           <div><label>RF tax rate</label><input id="taxRate" type="number" step="0.01" inputmode="decimal"/></div>
         </div>
         <div class="row" style="margin-top:8px"><div><label>Bank / Admin</label><select id="bankSelect"></select></div></div>
-        <!-- Cash Game chip values -->
         <div id="chipValuesSection">
           <div class="sep"></div>
           <label>Chip values (units per chip)</label>
@@ -256,7 +251,6 @@
             <div><label>Orange</label><input id="v_orange" type="number" step="1" inputmode="numeric"/></div>
           </div>
         </div>
-        <!-- Tournament prize split + chip pack -->
         <div id="prizeSplitSection" class="hidden">
           <div class="sep"></div>
           <label>Prize split (%)</label>
@@ -287,7 +281,6 @@
     <div class="card">
       <div class="hd"><h2>Players (<span id="playerCount">0</span>)</h2><div class="btnbar"><button class="btn" id="addPlayer" type="button">+ Add player</button></div></div>
       <div class="bd"><div id="jumpNav" class="jumpNav"></div><div id="players" class="players"></div>
-        <!-- Tournament Placements -->
         <div id="placementSection" class="hidden" style="margin-top:14px">
           <label style="font-weight:700;color:var(--warn);font-size:13px">🏆 Placements</label>
           <div class="placeSelect">
@@ -300,13 +293,11 @@
     </div>
   </div>
 
-  <!-- Audit (cash only) -->
   <div class="grid" id="cashAuditGrid">
     <div class="card"><div class="hd"><h2>Audit: IN vs OUT</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Color</th><th class="num">IN</th><th class="num">OUT</th><th class="num">Diff</th></tr></thead><tbody id="auditBody"></tbody></table></div></div></div>
     <div class="card"><div class="hd"><h2>Summary</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Buy-ins</th><th class="num">Gross</th><th class="num">RF tax</th><th class="num">Final</th><th class="num">Net</th></tr></thead><tbody id="summaryBody"></tbody></table></div></div></div>
   </div>
 
-  <!-- Tournament Summary -->
   <div class="card hidden" id="tournamentSummary" style="margin-top:14px">
     <div class="hd"><h2>🏆 Tournament Summary</h2></div>
     <div class="bd"><div class="tablewrap"><table>
@@ -317,7 +308,6 @@
     </div>
   </div>
 
-  <!-- Payouts with swipe -->
   <div class="card" id="payoutCard" style="margin-top:14px;display:none">
     <div class="hd"><h2>Payouts</h2><div class="btnbar"><button class="btn small" id="copyPayouts" type="button">Copy payouts</button></div></div>
     <div class="bd">
@@ -326,7 +316,6 @@
     </div>
   </div>
 
-  <!-- Stats & History -->
   <div class="card" style="margin-top:14px"><div class="hd histHd"><h2>Player Stats (All-Time)</h2><span class="muted" id="statsSessionCount" style="font-size:11px"></span></div>
     <div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Sessions</th><th class="num">Wins</th><th class="num">Win%</th><th class="num">Net</th><th class="num">Avg</th></tr></thead><tbody id="statsBody"></tbody></table></div><div id="statsEmpty" class="emptyState" style="display:none">No sessions archived yet.</div></div>
   </div>
@@ -467,7 +456,36 @@
   // ── Firebase ──
   function generateCode(){const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let c="";for(let i=0;i<4;i++)c+=ch[Math.floor(Math.random()*ch.length)];return c}
   function getPlayerPageUrl(code){return window.location.href.replace(/\/[^/]*$/,"/")+`player.html?code=${code}`}
-  function startOnlineSession(){const names=state.players.map(p=>p.name.trim()).filter(Boolean);if(!names.length){toast("Add players first");return}const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names");return}const code=generateCode();onlineSessionCode=code;db.ref("sessions/"+code).set({config:{sessionName:state.sessionName||"Poker Night",buyinUsd:state.buyinUsd,taxRate:state.taxRate,chipValues:clone(state.chipValues),playerNames:names,createdAt:Date.now()},cashouts:Object.fromEntries(names.map(n=>[n,{submitted:false,black:0,purple:0,yellow:0,pink:0,orange:0}]))}).then(()=>{$("onlineOff").style.display="none";$("onlineOn").style.display="block";$("sessionCodeDisplay").textContent=code;const url=getPlayerPageUrl(code);$("playerLinkDisplay").textContent=url;$("qrWrap").innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}" width="180" height="180"/>`;$("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";$("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`;toast("Online: "+code);listenForCashouts(code)})}
+  
+  // NEW: Sync buyin amounts to allow "Net Profit" display on phones
+  function getBuyinMap(){
+    const map={};
+    state.players.forEach(p=>{
+      // Use dollar amount for Cash, or count for Tournament (though mostly for Cash mode)
+      map[p.name.trim()] = p.buyins.length * state.buyinUsd;
+    });
+    return map;
+  }
+  
+  function updateOnlineBuyins(){
+     if(!onlineSessionCode) return;
+     db.ref("sessions/"+onlineSessionCode+"/config/buyins").set(getBuyinMap());
+  }
+
+  function startOnlineSession(){const names=state.players.map(p=>p.name.trim()).filter(Boolean);if(!names.length){toast("Add players first");return}const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names");return}const code=generateCode();onlineSessionCode=code;
+    db.ref("sessions/"+code).set({
+      config:{
+        sessionName:state.sessionName||"Poker Night",
+        buyinUsd:state.buyinUsd,
+        taxRate:state.taxRate,
+        chipValues:clone(state.chipValues),
+        playerNames:names,
+        buyins: getBuyinMap(), // Send initial buyins
+        createdAt:Date.now()
+      },
+      cashouts:Object.fromEntries(names.map(n=>[n,{submitted:false,black:0,purple:0,yellow:0,pink:0,orange:0}]))
+    }).then(()=>{$("onlineOff").style.display="none";$("onlineOn").style.display="block";$("sessionCodeDisplay").textContent=code;const url=getPlayerPageUrl(code);$("playerLinkDisplay").textContent=url;$("qrWrap").innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}" width="180" height="180"/>`;$("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";$("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`;toast("Online: "+code);listenForCashouts(code)})
+  }
   function stopOnlineSession(){if(firebaseListener&&onlineSessionCode){db.ref("sessions/"+onlineSessionCode+"/cashouts").off("value",firebaseListener);firebaseListener=null}onlineSessionCode=null;$("onlineOff").style.display="block";$("onlineOn").style.display="none";$("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";$("liveBadge").style.display="none";toast("Online ended")}
   function listenForCashouts(code){firebaseListener=db.ref("sessions/"+code+"/cashouts").on("value",snap=>{const data=snap.val();if(!data)return;const names=Object.keys(data);let sub=0;$("statusGrid").innerHTML=names.map(n=>{const d=data[n],is=!!d.submitted;if(is)sub++;return`<div class="statusItem ${is?"submitted":"pending"}"><span class="sDot"></span>${esc(n)}</div>`}).join("");$("submitCount").textContent=sub;$("submitTotal").textContent=names.length;let ch=false;for(const p of state.players){const pn=p.name.trim();if(data[pn]&&data[pn].submitted)COLORS.forEach(c=>{const nv=clamp(data[pn][c]||0);if(p.cashout[c]!==nv){p.cashout[c]=nv;ch=true}})}if(ch){toast("Cashout received ✓");save();renderPlayersFull();renderAuditAndSummary()}})}
 
@@ -577,12 +595,29 @@
       const isPaid=!!paidMap[l.key];
       return`<div class="payLine ${isPaid?"paid":""}" data-paykey="${l.key}"><div class="payBg ${isPaid?"toUnpay":"toBePaid"}">${isPaid?"← Swipe to unpay":"Paid ✓ →"}</div><div class="payContent"><div><span style="font-size:12px;font-weight:600">${esc(l.label)}</span><br><span class="muted" style="font-size:11px">${l.type==="collect"?"Buy-in":"Payout"}</span></div><div style="text-align:right"><span style="font-weight:700">${fmtUsd(l.amount)}</span>${isPaid?'<br><span class="paidBadge">PAID</span>':''}</div></div></div>`;
     }).join("");
-    // Attach swipe handlers
+    // Attach swipe handlers with scroll protection
     document.querySelectorAll(".payLine").forEach(el=>{
-      let sx=0,cx=0;
-      el.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;cx=sx},{passive:true});
-      el.addEventListener("touchmove",e=>{cx=e.touches[0].clientX;const dx=cx-sx;const content=el.querySelector(".payContent");content.style.transform=`translateX(${Math.max(-80,Math.min(80,dx))}px)`;content.style.transition="none"},{passive:true});
-      el.addEventListener("touchend",()=>{const dx=cx-sx;const content=el.querySelector(".payContent");content.style.transition="transform .2s";content.style.transform="";const key=el.dataset.paykey;
+      let sx=0,sy=0,cx=0,cy=0;
+      el.addEventListener("touchstart",e=>{
+        sx=e.touches[0].clientX; sy=e.touches[0].clientY;
+        cx=sx; cy=sy;
+      },{passive:true});
+      el.addEventListener("touchmove",e=>{
+        cx=e.touches[0].clientX; cy=e.touches[0].clientY;
+        const dx=cx-sx; const dy=cy-sy;
+        // If vertical scroll is more prominent than horizontal, ignore swipe
+        if(Math.abs(dy) > Math.abs(dx)) return;
+        
+        const content=el.querySelector(".payContent");
+        content.style.transform=`translateX(${Math.max(-80,Math.min(80,dx))}px)`;
+        content.style.transition="none";
+      },{passive:true});
+      el.addEventListener("touchend",()=>{
+        const dx=cx-sx;
+        const content=el.querySelector(".payContent");
+        content.style.transition="transform .2s";
+        content.style.transform="";
+        const key=el.dataset.paykey;
         if(dx>60&&!paidMap[key]){paidMap[key]=true;savePaid();renderPayouts();toast("Marked as paid ✓")}
         else if(dx<-60&&paidMap[key]){delete paidMap[key];savePaid();renderPayouts();toast("Unmarked")}
       });
@@ -649,18 +684,18 @@
 
   document.addEventListener("input",e=>{if(state.locked)return;const t=e.target,kind=t?.getAttribute?.("data-kind"),pid=t?.getAttribute?.("data-p");
     if(kind==="tpack"){const color=t.getAttribute("data-c");if(color){state.tourneyPack[color]=Math.max(0,Number(t.value)||0);save();renderTourneyChipPack()}return}
-    if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){p.name=t.value;renderAuditAndSummary();renderJumpNav();save();return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}}if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}},{passive:true});
+    if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){p.name=t.value;renderAuditAndSummary();renderJumpNav();save();return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary();updateOnlineBuyins()}}if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}},{passive:true});
 
   document.addEventListener("click",e=>{const t=e.target.closest(".sbtn");if(!t||state.locked)return;const step=Number(t.dataset.step)||0,kind=t.dataset.kind,pid=t.dataset.p,color=t.dataset.c,bid=t.dataset.b;
     if(kind==="tpack"&&color){state.tourneyPack[color]=Math.max(0,(state.tourneyPack[color]||0)+step);t.parentElement.querySelector("input").value=state.tourneyPack[color];save();renderTourneyChipPack();return}
-    const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary()}}if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary()}},true);
+    const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary();updateOnlineBuyins()}}if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary()}},true);
 
   document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const act=t.dataset.act,pid=t.dataset.p;
     if(act==="togglePlayer"){if(collapsedPlayers.has(pid))collapsedPlayers.delete(pid);else collapsedPlayers.add(pid);const el=document.getElementById("player_"+pid);if(el){el.classList.toggle("is-collapsed");el.querySelector(".pbd")?.classList.toggle("collapsed")}return}
-    if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();toast(`${p.name} removed`)}}
-    if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){const counts=mode==="tournament"?clone(state.tourneyPack):{black:0,purple:0,yellow:0,pink:0,orange:0};p.buyins.push({id:uid(),counts});renderAllFull();toast("Rebuy added")}}
-    if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();toast("Rebuy removed")}}
-    if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull()}}
+    if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();updateOnlineBuyins();toast(`${p.name} removed`)}}
+    if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){const counts=mode==="tournament"?clone(state.tourneyPack):{black:0,purple:0,yellow:0,pink:0,orange:0};p.buyins.push({id:uid(),counts});renderAllFull();updateOnlineBuyins();toast("Rebuy added")}}
+    if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();updateOnlineBuyins();toast("Rebuy removed")}}
+    if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull();updateOnlineBuyins()}}
   },true);
 
   document.addEventListener("click",e=>{const t=e.target.closest("[data-jump]");if(t){const el=document.getElementById("player_"+t.dataset.jump);if(el){collapsedPlayers.delete(t.dataset.jump);el.classList.remove("is-collapsed");el.querySelector(".pbd")?.classList.remove("collapsed");el.scrollIntoView({behavior:"smooth"})}}},true);
