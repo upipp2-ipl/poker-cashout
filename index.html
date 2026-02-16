@@ -13,7 +13,7 @@
     .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:28px;font-weight:800;letter-spacing:1px}
     .suit{font-size:20px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
     .iplSub{color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.5px}
-    .wrap{max-width:1050px;margin:0 auto;padding:0 14px 160px}
+    .wrap{max-width:1050px;margin:0 auto;padding:0 14px 90px}
     .top{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh);margin-bottom:14px}
     .topPills{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
     h1{margin:0;font-size:15px}.sub{color:var(--muted);font-size:11px;margin-top:2px}
@@ -90,8 +90,8 @@
     table{width:100%;border-collapse:separate;border-spacing:0}
     th,td{padding:8px 10px;border-bottom:1px solid var(--line);font-size:12px}
     th{background:var(--input-bg);color:var(--muted);text-align:left;font-weight:600}.num{text-align:right}
-    .footer{position:sticky;bottom:0;z-index:9;margin-top:14px;padding-bottom:env(safe-area-inset-bottom);border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh)}
-    .footer .inner{padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .footer{position:fixed;bottom:0;left:0;right:0;z-index:9;padding-bottom:env(safe-area-inset-bottom);border-top:1px solid var(--card-border);background:var(--bg2);box-shadow:0 -4px 20px rgba(0,0,0,.20)}
+    .footer .inner{max-width:1050px;margin:0 auto;padding:8px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
     .tot{border:1px solid var(--card-border);background:var(--input-bg);padding:6px 9px;border-radius:10px;min-width:130px;flex:1 1 130px}
     .tot .k{font-size:10px;color:var(--muted);font-weight:500}.tot .v{font-size:13px;font-weight:800}
     .totwrap{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;flex:1;min-width:250px}
@@ -205,13 +205,13 @@
   </div>
 
   <!-- Online Session -->
-  <div class="card onlineCard hidden" id="onlineCard">
+  <div class="card onlineCard" id="onlineCard">
     <div class="hd"><h2>Online Session</h2><div class="btnbar">
       <button class="btn small live" id="startOnline" type="button">Start Online</button>
       <button class="btn small danger" id="stopOnline" type="button" style="display:none">End Online</button>
     </div></div>
     <div class="bd">
-      <div id="onlineOff"><div class="note" style="margin:0;text-align:center;padding:6px 0">Players submit cashouts from their phones.<br><b style="color:var(--warn)">Set player names before starting.</b></div></div>
+      <div id="onlineOff"><div class="note" style="margin:0;text-align:center;padding:6px 0">Let players submit cashouts from their phones.<br><b style="color:var(--warn)">1) Add & name your players below  2) Click "Start Online"</b></div></div>
       <div id="onlineOn" style="display:none">
         <div class="note" style="margin:0;text-align:center">Share this code:</div>
         <div class="codeDisplay" id="sessionCodeDisplay"></div>
@@ -334,12 +334,14 @@
     <div class="bd"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Session</th><th class="num">Mode</th><th class="num">Players</th><th></th></tr></thead><tbody id="historyBody"></tbody></table></div><div id="historyEmpty" class="emptyState" style="display:none">No sessions yet.</div></div>
   </div>
 
-  <div class="footer"><div class="inner"><div class="totwrap">
+</div><!-- end wrap -->
+
+<div class="footer"><div class="inner"><div class="totwrap">
     <div class="tot"><div class="k" id="footK1">Total Gross</div><div class="v" id="t_gross">$0.00</div></div>
     <div class="tot"><div class="k">RF fund</div><div class="v" id="t_rf">$0.00</div></div>
     <div class="tot"><div class="k" id="footK3">Total Final</div><div class="v" id="t_final">$0.00</div></div>
   </div><button class="btn" id="toTop" type="button">↑</button></div></div>
-</div>
+
 <div id="lockedOverlay" class="lockedOverlay"><b>Session locked.</b> <span class="muted">Unlock to edit.</span></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -692,7 +694,7 @@
   document.addEventListener("focus",e=>{const t=e.target;if(t&&t.type==="number"&&t.closest(".stepper,.chips,.row")){t.select()}},true);
   document.addEventListener("blur",e=>{const t=e.target;if(t&&t.type==="number"&&t.closest(".stepper,.chips,.row")){if(t.value===""||t.value===null)t.value="0"}},true);
 
-  state=sanitize(state);renderAllFull();
+  state=sanitize(state);setMode("cash");renderAllFull();
 })();
 </script>
 </body>
