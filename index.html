@@ -256,7 +256,7 @@
             <div><label>Orange</label><input id="v_orange" type="number" step="1" inputmode="numeric"/></div>
           </div>
         </div>
-        <!-- Tournament prize split -->
+        <!-- Tournament prize split + chip pack -->
         <div id="prizeSplitSection" class="hidden">
           <div class="sep"></div>
           <label>Prize split (%)</label>
@@ -265,6 +265,14 @@
             <div><label>🥈 2nd</label><input id="split2" type="number" value="30" inputmode="numeric"/></div>
             <div><label>🥉 3rd</label><input id="split3" type="number" value="20" inputmode="numeric"/></div>
           </div>
+          <div class="sep"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+            <label style="margin:0;font-weight:700;color:var(--warn)">🎰 Tournament Chip Pack (per buy-in)</label>
+            <button class="btn small gold" id="copyChipPack" type="button">Copy to all players</button>
+          </div>
+          <div class="note" style="margin-top:4px;margin-bottom:8px">Set the starting chip count here. Hit "Copy to all players" to apply to everyone.</div>
+          <div class="chips" id="tourneyChipPack"></div>
+          <div class="note" id="tourneyPackValue"></div>
         </div>
         <div class="sep"></div>
         <div class="btnbar">
@@ -364,7 +372,7 @@
   function savePaid(){try{localStorage.setItem(PAY_KEY,JSON.stringify(paidMap))}catch{}}
 
   function makePlayer(n){return{id:uid(),name:n||"Player",buyins:[{id:uid(),counts:clone(DEFAULTS.defaultPack)}],cashout:{black:0,purple:0,yellow:0,pink:0,orange:0}}}
-  function defaultState(){return{sessionName:"",buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[makePlayer("Player 1"),makePlayer("Player 2")],place1:"",place2:"",place3:"",split1:50,split2:30,split3:20}}
+  function defaultState(){return{sessionName:"",buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[makePlayer("Player 1"),makePlayer("Player 2")],place1:"",place2:"",place3:"",split1:50,split2:30,split3:20,tourneyPack:{black:0,purple:0,yellow:0,pink:0,orange:0}}}
 
   function sanitize(s){
     if(!s||typeof s!=="object")return defaultState();
@@ -378,6 +386,8 @@
     const ids=s.players.map(p=>p.id);if(!s.bankId||!ids.includes(s.bankId))s.bankId=ids[0]||null;
     s.place1=s.place1||"";s.place2=s.place2||"";s.place3=s.place3||"";
     s.split1=Number(s.split1)||50;s.split2=Number(s.split2)||30;s.split3=Number(s.split3)||20;
+    if(!s.tourneyPack)s.tourneyPack={black:0,purple:0,yellow:0,pink:0,orange:0};
+    for(const c of COLORS){const n=Number(s.tourneyPack[c]);s.tourneyPack[c]=Number.isFinite(n)&&n>=0?n:0}
     return s;
   }
 
@@ -515,6 +525,15 @@
     $("t_gross").textContent=fmtUsd(t.pool);$("t_rf").textContent=fmtUsd(totalRF);$("t_final").textContent=fmtUsd(totalPay);
   }
 
+  function renderTourneyChipPack(){
+    const wrap=$("tourneyChipPack");if(!wrap)return;
+    const cv=state.chipValues;
+    wrap.innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="ctop"><span class="sw ${SW[c]}"></span><span class="cname">${c[0].toUpperCase()+c.slice(1)}</span><span class="cval">${cv[c].toLocaleString()}</span></div><div class="stepper"><button class="sbtn" data-step="-1" data-kind="tpack" data-c="${c}" ${state.locked?"disabled":""}>−</button><input type="number" step="1" inputmode="numeric" data-kind="tpack" data-c="${c}" value="${state.tourneyPack[c]}" ${state.locked?"disabled":""}/><button class="sbtn" data-step="1" data-kind="tpack" data-c="${c}" ${state.locked?"disabled":""}>+</button></div></div>`).join("");
+    const units=ufc(state.tourneyPack,cv);
+    const valEl=$("tourneyPackValue");
+    if(valEl)valEl.innerHTML=`Pack value: <b>${units.toLocaleString()}</b> units (~ <b>${fmtUsd(u2d(units))}</b>)`;
+  }
+
   function applyMismatchHighlights(mc){document.querySelectorAll('.cell').forEach(el=>el.className=el.className.replace(/\bhl-\w+/g,''));if(mc)for(const c of mc)document.querySelectorAll(`.cell[data-color="${c}"]`).forEach(el=>el.classList.add('hl-'+c))}
   function setAuditHint(m){const box=$('auditHint');if(!m||!m.length){box.style.display='none';return}box.style.display='block';box.innerHTML='Fix mismatches:<br/>'+m.map(x=>`<span class="chip"><span class="sw ${SW[x.color]}"></span><b>${x.color[0].toUpperCase()+x.color.slice(1)}</b>: ${x.diff>0?"+":""}${x.diff}</span>`).join('')}
 
@@ -599,7 +618,19 @@
   ["split1","split2","split3"].forEach(id=>$(id).addEventListener("input",e=>{if(!state.locked){state[id]=Number(e.target.value)||0;renderAllFull()}}));
   [1,2,3].forEach(i=>$("place"+i).addEventListener("change",e=>{state["place"+i]=e.target.value;save();renderAllFull()}));
 
-  $("addPlayer").addEventListener("click",()=>{if(!state.locked){state.players.push(makePlayer(`Player ${state.players.length+1}`));renderAllFull();toast("Player added")}});
+  // Tournament chip pack copy
+  $("copyChipPack").addEventListener("click",()=>{
+    if(state.locked)return;
+    const pack=clone(state.tourneyPack);
+    for(const p of state.players){
+      // Set first buy-in to the pack, keep rebuys as copies too
+      for(const b of p.buyins){for(const c of COLORS)b.counts[c]=pack[c]}
+    }
+    save();renderAllFull();
+    toast(`Chip pack copied to ${state.players.length} players ✓`);
+  });
+
+  $("addPlayer").addEventListener("click",()=>{if(!state.locked){const p=makePlayer(`Player ${state.players.length+1}`);if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);state.players.push(p);renderAllFull();toast("Player added")}});
   $("resetAll").addEventListener("click",()=>{if(!state.locked&&confirm("Reset session?")){localStorage.removeItem(KEY);state=defaultState();collapsedPlayers.clear();paidMap={};savePaid();renderAllFull();toast("Reset")}});
   $("lockSession").addEventListener("click",()=>{const was=!state.locked;state.locked=!state.locked;save();if(state.locked&&was&&archiveCurrentSession()){toast("Locked & archived 🔒");renderAllFull();return}renderAllFull();toast(state.locked?"Locked 🔒":"Unlocked 🔓")});
   $("archiveSession").addEventListener("click",()=>{if(archiveCurrentSession()){renderHistory();renderStats();toast("Archived ✓")}});
@@ -616,14 +647,18 @@
   $("copyAll").addEventListener("click",()=>{const l=[state.sessionName.trim()];if(mode==="tournament"){const t=calcTournament();t.results.forEach((r,i)=>{if(r)l.push(`${i+1}. ${r.name}: ${fmtUsd(r.payout)} (net ${r.net>=0?"+":""}${fmtUsd(r.net)})`)})}else state.players.forEach(p=>{l.push(p.name,outputBlockText(p),"")});navigator.clipboard?.writeText(l.join("\n")).then(()=>toast("Copied"))});
   $("copyPayouts").addEventListener("click",()=>{const lines=buildPayoutLines().map(l=>`${l.label}: ${fmtUsd(l.amount)}${paidMap[l.key]?" ✓ PAID":""}`);navigator.clipboard?.writeText(lines.join("\n")).then(()=>toast("Copied"))});
 
-  document.addEventListener("input",e=>{if(state.locked)return;const t=e.target,kind=t?.getAttribute?.("data-kind"),pid=t?.getAttribute?.("data-p");if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){p.name=t.value;renderAuditAndSummary();renderJumpNav();save();return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}}if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}},{passive:true});
+  document.addEventListener("input",e=>{if(state.locked)return;const t=e.target,kind=t?.getAttribute?.("data-kind"),pid=t?.getAttribute?.("data-p");
+    if(kind==="tpack"){const color=t.getAttribute("data-c");if(color){state.tourneyPack[color]=Math.max(0,Number(t.value)||0);save();renderTourneyChipPack()}return}
+    if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){p.name=t.value;renderAuditAndSummary();renderJumpNav();save();return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}}if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}},{passive:true});
 
-  document.addEventListener("click",e=>{const t=e.target.closest(".sbtn");if(!t||state.locked)return;const step=Number(t.dataset.step)||0,kind=t.dataset.kind,pid=t.dataset.p,color=t.dataset.c,bid=t.dataset.b;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary()}}if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary()}},true);
+  document.addEventListener("click",e=>{const t=e.target.closest(".sbtn");if(!t||state.locked)return;const step=Number(t.dataset.step)||0,kind=t.dataset.kind,pid=t.dataset.p,color=t.dataset.c,bid=t.dataset.b;
+    if(kind==="tpack"&&color){state.tourneyPack[color]=Math.max(0,(state.tourneyPack[color]||0)+step);t.parentElement.querySelector("input").value=state.tourneyPack[color];save();renderTourneyChipPack();return}
+    const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary()}}if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary()}},true);
 
   document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const act=t.dataset.act,pid=t.dataset.p;
     if(act==="togglePlayer"){if(collapsedPlayers.has(pid))collapsedPlayers.delete(pid);else collapsedPlayers.add(pid);const el=document.getElementById("player_"+pid);if(el){el.classList.toggle("is-collapsed");el.querySelector(".pbd")?.classList.toggle("collapsed")}return}
     if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();toast(`${p.name} removed`)}}
-    if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){p.buyins.push({id:uid(),counts:{black:0,purple:0,yellow:0,pink:0,orange:0}});renderAllFull();toast("Rebuy added")}}
+    if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){const counts=mode==="tournament"?clone(state.tourneyPack):{black:0,purple:0,yellow:0,pink:0,orange:0};p.buyins.push({id:uid(),counts});renderAllFull();toast("Rebuy added")}}
     if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();toast("Rebuy removed")}}
     if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull()}}
   },true);
