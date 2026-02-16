@@ -5,47 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>IPL – Poker Cashout Admin</title>
   <style>
-    /* ── Theme Variables ── */
-    [data-theme="dark"]{
-      --bg:#1a1f2e;--bg2:#242938;--bg3:#2d3348;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);
-      --card:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
-      --card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);
-      --hover:rgba(255,255,255,.04);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;
-      --b:#3b4557;--p:#7c3aed;--y:#f59e0b;--pk:#ec4899;--o:#f97316;
-      --hero-grad:radial-gradient(900px 600px at 30% 0%,rgba(122,167,255,.10),transparent 60%),radial-gradient(700px 500px at 80% 10%,rgba(140,100,255,.07),transparent 60%);
-      --sh:0 4px 20px rgba(0,0,0,.25);
-    }
-    [data-theme="light"]{
-      --bg:#f0f2f7;--bg2:#ffffff;--bg3:#e8ebf0;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);
-      --card:linear-gradient(180deg,#ffffff,#fafbfd);
-      --card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);
-      --hover:rgba(0,0,0,.03);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;
-      --b:#6b7280;--p:#7c3aed;--y:#d97706;--pk:#db2777;--o:#ea580c;
-      --hero-grad:none;
-      --sh:0 2px 12px rgba(0,0,0,.06);
-    }
+    [data-theme="dark"]{--bg:#1a1f2e;--bg2:#242938;--bg3:#2d3348;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);--card:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));--card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);--hover:rgba(255,255,255,.04);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;--b:#3b4557;--p:#7c3aed;--y:#f59e0b;--pk:#ec4899;--o:#f97316;--sh:0 4px 20px rgba(0,0,0,.25)}
+    [data-theme="light"]{--bg:#f0f2f7;--bg2:#ffffff;--bg3:#e8ebf0;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);--card:linear-gradient(180deg,#ffffff,#fafbfd);--card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);--hover:rgba(0,0,0,.03);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;--b:#6b7280;--p:#7c3aed;--y:#d97706;--pk:#db2777;--o:#ea580c;--sh:0 2px 12px rgba(0,0,0,.06)}
     *{box-sizing:border-box}
     body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);transition:background .3s,color .3s}
-    body::before{content:'';position:fixed;inset:0;z-index:-1;background:var(--hero-grad);pointer-events:none}
-
-    /* ── IPL Header ── */
     .iplHeader{text-align:center;padding:20px 14px 10px}
     .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:28px;font-weight:800;letter-spacing:1px}
     .suit{font-size:20px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
     .iplSub{color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.5px}
-
     .wrap{max-width:1050px;margin:0 auto;padding:0 14px 120px}
-    .r{border-radius:14px}
-
-    /* ── Top bar ── */
-    .top{
-      position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;
-      padding:10px 14px;border:1px solid var(--card-border);border-radius:14px;
-      background:var(--bg2);box-shadow:var(--sh);backdrop-filter:blur(8px);margin-bottom:14px;
-    }
+    .top{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh);margin-bottom:14px}
     .topPills{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-    h1{margin:0;font-size:15px}
-    .sub{color:var(--muted);font-size:11px;margin-top:2px;line-height:1.35}
+    h1{margin:0;font-size:15px}.sub{color:var(--muted);font-size:11px;margin-top:2px}
     .pill{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);font-size:11px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
     @media(max-width:480px){.pill{max-width:130px;font-size:10px;padding:5px 8px}}
     .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
@@ -54,33 +25,25 @@
     .pill.live{background:rgba(43,213,118,.10);border-color:rgba(43,213,118,.25);color:var(--good)}
     .pill.live .dot{background:var(--good);animation:pulse 2s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-
-    /* ── Theme toggle ── */
-    .themeToggle{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0}
-    .themeToggle:hover{background:var(--hover);color:var(--text)}
-
+    .themeToggle{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
     .lockedOverlay{position:fixed;inset:auto 0 0 0;z-index:99;display:none;margin:10px 12px;padding:10px 12px;border-radius:14px;border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--sh);max-width:1050px;opacity:.95}
     @media(min-width:1050px){.lockedOverlay{left:50%;transform:translateX(-50%);width:1050px}}
     button[disabled],input[disabled],select[disabled]{opacity:.5;cursor:not-allowed!important}
-
-    /* ── Grid & Cards ── */
     .grid{display:grid;gap:14px;margin-top:14px}
     @media(min-width:900px){.grid{grid-template-columns:1.05fr .95fr}}
     .card{border:1px solid var(--card-border);border-radius:14px;background:var(--card);box-shadow:var(--sh);overflow:hidden;transition:background .3s}
     .hd{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
-    .hd h2{margin:0;font-size:13px;font-weight:700}
-    .bd{padding:14px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
-    .row>*{flex:1}
+    .hd h2{margin:0;font-size:13px;font-weight:700}.bd{padding:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}.row>*{flex:1}
     label{display:block;color:var(--muted);font-size:11px;margin-bottom:5px;font-weight:500}
     input,select,button{font:inherit}
-    input,select{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);outline:none;font-size:14px;transition:border-color .15s}
+    input,select{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);outline:none;font-size:14px}
     input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(122,167,255,.10)}
     input[type="number"]{appearance:textfield}
     input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);cursor:pointer;user-select:none;touch-action:manipulation;font-size:13px;font-weight:500;transition:all .15s}
     .btn:hover{background:var(--hover)}
-    .btn.secondary{opacity:.8}.btn.danger{color:var(--bad);border-color:rgba(255,92,122,.20)}
+    .btn.danger{color:var(--bad);border-color:rgba(255,92,122,.20)}
     .btn.small{padding:6px 10px;font-size:11px;border-radius:8px}
     .btn.gold{color:var(--warn);border-color:rgba(245,158,11,.25)}
     .btn.live{color:var(--good);border-color:rgba(43,213,118,.25)}
@@ -88,37 +51,15 @@
     .sep{height:1px;background:var(--line);margin:12px 0}
     .note{color:var(--muted);font-size:11px;line-height:1.4;margin-top:6px}
     .muted{color:var(--muted)}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
-    .auditHint{margin-top:10px;padding:10px;border-radius:12px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);font-size:11px;line-height:1.4}
-    .auditHint b{color:var(--text)}
-    .auditHint .chip{display:inline-flex;align-items:center;gap:5px;margin-right:8px;margin-top:5px}
-    .auditHint .sw{width:10px;height:10px;border-radius:3px;display:inline-block}
-    .hl-black{outline:2px solid rgba(90,160,255,.7);box-shadow:0 0 0 3px rgba(90,160,255,.12)}
-    .hl-purple{outline:2px solid rgba(167,139,250,.7);box-shadow:0 0 0 3px rgba(167,139,250,.12)}
-    .hl-yellow{outline:2px solid rgba(250,204,21,.7);box-shadow:0 0 0 3px rgba(250,204,21,.12)}
-    .hl-pink{outline:2px solid rgba(244,114,182,.7);box-shadow:0 0 0 3px rgba(244,114,182,.12)}
-    .hl-orange{outline:2px solid rgba(251,146,60,.7);box-shadow:0 0 0 3px rgba(251,146,60,.12)}
-
-    /* ── Jump nav ── */
-    .jumpNav{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
-    .jumpNav .jbtn{padding:5px 9px;border-radius:8px;font-size:11px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);cursor:pointer;user-select:none;transition:all .15s}
-    .jumpNav .jbtn:hover{color:var(--text);border-color:var(--accent)}
-
-    /* ── Players ── */
-    .players{display:flex;flex-direction:column;gap:10px}
-    .player{border:1px solid var(--card-border);border-radius:12px;overflow:hidden;background:var(--input-bg);transition:background .3s}
-    .phd{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between}
-    .pname{flex:1;min-width:0}
-    .pactions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
-    .pbd{padding:12px}.pbd.collapsed{display:none}
-    .pSummaryInline{display:none;font-size:11px;color:var(--muted);margin-top:3px}
-    .player.is-collapsed .pSummaryInline{display:block}
-
-    /* ── Chip cells ── */
+    /* Mode Toggle */
+    .modeToggle{display:flex;border:1px solid var(--card-border);border-radius:10px;overflow:hidden;background:var(--input-bg);margin-bottom:14px}
+    .modeBtn{flex:1;padding:12px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;user-select:none;transition:all .2s;border:none;background:transparent;color:var(--muted)}
+    .modeBtn.active{background:var(--accent);color:#fff}
+    .modeBtn.active.tourney{background:var(--warn);color:#1a1f2e}
+    /* Chip cells */
     .chips{display:grid;gap:8px;grid-template-columns:repeat(5,minmax(0,1fr))}
     @media(max-width:560px){.chips{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:360px){.chips{grid-template-columns:1fr}}
-    .cell{border-radius:10px;padding:8px;transition:box-shadow .15s}
-    .cell .ctop{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+    .cell{border-radius:10px;padding:8px}.cell .ctop{display:flex;gap:6px;align-items:center;margin-bottom:6px}
     .sw{width:10px;height:10px;border-radius:3px}
     .sw.b{background:var(--b)}.sw.p{background:var(--p)}.sw.y{background:var(--y)}.sw.pk{background:var(--pk)}.sw.o{background:var(--o)}
     .cname{color:var(--muted);font-size:11px;font-weight:600}.cval{margin-left:auto;color:var(--muted);font-size:10px;opacity:.7}
@@ -132,33 +73,23 @@
     [data-theme="light"] .cell[data-color="yellow"]{background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.15)}
     [data-theme="light"] .cell[data-color="pink"]{background:rgba(236,72,153,.05);border-color:rgba(236,72,153,.15)}
     [data-theme="light"] .cell[data-color="orange"]{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.15)}
-
-    /* ── Stepper ── */
-    .stepper{display:flex;align-items:stretch;border-radius:8px;overflow:hidden;border:1px solid var(--input-border);background:var(--input-bg)}
+    .stepper{display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--input-border);background:var(--input-bg)}
     .stepper input{border:none;border-radius:0;text-align:center;padding:7px 2px;min-width:0;flex:1;background:transparent;font-size:13px}
     .stepper input:focus{box-shadow:none}
     .stepper .sbtn{display:flex;align-items:center;justify-content:center;width:32px;min-width:32px;background:var(--hover);color:var(--muted);cursor:pointer;user-select:none;touch-action:manipulation;font-size:16px;font-weight:700;border:none;transition:all .12s}
     .stepper .sbtn:hover{color:var(--text)}.stepper .sbtn:active{background:rgba(122,167,255,.15)}
     .stepper .sbtn[disabled]{pointer-events:none;opacity:.3}
-
     .cashoutSection{border:1px solid rgba(122,167,255,.15);border-radius:12px;background:rgba(122,167,255,.03);padding:10px;margin-top:10px}
     .cashoutSection>label{color:var(--accent);font-weight:600}
-    [data-theme="light"] .cashoutSection{background:rgba(74,127,221,.04);border-color:rgba(74,127,221,.15)}
-
     .miniCard{border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg);overflow:hidden;margin-top:10px}
     .miniHd{padding:8px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--line);background:var(--hover)}
     .miniHd b{font-size:12px}.miniBd{padding:10px}
     .outblock{border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg);padding:10px;margin-top:10px}
     .outblock pre{margin:0;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.4;color:var(--text)}
-
-    /* ── Tables ── */
     .tablewrap{overflow:auto;border:1px solid var(--card-border);border-radius:12px}
     table{width:100%;border-collapse:separate;border-spacing:0}
     th,td{padding:8px 10px;border-bottom:1px solid var(--line);font-size:12px}
-    th{background:var(--input-bg);color:var(--muted);text-align:left;font-weight:600}
-    .num{text-align:right}
-
-    /* ── Footer ── */
+    th{background:var(--input-bg);color:var(--muted);text-align:left;font-weight:600}.num{text-align:right}
     .footer{position:sticky;bottom:0;z-index:9;margin-top:14px;padding-bottom:env(safe-area-inset-bottom);border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh)}
     .footer .inner{padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
     .tot{border:1px solid var(--card-border);background:var(--input-bg);padding:6px 9px;border-radius:10px;min-width:130px;flex:1 1 130px}
@@ -166,28 +97,39 @@
     .totwrap{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;flex:1;min-width:250px}
     .totwrap .tot{max-width:200px}
     @media(max-width:420px){.totwrap{min-width:0}.totwrap .tot{max-width:none}}
-
-    /* ── Toast ── */
     .toastBox{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
     .toast{padding:9px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--card-border);color:var(--text);font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(-8px) scale(.96);animation:toastIn .25s ease forwards;pointer-events:auto}
     .toast.out{animation:toastOut .2s ease forwards}
     @keyframes toastIn{to{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.96)}}
+    .players{display:flex;flex-direction:column;gap:10px}
+    .player{border:1px solid var(--card-border);border-radius:12px;overflow:hidden;background:var(--input-bg)}
+    .phd{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between}
+    .pname{flex:1;min-width:0}.pactions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .pbd{padding:12px}.pbd.collapsed{display:none}
+    .pSummaryInline{display:none;font-size:11px;color:var(--muted);margin-top:3px}
+    .player.is-collapsed .pSummaryInline{display:block}
     .chevron{display:inline-block;width:18px;height:18px;border-radius:5px;background:var(--hover);text-align:center;line-height:18px;font-size:11px;color:var(--muted);cursor:pointer;user-select:none;transition:transform .2s;flex-shrink:0}
     .player.is-collapsed .chevron{transform:rotate(-90deg)}
-
-    /* ── History ── */
+    .jumpNav{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+    .jumpNav .jbtn{padding:5px 9px;border-radius:8px;font-size:11px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);cursor:pointer;transition:all .15s}
+    .jumpNav .jbtn:hover{color:var(--text);border-color:var(--accent)}
+    .auditHint{margin-top:10px;padding:10px;border-radius:12px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);font-size:11px}.auditHint b{color:var(--text)}
+    .auditHint .chip{display:inline-flex;align-items:center;gap:5px;margin-right:8px;margin-top:5px}
+    .auditHint .sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+    .hl-black{outline:2px solid rgba(90,160,255,.7);box-shadow:0 0 0 3px rgba(90,160,255,.12)}
+    .hl-purple{outline:2px solid rgba(167,139,250,.7);box-shadow:0 0 0 3px rgba(167,139,250,.12)}
+    .hl-yellow{outline:2px solid rgba(250,204,21,.7);box-shadow:0 0 0 3px rgba(250,204,21,.12)}
+    .hl-pink{outline:2px solid rgba(244,114,182,.7);box-shadow:0 0 0 3px rgba(244,114,182,.12)}
+    .hl-orange{outline:2px solid rgba(251,146,60,.7);box-shadow:0 0 0 3px rgba(251,146,60,.12)}
     .histHd{border-bottom-color:var(--line)}
     .statPositive{color:var(--good);font-weight:700}.statNegative{color:var(--bad);font-weight:700}.statNeutral{color:var(--muted);font-weight:700}
     .sessionRow{cursor:pointer;transition:background .12s}.sessionRow:hover{background:var(--hover)}
-    .sessionDetail{display:none;background:var(--input-bg)}.sessionDetail td{font-size:11px;color:var(--muted)}
-    .sessionDetail.open{display:table-row}
-    .deleteSession{opacity:.4;cursor:pointer;font-size:10px;transition:opacity .12s}.deleteSession:hover{opacity:1;color:var(--bad)}
+    .sessionDetail{display:none;background:var(--input-bg)}.sessionDetail td{font-size:11px;color:var(--muted)}.sessionDetail.open{display:table-row}
+    .deleteSession{opacity:.4;cursor:pointer;font-size:10px}.deleteSession:hover{opacity:1;color:var(--bad)}
     .emptyState{text-align:center;padding:20px;color:var(--muted);font-size:12px}
-
-    /* ── Online session ── */
-    .onlineCard{margin-top:14px}.onlineCard .hd{border-bottom-color:rgba(43,213,118,.15)}
-    .codeDisplay{font-size:28px;font-weight:800;letter-spacing:4px;text-align:center;padding:14px;color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .onlineCard{margin-top:14px}
+    .codeDisplay{font-size:28px;font-weight:800;letter-spacing:4px;text-align:center;padding:14px;font-family:ui-monospace,monospace}
     .playerLink{font-size:12px;color:var(--accent);word-break:break-all;text-align:center}
     .statusGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-top:10px}
     .statusItem{padding:8px;border-radius:8px;border:1px solid var(--card-border);background:var(--input-bg);font-size:12px;display:flex;align-items:center;gap:6px}
@@ -196,131 +138,199 @@
     .statusItem.submitted{border-color:rgba(43,213,118,.20)}
     .submitBadge{font-size:10px;padding:3px 6px;border-radius:5px;font-weight:600}
     .submitBadge.yes{background:rgba(43,213,118,.12);color:var(--good)}.submitBadge.no{background:var(--input-bg);color:var(--muted)}
-    .qrWrap{text-align:center;margin:10px 0}
-    .qrWrap img{border-radius:10px;background:#fff;padding:8px}
+    .qrWrap{text-align:center;margin:10px 0}.qrWrap img{border-radius:10px;background:#fff;padding:8px}
+    .hidden{display:none!important}
+    /* Timer */
+    .timerCard .hd{border-bottom-color:rgba(245,158,11,.15)}
+    .timerDisplay{font-size:48px;font-weight:800;text-align:center;padding:16px 0;font-family:ui-monospace,monospace;letter-spacing:2px}
+    .timerDisplay.warn{color:var(--warn)}.timerDisplay.danger{color:var(--bad);animation:blink 1s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+    /* Tournament placements */
+    .placeSelect{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .placeItem{flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg)}
+    .placeItem .placeLabel{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600}
+    .placeItem.gold .placeLabel{color:#f5c542}.placeItem.silver .placeLabel{color:#c0c0c0}.placeItem.bronze .placeLabel{color:#cd7f32}
+    /* Payout swipe */
+    .payLine{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:10px;margin-top:6px;background:var(--input-bg);touch-action:pan-y}
+    .payLine .payContent{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;background:var(--input-bg);transition:transform .2s}
+    .payLine .payBg{position:absolute;inset:0;display:flex;align-items:center;padding-left:16px;font-size:12px;font-weight:600;color:#fff}
+    .payLine .payBg.toBePaid{background:var(--good)}
+    .payLine .payBg.toUnpay{background:var(--bad)}
+    .payLine.paid .payContent{opacity:.6;text-decoration:line-through}
+    .payLine.paid{border-color:rgba(43,213,118,.25)}
+    .paidBadge{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(43,213,118,.15);color:var(--good);font-weight:600}
+    .modeBadge{font-size:9px;padding:2px 5px;border-radius:4px;font-weight:600;text-transform:uppercase}
+    .modeBadge.cash{background:rgba(122,167,255,.12);color:var(--accent)}
+    .modeBadge.tourney{background:rgba(245,158,11,.12);color:var(--warn)}
   </style>
 </head>
 <body>
 <div class="toastBox" id="toastBox"></div>
-
 <div class="iplHeader">
-  <div class="iplLogo">
-    <span class="suit blk">♠</span><span class="suit red">♥</span>
-    IPL
-    <span class="suit red">♦</span><span class="suit blk">♣</span>
-  </div>
+  <div class="iplLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div>
   <div class="iplSub">Innovation Poker League</div>
 </div>
-
 <div class="wrap">
+  <!-- Mode Toggle -->
+  <div class="modeToggle" id="modeToggle">
+    <button class="modeBtn active" data-mode="cash" type="button">♠ Cash Game</button>
+    <button class="modeBtn" data-mode="tournament" type="button">🏆 Tournament</button>
+  </div>
+
   <div class="top">
-    <div>
-      <h1>Poker Cashout (Admin)</h1>
-      <div class="sub">$1 = 1000 units · Buy-in $50 · RF tax 30%</div>
-    </div>
+    <div><h1 id="topTitle">Poker Cashout (Admin)</h1><div class="sub" id="topSub">$1 = 1000 units · Buy-in $50 · RF tax 30%</div></div>
     <div class="topPills">
       <div id="liveBadge" class="pill live" style="display:none"><span class="dot"></span><span id="liveText">LIVE</span></div>
       <div id="lockBadge" class="pill secondary" style="display:none"><span class="dot" style="background:var(--accent)"></span><span>LOCKED</span></div>
       <div id="pill" class="pill warn"><span class="dot"></span><span id="pillText">Audit: pending</span></div>
-      <button class="themeToggle" id="themeToggle" type="button" title="Toggle theme">🌙</button>
+      <button class="themeToggle" id="themeToggle" type="button">🌙</button>
     </div>
   </div>
 
-  <div class="card onlineCard" id="onlineCard">
-    <div class="hd"><h2>Online Session</h2>
+  <!-- Timer (tournament only) -->
+  <div class="card timerCard hidden" id="timerCard" style="margin-bottom:14px">
+    <div class="hd"><h2>⏱ Blinds Timer</h2>
       <div class="btnbar">
-        <button class="btn small live" id="startOnline" type="button">Start Online Session</button>
-        <button class="btn small danger" id="stopOnline" type="button" style="display:none">End Online</button>
+        <button class="btn small" id="timerStart" type="button">Start</button>
+        <button class="btn small danger" id="timerReset" type="button">Reset</button>
       </div>
     </div>
     <div class="bd">
-      <div id="onlineOff"><div class="note" style="margin:0;text-align:center;padding:6px 0">Start an online session so players can submit cashouts from their phones.<br><b style="color:var(--warn)">Set player names before starting.</b></div></div>
+      <div class="timerDisplay" id="timerDisplay">10:00</div>
+      <div class="row" style="max-width:300px;margin:0 auto">
+        <div><label>Minutes</label><input id="timerMin" type="number" value="10" min="1" max="120" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:700"/></div>
+      </div>
+      <div class="note" style="text-align:center">Set the time and press Start. A sound plays when time is up.</div>
+    </div>
+  </div>
+
+  <!-- Online Session -->
+  <div class="card onlineCard hidden" id="onlineCard">
+    <div class="hd"><h2>Online Session</h2><div class="btnbar">
+      <button class="btn small live" id="startOnline" type="button">Start Online</button>
+      <button class="btn small danger" id="stopOnline" type="button" style="display:none">End Online</button>
+    </div></div>
+    <div class="bd">
+      <div id="onlineOff"><div class="note" style="margin:0;text-align:center;padding:6px 0">Players submit cashouts from their phones.<br><b style="color:var(--warn)">Set player names before starting.</b></div></div>
       <div id="onlineOn" style="display:none">
-        <div class="note" style="margin:0;text-align:center">Share this code with your players:</div>
+        <div class="note" style="margin:0;text-align:center">Share this code:</div>
         <div class="codeDisplay" id="sessionCodeDisplay"></div>
         <div class="qrWrap" id="qrWrap"></div>
         <div class="playerLink" id="playerLinkDisplay"></div>
         <div class="btnbar" style="justify-content:center;margin-top:8px">
-          <button class="btn small secondary" id="copyCode" type="button">Copy code</button>
-          <button class="btn small secondary" id="copyLink" type="button">Copy link</button>
+          <button class="btn small" id="copyCode" type="button">Copy code</button>
+          <button class="btn small" id="copyLink" type="button">Copy link</button>
         </div>
         <div class="sep"></div>
-        <div style="font-size:11px;color:var(--muted)"><b id="submitCount">0</b> / <span id="submitTotal">0</span> players submitted</div>
+        <div style="font-size:11px;color:var(--muted)"><b id="submitCount">0</b> / <span id="submitTotal">0</span> submitted</div>
         <div class="statusGrid" id="statusGrid"></div>
       </div>
     </div>
   </div>
 
-  <div class="grid">
+  <!-- Session & Rules -->
+  <div class="grid" style="margin-top:14px">
     <div class="card">
-      <div class="hd"><h2>Session & Rules</h2>
-        <div class="btnbar">
-          <button class="btn small gold" id="archiveSession" type="button">Archive</button>
-          <button class="btn small danger" id="resetAll" type="button">Reset</button>
-          <button class="btn small" id="lockSession" type="button">Lock session</button>
-          <button class="btn small secondary" id="toggleRules" type="button">Collapse</button>
-        </div>
-      </div>
+      <div class="hd"><h2>Session & Rules</h2><div class="btnbar">
+        <button class="btn small gold" id="archiveSession" type="button">Archive</button>
+        <button class="btn small danger" id="resetAll" type="button">Reset</button>
+        <button class="btn small" id="lockSession" type="button">Lock session</button>
+        <button class="btn small" id="toggleRules" type="button">Collapse</button>
+      </div></div>
       <div class="bd" id="rulesBody">
         <div class="row">
-          <div><label>Session name</label><input id="sessionName" type="text" placeholder="Friday poker — Feb 7"/></div>
+          <div><label>Session name</label><input id="sessionName" type="text" placeholder="Friday poker"/></div>
           <div><label>Buy-in ($)</label><input id="buyinUsd" type="number" step="0.01" inputmode="decimal"/></div>
           <div><label>RF tax rate</label><input id="taxRate" type="number" step="0.01" inputmode="decimal"/></div>
         </div>
         <div class="row" style="margin-top:8px"><div><label>Bank / Admin</label><select id="bankSelect"></select></div></div>
-        <div class="sep"></div>
-        <label>Chip values (units per chip)</label>
-        <div class="row">
-          <div><label>Black</label><input id="v_black" type="number" step="1" inputmode="numeric"/></div>
-          <div><label>Purple</label><input id="v_purple" type="number" step="1" inputmode="numeric"/></div>
-          <div><label>Yellow</label><input id="v_yellow" type="number" step="1" inputmode="numeric"/></div>
-          <div><label>Pink</label><input id="v_pink" type="number" step="1" inputmode="numeric"/></div>
-          <div><label>Orange</label><input id="v_orange" type="number" step="1" inputmode="numeric"/></div>
+        <!-- Cash Game chip values -->
+        <div id="chipValuesSection">
+          <div class="sep"></div>
+          <label>Chip values (units per chip)</label>
+          <div class="row">
+            <div><label>Black</label><input id="v_black" type="number" step="1" inputmode="numeric"/></div>
+            <div><label>Purple</label><input id="v_purple" type="number" step="1" inputmode="numeric"/></div>
+            <div><label>Yellow</label><input id="v_yellow" type="number" step="1" inputmode="numeric"/></div>
+            <div><label>Pink</label><input id="v_pink" type="number" step="1" inputmode="numeric"/></div>
+            <div><label>Orange</label><input id="v_orange" type="number" step="1" inputmode="numeric"/></div>
+          </div>
+        </div>
+        <!-- Tournament prize split -->
+        <div id="prizeSplitSection" class="hidden">
+          <div class="sep"></div>
+          <label>Prize split (%)</label>
+          <div class="row">
+            <div><label>🥇 1st</label><input id="split1" type="number" value="50" inputmode="numeric"/></div>
+            <div><label>🥈 2nd</label><input id="split2" type="number" value="30" inputmode="numeric"/></div>
+            <div><label>🥉 3rd</label><input id="split3" type="number" value="20" inputmode="numeric"/></div>
+          </div>
         </div>
         <div class="sep"></div>
         <div class="btnbar">
-          <button class="btn secondary" id="saveRoster" type="button">Save roster</button>
-          <button class="btn secondary" id="loadRoster" type="button">Load roster</button>
-          <button class="btn secondary" id="copyAll" type="button">Copy all outputs</button>
+          <button class="btn" id="saveRoster" type="button">Save roster</button>
+          <button class="btn" id="loadRoster" type="button">Load roster</button>
+          <button class="btn" id="copyAll" type="button">Copy outputs</button>
         </div>
         <div id="auditHint" class="auditHint" style="display:none"></div>
       </div>
     </div>
+
     <div class="card">
       <div class="hd"><h2>Players (<span id="playerCount">0</span>)</h2><div class="btnbar"><button class="btn" id="addPlayer" type="button">+ Add player</button></div></div>
-      <div class="bd"><div id="jumpNav" class="jumpNav"></div><div id="players" class="players"></div></div>
+      <div class="bd"><div id="jumpNav" class="jumpNav"></div><div id="players" class="players"></div>
+        <!-- Tournament Placements -->
+        <div id="placementSection" class="hidden" style="margin-top:14px">
+          <label style="font-weight:700;color:var(--warn);font-size:13px">🏆 Placements</label>
+          <div class="placeSelect">
+            <div class="placeItem gold"><div class="placeLabel">🥇 1st Place (50%)</div><select id="place1" style="font-size:14px"><option value="">Select player</option></select></div>
+            <div class="placeItem silver"><div class="placeLabel">🥈 2nd Place (30%)</div><select id="place2" style="font-size:14px"><option value="">Select player</option></select></div>
+            <div class="placeItem bronze"><div class="placeLabel">🥉 3rd Place (20%)</div><select id="place3" style="font-size:14px"><option value="">Select player</option></select></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="grid">
-    <div class="card"><div class="hd"><h2>Audit: IN vs OUT</h2><span class="muted" style="font-size:11px">Table check</span></div>
-      <div class="bd"><div class="tablewrap"><table><thead><tr><th>Color</th><th class="num">IN</th><th class="num">OUT</th><th class="num">Diff</th></tr></thead><tbody id="auditBody"></tbody></table></div></div>
-    </div>
-    <div class="card"><div class="hd"><h2>Summary</h2></div>
-      <div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Buy-ins</th><th class="num">Gross</th><th class="num">RF tax</th><th class="num">Final</th><th class="num">Net</th></tr></thead><tbody id="summaryBody"></tbody></table></div></div>
+  <!-- Audit (cash only) -->
+  <div class="grid" id="cashAuditGrid">
+    <div class="card"><div class="hd"><h2>Audit: IN vs OUT</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Color</th><th class="num">IN</th><th class="num">OUT</th><th class="num">Diff</th></tr></thead><tbody id="auditBody"></tbody></table></div></div></div>
+    <div class="card"><div class="hd"><h2>Summary</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Buy-ins</th><th class="num">Gross</th><th class="num">RF tax</th><th class="num">Final</th><th class="num">Net</th></tr></thead><tbody id="summaryBody"></tbody></table></div></div></div>
+  </div>
+
+  <!-- Tournament Summary -->
+  <div class="card hidden" id="tournamentSummary" style="margin-top:14px">
+    <div class="hd"><h2>🏆 Tournament Summary</h2></div>
+    <div class="bd"><div class="tablewrap"><table>
+      <thead><tr><th>Place</th><th>Player</th><th class="num">Buy-ins</th><th class="num">Prize</th><th class="num">RF Tax</th><th class="num">Payout</th><th class="num">Net</th></tr></thead>
+      <tbody id="tourneySummaryBody"></tbody>
+    </table></div>
+    <div class="outblock" style="margin-top:10px"><pre id="tourneyInfoText"></pre></div>
     </div>
   </div>
 
+  <!-- Payouts with swipe -->
+  <div class="card" id="payoutCard" style="margin-top:14px;display:none">
+    <div class="hd"><h2>Payouts</h2><div class="btnbar"><button class="btn small" id="copyPayouts" type="button">Copy payouts</button></div></div>
+    <div class="bd">
+      <div class="note" style="margin:0 0 8px">Swipe right on a line to mark as paid. Swipe left to undo.</div>
+      <div id="payoutLines"></div>
+    </div>
+  </div>
+
+  <!-- Stats & History -->
   <div class="card" style="margin-top:14px"><div class="hd histHd"><h2>Player Stats (All-Time)</h2><span class="muted" id="statsSessionCount" style="font-size:11px"></span></div>
-    <div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Sessions</th><th class="num">Wins</th><th class="num">Win%</th><th class="num">Total Net</th><th class="num">Avg</th><th class="num">Best</th><th class="num">Worst</th></tr></thead><tbody id="statsBody"></tbody></table></div><div id="statsEmpty" class="emptyState" style="display:none">No archived sessions yet.</div></div>
+    <div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Sessions</th><th class="num">Wins</th><th class="num">Win%</th><th class="num">Net</th><th class="num">Avg</th></tr></thead><tbody id="statsBody"></tbody></table></div><div id="statsEmpty" class="emptyState" style="display:none">No sessions archived yet.</div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="hd histHd"><h2>Session History</h2><div class="btnbar"><button class="btn small danger" id="clearHistory" type="button">Clear</button></div></div>
+    <div class="bd"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Session</th><th class="num">Mode</th><th class="num">Players</th><th></th></tr></thead><tbody id="historyBody"></tbody></table></div><div id="historyEmpty" class="emptyState" style="display:none">No sessions yet.</div></div>
   </div>
 
-  <div class="card" style="margin-top:14px"><div class="hd histHd"><h2>Session History</h2><div class="btnbar"><button class="btn small danger" id="clearHistory" type="button">Clear history</button></div></div>
-    <div class="bd"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Session</th><th class="num">Players</th><th class="num">RF</th><th></th></tr></thead><tbody id="historyBody"></tbody></table></div><div id="historyEmpty" class="emptyState" style="display:none">No sessions archived yet.</div></div>
-  </div>
-
-  <div class="card" id="payoutCard" style="margin-top:14px;display:none"><div class="hd"><h2>Final Payouts</h2><div class="btnbar"><button class="btn small secondary" id="copyPayouts" type="button">Copy payouts</button></div></div>
-    <div class="bd"><div class="outblock"><pre id="payoutSuggested"></pre><div class="sep"></div><pre id="payoutText"></pre></div></div>
-  </div>
-
-  <div class="footer"><div class="inner">
-    <div class="totwrap">
-      <div class="tot"><div class="k">Total Gross</div><div class="v" id="t_gross">$0.00</div></div>
-      <div class="tot"><div class="k">Total RF fund</div><div class="v" id="t_rf">$0.00</div></div>
-      <div class="tot"><div class="k">Total Final</div><div class="v" id="t_final">$0.00</div></div>
-    </div>
-    <button class="btn secondary" id="toTop" type="button">↑ Top</button>
-  </div></div>
+  <div class="footer"><div class="inner"><div class="totwrap">
+    <div class="tot"><div class="k" id="footK1">Total Gross</div><div class="v" id="t_gross">$0.00</div></div>
+    <div class="tot"><div class="k">RF fund</div><div class="v" id="t_rf">$0.00</div></div>
+    <div class="tot"><div class="k" id="footK3">Total Final</div><div class="v" id="t_final">$0.00</div></div>
+  </div><button class="btn" id="toTop" type="button">↑</button></div></div>
 </div>
 <div id="lockedOverlay" class="lockedOverlay"><b>Session locked.</b> <span class="muted">Unlock to edit.</span></div>
 
@@ -330,32 +340,31 @@
 (()=>{
   firebase.initializeApp({apiKey:"AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",authDomain:"poker-cashout-bde23.firebaseapp.com",databaseURL:"https://poker-cashout-bde23-default-rtdb.firebaseio.com",projectId:"poker-cashout-bde23",storageBucket:"poker-cashout-bde23.firebasestorage.app",messagingSenderId:"1054875878552",appId:"1:1054875878552:web:94d610f9d20a18bed07ced"});
   const db=firebase.database();
-
-  const KEY="poker_admin_option1_v12_suggested_payouts",ROSTER_KEY="poker_admin_roster_v1",HISTORY_KEY="poker_admin_history_v1",THEME_KEY="poker_theme";
-  const COLORS=["black","purple","yellow","pink","orange"];
-  const SW={black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
-  const DEFAULTS={sessionName:"",buyinUsd:50,taxRate:.30,chipValues:{black:100,purple:500,yellow:1000,pink:5000,orange:10000},defaultPack:{black:15,purple:3,yellow:12,pink:3,orange:2}};
+  const KEY="poker_admin_v13",ROSTER_KEY="poker_admin_roster_v1",HISTORY_KEY="poker_admin_history_v2",THEME_KEY="poker_theme",PAY_KEY="poker_payments";
+  const COLORS=["black","purple","yellow","pink","orange"],SW={black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
+  const DEFAULTS={buyinUsd:50,taxRate:.30,chipValues:{black:100,purple:500,yellow:1000,pink:5000,orange:10000},defaultPack:{black:15,purple:3,yellow:12,pink:3,orange:2}};
   const $=id=>document.getElementById(id),clamp=v=>Number.isFinite(v)?v:0,clone=o=>JSON.parse(JSON.stringify(o));
   const uid=()=>Math.random().toString(16).slice(2)+"-"+Date.now().toString(16);
   const fmtUsd=x=>clamp(x).toLocaleString(undefined,{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
   const esc=s=>(s??"").toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
-  const unitsToUsd=u=>clamp(u)/1000;
-  const unitsFromCounts=(c,v)=>COLORS.reduce((s,cl)=>s+clamp(c[cl])*clamp(v[cl]),0);
-  const totalChipCount=c=>COLORS.reduce((s,cl)=>s+clamp(c[cl]),0);
+  const u2d=u=>clamp(u)/1000,ufc=(c,v)=>COLORS.reduce((s,cl)=>s+clamp(c[cl])*clamp(v[cl]),0),tcc=c=>COLORS.reduce((s,cl)=>s+clamp(c[cl]),0);
 
-  // ── Theme ──
   let theme=localStorage.getItem(THEME_KEY)||"dark";
   function applyTheme(){document.documentElement.setAttribute("data-theme",theme);$("themeToggle").textContent=theme==="dark"?"☀️":"🌙";localStorage.setItem(THEME_KEY,theme)}
-  applyTheme();
-  $("themeToggle").addEventListener("click",()=>{theme=theme==="dark"?"light":"dark";applyTheme()});
+  applyTheme();$("themeToggle").addEventListener("click",()=>{theme=theme==="dark"?"light":"dark";applyTheme()});
+  function toast(msg,d=2200){const box=$("toastBox"),el=document.createElement("div");el.className="toast";el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},d)}
 
-  function toast(msg,dur=2200){const box=$("toastBox"),el=document.createElement("div");el.className="toast";el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},dur)}
-
+  // ── State ──
+  let mode="cash"; // "cash" | "tournament"
   const collapsedPlayers=new Set();
   let onlineSessionCode=null,firebaseListener=null;
+  let timerInterval=null,timerSeconds=600,timerRunning=false;
+  let paidMap={}; // key -> boolean
+  try{paidMap=JSON.parse(localStorage.getItem(PAY_KEY)||"{}")}catch{}
+  function savePaid(){try{localStorage.setItem(PAY_KEY,JSON.stringify(paidMap))}catch{}}
 
   function makePlayer(n){return{id:uid(),name:n||"Player",buyins:[{id:uid(),counts:clone(DEFAULTS.defaultPack)}],cashout:{black:0,purple:0,yellow:0,pink:0,orange:0}}}
-  function defaultState(){return{sessionName:DEFAULTS.sessionName,buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[makePlayer("Player 1"),makePlayer("Player 2")]}}
+  function defaultState(){return{sessionName:"",buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[makePlayer("Player 1"),makePlayer("Player 2")],place1:"",place2:"",place3:"",split1:50,split2:30,split3:20}}
 
   function sanitize(s){
     if(!s||typeof s!=="object")return defaultState();
@@ -366,85 +375,151 @@
     if(!s.chipValues)s.chipValues={};for(const c of COLORS){const v=Number(s.chipValues[c]);s.chipValues[c]=Number.isFinite(v)&&v>0?v:DEFAULTS.chipValues[c]}
     if(!Array.isArray(s.players)||!s.players.length)s.players=[makePlayer("Player 1")];
     for(const p of s.players){if(!p.id)p.id=uid();if(typeof p.name!=="string")p.name="Player";if(!Array.isArray(p.buyins)||!p.buyins.length)p.buyins=[{id:uid(),counts:clone(DEFAULTS.defaultPack)}];for(const b of p.buyins){if(!b.id)b.id=uid();if(!b.counts)b.counts=clone(DEFAULTS.defaultPack);for(const c of COLORS){const n=Number(b.counts[c]);b.counts[c]=Number.isFinite(n)&&n>=0?n:0}}if(!p.cashout)p.cashout={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(p.cashout[c]);p.cashout[c]=Number.isFinite(n)&&n>=0?n:0}}
-    const ids=s.players.map(p=>p.id);if(!s.bankId||!ids.includes(s.bankId))s.bankId=ids[0]||null;return s;
+    const ids=s.players.map(p=>p.id);if(!s.bankId||!ids.includes(s.bankId))s.bankId=ids[0]||null;
+    s.place1=s.place1||"";s.place2=s.place2||"";s.place3=s.place3||"";
+    s.split1=Number(s.split1)||50;s.split2=Number(s.split2)||30;s.split3=Number(s.split3)||20;
+    return s;
   }
 
-  let state=(()=>{try{const r=localStorage.getItem(KEY);return sanitize(r?JSON.parse(r):null)}catch{return defaultState()}})();
+  let state=(()=>{try{return sanitize(JSON.parse(localStorage.getItem(KEY)))}catch{return defaultState()}})();
   function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{}}
   function loadHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]")}catch{return[]}}
   function saveHistory(h){try{localStorage.setItem(HISTORY_KEY,JSON.stringify(h))}catch{}}
 
-  function calcPlayer(p){const bc=p.buyins.length,ou=unitsFromCounts(p.cashout,state.chipValues),g=unitsToUsd(ou),bt=bc*state.buyinUsd,tb=Math.max(0,g-bt),rf=tb*state.taxRate,fp=g-rf,np=fp-bt;return{buyinsCount:bc,buyinUsdTotal:bt,outUnits:ou,outChips:totalChipCount(p.cashout),gross:g,rfTax:rf,finalPayout:fp,netProfit:np}}
+  // ── Calculations ──
+  function calcPlayer(p){const bc=p.buyins.length,ou=ufc(p.cashout,state.chipValues),g=u2d(ou),bt=bc*state.buyinUsd,tb=Math.max(0,g-bt),rf=tb*state.taxRate,fp=g-rf,np=fp-bt;return{buyinsCount:bc,buyinUsdTotal:bt,outUnits:ou,outChips:tcc(p.cashout),gross:g,rfTax:rf,finalPayout:fp,netProfit:np}}
   function calcAudit(){const IN={black:0,purple:0,yellow:0,pink:0,orange:0},OUT={black:0,purple:0,yellow:0,pink:0,orange:0};for(const p of state.players){for(const b of p.buyins)for(const c of COLORS)IN[c]+=clamp(b.counts[c]);for(const c of COLORS)OUT[c]+=clamp(p.cashout[c])}return{IN,OUT}}
-  function outputBlockText(p){const c=calcPlayer(p),s=c.netProfit>=0?"+":"";return`Chips: ${c.outChips} / ${Math.round(c.outUnits).toLocaleString()} units\nGross: ${fmtUsd(c.gross)}\nRF tax: ${fmtUsd(c.rfTax)}\nFinal: ${fmtUsd(c.finalPayout)}\nNet: ${s}${fmtUsd(c.netProfit)}`}
-  function shortSummary(p){const c=calcPlayer(p),s=c.netProfit>=0?"+":"";return`${c.buyinsCount} buy-in${c.buyinsCount>1?"s":""} · Final ${fmtUsd(c.finalPayout)} · Net ${s}${fmtUsd(c.netProfit)}`}
 
-  function archiveCurrentSession(){const players=state.players.map(p=>{const c=calcPlayer(p);return{name:p.name.trim()||"Player",buyins:c.buyinsCount,gross:c.gross,rfTax:c.rfTax,final:c.finalPayout,net:c.netProfit}});const totalRF=players.reduce((s,p)=>s+p.rfTax,0);const entry={id:uid(),date:new Date().toISOString(),sessionName:(state.sessionName||"").trim()||"Untitled",buyinUsd:state.buyinUsd,taxRate:state.taxRate,playerCount:players.length,totalRF,players};const h=loadHistory();const r=h[0];if(r&&Math.abs(new Date(r.date)-new Date(entry.date))<30000&&r.sessionName===entry.sessionName){toast("Already archived");return false}h.unshift(entry);saveHistory(h);return true}
+  function calcTournament(){
+    const pool=state.players.reduce((s,p)=>s+p.buyins.length*state.buyinUsd,0);
+    const splits=[state.split1/100,state.split2/100,state.split3/100];
+    const placeIds=[state.place1,state.place2,state.place3];
+    const results=placeIds.map((pid,i)=>{
+      const p=state.players.find(x=>x.id===pid);
+      if(!p)return null;
+      const prize=pool*splits[i];
+      const buyinTotal=p.buyins.length*state.buyinUsd;
+      const taxable=Math.max(0,prize-buyinTotal);
+      const rf=taxable*state.taxRate;
+      const payout=prize-rf;
+      const net=payout-buyinTotal;
+      return{name:p.name,place:i+1,buyins:p.buyins.length,buyinTotal,prize,rf,payout,net};
+    });
+    return{pool,results};
+  }
 
+  function outputBlockText(p){const c=calcPlayer(p),s=c.netProfit>=0?"+":"";return`Chips: ${c.outChips} / ${Math.round(c.outUnits).toLocaleString()}\nGross: ${fmtUsd(c.gross)}\nRF: ${fmtUsd(c.rfTax)}\nFinal: ${fmtUsd(c.finalPayout)}\nNet: ${s}${fmtUsd(c.netProfit)}`}
+  function shortSummary(p){const c=calcPlayer(p),s=c.netProfit>=0?"+":"";return`${c.buyinsCount} buy-in${c.buyinsCount>1?"s":""} · Net ${s}${fmtUsd(c.netProfit)}`}
+
+  // ── Mode Toggle ──
+  function setMode(m){
+    mode=m;
+    document.querySelectorAll(".modeBtn").forEach(b=>{b.classList.toggle("active",b.dataset.mode===m);b.classList.toggle("tourney",b.dataset.mode==="tournament"&&b.dataset.mode===m)});
+    $("onlineCard").classList.toggle("hidden",m!=="cash");
+    $("chipValuesSection").classList.toggle("hidden",m!=="cash");
+    $("prizeSplitSection").classList.toggle("hidden",m!=="tournament");
+    $("cashAuditGrid").classList.toggle("hidden",m!=="cash");
+    $("tournamentSummary").classList.toggle("hidden",m!=="tournament");
+    $("timerCard").classList.toggle("hidden",m!=="tournament");
+    $("placementSection").classList.toggle("hidden",m!=="tournament");
+    $("topTitle").textContent=m==="cash"?"Poker Cashout (Admin)":"Tournament Mode (Admin)";
+    $("topSub").textContent=m==="cash"?`$1 = 1000 units · Buy-in $${state.buyinUsd} · RF ${Math.round(state.taxRate*100)}%`:`Buy-in $${state.buyinUsd} · Pool: all buy-ins · RF ${Math.round(state.taxRate*100)}%`;
+    $("pill").classList.toggle("hidden",m!=="cash");
+    $("footK1").textContent=m==="cash"?"Total Gross":"Prize Pool";
+    $("footK3").textContent=m==="cash"?"Total Final":"Total Payouts";
+    renderAllFull();
+  }
+  $("modeToggle").addEventListener("click",e=>{const b=e.target.closest(".modeBtn");if(b)setMode(b.dataset.mode)});
+
+  // ── Timer ──
+  function fmtTimer(s){const m=Math.floor(s/60),sec=s%60;return`${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`}
+  function renderTimer(){
+    const d=$("timerDisplay");d.textContent=fmtTimer(timerSeconds);
+    d.className="timerDisplay"+(timerSeconds<=30&&timerSeconds>0?" danger":(timerSeconds<=60?" warn":""));
+  }
+  function startTimer(){
+    if(timerRunning)return;
+    timerSeconds=Math.max(1,(Number($("timerMin").value)||10))*60;
+    timerRunning=true;$("timerStart").textContent="Pause";renderTimer();
+    timerInterval=setInterval(()=>{
+      timerSeconds--;renderTimer();
+      if(timerSeconds<=0){clearInterval(timerInterval);timerRunning=false;$("timerStart").textContent="Start";
+        try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator();o.type="sine";o.frequency.value=880;o.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.5);setTimeout(()=>{const o2=ctx.createOscillator();o2.type="sine";o2.frequency.value=1100;o2.connect(ctx.destination);o2.start();o2.stop(ctx.currentTime+.5)},600)}catch{}
+        toast("⏰ Time's up! Change blinds")}
+    },1000);
+  }
+  function pauseTimer(){clearInterval(timerInterval);timerRunning=false;$("timerStart").textContent="Start"}
+  $("timerStart").addEventListener("click",()=>{timerRunning?pauseTimer():startTimer()});
+  $("timerReset").addEventListener("click",()=>{pauseTimer();timerSeconds=(Number($("timerMin").value)||10)*60;renderTimer()});
+  $("timerMin").addEventListener("input",()=>{if(!timerRunning){timerSeconds=(Number($("timerMin").value)||10)*60;renderTimer()}});
+  renderTimer();
+
+  // ── Firebase ──
   function generateCode(){const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let c="";for(let i=0;i<4;i++)c+=ch[Math.floor(Math.random()*ch.length)];return c}
   function getPlayerPageUrl(code){return window.location.href.replace(/\/[^/]*$/,"/")+`player.html?code=${code}`}
+  function startOnlineSession(){const names=state.players.map(p=>p.name.trim()).filter(Boolean);if(!names.length){toast("Add players first");return}const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names");return}const code=generateCode();onlineSessionCode=code;db.ref("sessions/"+code).set({config:{sessionName:state.sessionName||"Poker Night",buyinUsd:state.buyinUsd,taxRate:state.taxRate,chipValues:clone(state.chipValues),playerNames:names,createdAt:Date.now()},cashouts:Object.fromEntries(names.map(n=>[n,{submitted:false,black:0,purple:0,yellow:0,pink:0,orange:0}]))}).then(()=>{$("onlineOff").style.display="none";$("onlineOn").style.display="block";$("sessionCodeDisplay").textContent=code;const url=getPlayerPageUrl(code);$("playerLinkDisplay").textContent=url;$("qrWrap").innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}" width="180" height="180"/>`;$("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";$("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`;toast("Online: "+code);listenForCashouts(code)})}
+  function stopOnlineSession(){if(firebaseListener&&onlineSessionCode){db.ref("sessions/"+onlineSessionCode+"/cashouts").off("value",firebaseListener);firebaseListener=null}onlineSessionCode=null;$("onlineOff").style.display="block";$("onlineOn").style.display="none";$("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";$("liveBadge").style.display="none";toast("Online ended")}
+  function listenForCashouts(code){firebaseListener=db.ref("sessions/"+code+"/cashouts").on("value",snap=>{const data=snap.val();if(!data)return;const names=Object.keys(data);let sub=0;$("statusGrid").innerHTML=names.map(n=>{const d=data[n],is=!!d.submitted;if(is)sub++;return`<div class="statusItem ${is?"submitted":"pending"}"><span class="sDot"></span>${esc(n)}</div>`}).join("");$("submitCount").textContent=sub;$("submitTotal").textContent=names.length;let ch=false;for(const p of state.players){const pn=p.name.trim();if(data[pn]&&data[pn].submitted)COLORS.forEach(c=>{const nv=clamp(data[pn][c]||0);if(p.cashout[c]!==nv){p.cashout[c]=nv;ch=true}})}if(ch){toast("Cashout received ✓");save();renderPlayersFull();renderAuditAndSummary()}})}
 
-  function startOnlineSession(){
-    const names=state.players.map(p=>p.name.trim()).filter(Boolean);
-    if(names.some(n=>/^Player \d+$/i.test(n))){if(!confirm("Some players have default names. Rename them so players can find themselves.\n\nContinue anyway?"))return}
-    const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names: "+dupes.join(", "));return}
-    if(!names.length){toast("Add players first");return}
-    const code=generateCode();onlineSessionCode=code;
-    const config={sessionName:state.sessionName||"Poker Night",buyinUsd:state.buyinUsd,taxRate:state.taxRate,chipValues:clone(state.chipValues),playerNames:names,createdAt:Date.now()};
-    const cashouts={};names.forEach(n=>{cashouts[n]={submitted:false,black:0,purple:0,yellow:0,pink:0,orange:0}});
-    db.ref("sessions/"+code).set({config,cashouts}).then(()=>{
-      $("onlineOff").style.display="none";$("onlineOn").style.display="block";
-      $("sessionCodeDisplay").textContent=code;
-      const url=getPlayerPageUrl(code);
-      $("playerLinkDisplay").textContent=url;
-      $("qrWrap").innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}" width="180" height="180" alt="QR Code"/>`;
-      $("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";
-      $("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`;
-      toast("Online session: "+code);listenForCashouts(code);
-    }).catch(err=>{toast("Firebase error");console.error(err)});
-  }
-
-  function stopOnlineSession(){if(firebaseListener&&onlineSessionCode){db.ref("sessions/"+onlineSessionCode+"/cashouts").off("value",firebaseListener);firebaseListener=null}onlineSessionCode=null;$("onlineOff").style.display="block";$("onlineOn").style.display="none";$("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";$("liveBadge").style.display="none";toast("Online session ended")}
-
-  function listenForCashouts(code){
-    firebaseListener=db.ref("sessions/"+code+"/cashouts").on("value",snap=>{
-      const data=snap.val();if(!data)return;
-      const names=Object.keys(data);let submitted=0;
-      $("statusGrid").innerHTML=names.map(n=>{const d=data[n],isSub=!!d.submitted;if(isSub)submitted++;return`<div class="statusItem ${isSub?"submitted":"pending"}"><span class="sDot"></span><span>${esc(n)}</span></div>`}).join("");
-      $("submitCount").textContent=submitted;$("submitTotal").textContent=names.length;
-      let changed=false;for(const p of state.players){const pn=p.name.trim();if(data[pn]&&data[pn].submitted)COLORS.forEach(c=>{const nv=clamp(data[pn][c]||0);if(p.cashout[c]!==nv){p.cashout[c]=nv;changed=true}})}
-      if(changed){toast("Player cashout received ✓");save();renderPlayersFull();renderAuditAndSummary()}
-    },err=>{console.error(err);toast("Firebase sync error")});
-  }
-
-  function colorCell(color,vu,count,kind,pid,bid){const dis=state.locked?"disabled":"";return`<div class="cell" data-color="${color}"><div class="ctop"><span class="sw ${SW[color]}"></span><span class="cname">${color[0].toUpperCase()+color.slice(1)}</span><span class="cval">${vu.toLocaleString()}</span></div><div class="stepper"><button class="sbtn" data-step="-1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${color}" ${dis}>−</button><input type="number" step="1" inputmode="numeric" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${color}" value="${count??0}" placeholder="0" ${dis}/><button class="sbtn" data-step="1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${color}" ${dis}>+</button></div></div>`}
-
-  function renderJumpNav(){const nav=$("jumpNav");if(state.players.length<=2){nav.innerHTML="";return}nav.innerHTML=state.players.map(p=>`<span class="jbtn" data-jump="${p.id}">${esc(p.name||"Player")}</span>`).join("")}
+  // ── Render helpers ──
+  function colorCell(col,vu,ct,kind,pid,bid){const d=state.locked?"disabled":"";return`<div class="cell" data-color="${col}"><div class="ctop"><span class="sw ${SW[col]}"></span><span class="cname">${col[0].toUpperCase()+col.slice(1)}</span><span class="cval">${vu.toLocaleString()}</span></div><div class="stepper"><button class="sbtn" data-step="-1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" ${d}>−</button><input type="number" step="1" inputmode="numeric" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" value="${ct??0}" ${d}/><button class="sbtn" data-step="1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" ${d}>+</button></div></div>`}
 
   function renderStatic(){
-    $("playerCount").textContent=state.players.length;$("sessionName").value=state.sessionName;$("buyinUsd").value=state.buyinUsd;$("taxRate").value=state.taxRate;
+    $("playerCount").textContent=state.players.length;$("sessionName").value=state.sessionName;$("buyinUsd").value=state.buyinUsd;$("taxRate").value=state.taxRate;$("split1").value=state.split1;$("split2").value=state.split2;$("split3").value=state.split3;
     for(const c of COLORS)$("v_"+c).value=state.chipValues[c];
-    const lb=$("lockSession"),ba=$("lockBadge"),ov=$("lockedOverlay");
-    if(lb){lb.textContent=state.locked?"Unlock":"Lock session";lb.classList.toggle("danger",state.locked)}
-    if(ba)ba.style.display=state.locked?"inline-flex":"none";if(ov)ov.style.display=state.locked?"block":"none";
-    ["sessionName","buyinUsd","taxRate","v_black","v_purple","v_yellow","v_pink","v_orange"].forEach(id=>{const el=$(id);if(el)el.disabled=!!state.locked});
-    const bs=$("bankSelect");if(bs){bs.innerHTML=state.players.map(p=>`<option value="${p.id}">${esc(p.name||"Player")}</option>`).join("");bs.value=state.bankId||(state.players[0]?.id||"");bs.disabled=!!state.locked}
+    const lb=$("lockSession");if(lb){lb.textContent=state.locked?"Unlock":"Lock";lb.classList.toggle("danger",state.locked)}
+    $("lockBadge").style.display=state.locked?"inline-flex":"none";$("lockedOverlay").style.display=state.locked?"block":"none";
+    ["sessionName","buyinUsd","taxRate","v_black","v_purple","v_yellow","v_pink","v_orange","split1","split2","split3"].forEach(id=>{const el=$(id);if(el)el.disabled=!!state.locked});
+    const bs=$("bankSelect");bs.innerHTML=state.players.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");bs.value=state.bankId||(state.players[0]?.id||"");bs.disabled=!!state.locked;
     $("addPlayer").disabled=!!state.locked;$("resetAll").disabled=!!state.locked;
   }
 
+  function renderJumpNav(){const nav=$("jumpNav");nav.innerHTML=state.players.length<=2?"":state.players.map(p=>`<span class="jbtn" data-jump="${p.id}">${esc(p.name)}</span>`).join("")}
+
   function renderPlayersFull(){
-    $("players").innerHTML=state.players.map(p=>{
-      const isCol=collapsedPlayers.has(p.id);
-      const bh=p.buyins.map((b,i)=>{const t=i===0?"Buy-in 1":`Rebuy ${i}`,du=unitsFromCounts(b.counts,state.chipValues),dd=unitsToUsd(du);return`<div class="miniCard"><div class="miniHd"><b>${t}</b><button class="btn small danger" data-act="delBuyin" data-p="${p.id}" data-b="${b.id}" ${(state.locked||p.buyins.length===1)?"disabled":""}>Remove</button></div><div class="miniBd"><div class="chips">${COLORS.map(c=>colorCell(c,state.chipValues[c],b.counts[c],"buyin",p.id,b.id)).join("")}</div><div class="note" id="disp_${p.id}_${b.id}">Dispensed: <b>${du.toLocaleString()}</b> units (~ <b>${fmtUsd(dd)}</b>)</div></div></div>`}).join("");
-      const ou=unitsFromCounts(p.cashout,state.chipValues),od=unitsToUsd(ou);
-      return`<div class="player ${isCol?"is-collapsed":""}" data-p="${p.id}" id="player_${p.id}"><div class="phd"><span class="chevron" data-act="togglePlayer" data-p="${p.id}">▼</span><div class="pname"><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" autocomplete="off" autocapitalize="words" ${state.locked?"disabled":""} style="font-weight:600;background:transparent;border-color:transparent;padding:5px 8px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'"/><div class="pSummaryInline">${shortSummary(p)}</div></div><div class="pactions"><span class="submitBadge ${onlineSessionCode?(totalChipCount(p.cashout)>0?"yes":"no"):""}" style="${onlineSessionCode?"":"display:none"}">${totalChipCount(p.cashout)>0?"Submitted":"Pending"}</span><button class="btn small secondary" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>Remove</button></div></div><div class="pbd ${isCol?"collapsed":""}"><div class="outblock"><label>Buy-ins & Rebuys</label><div class="note">Buy-in 1: 15/3/12/3/2. Rebuys start at 0.</div></div>${bh}<div class="cashoutSection"><label>Cashout (chips OUT)</label><div class="chips" style="margin-top:6px">${COLORS.map(c=>colorCell(c,state.chipValues[c],p.cashout[c],"cashout",p.id,"")).join("")}</div><div class="note" id="cashnote_${p.id}">Cashout: <b>${ou.toLocaleString()}</b> units (~ <b>${fmtUsd(od)}</b>)</div></div><div class="outblock"><label>Summary</label><pre id="out_${p.id}">${esc(outputBlockText(p))}</pre></div></div></div>`;
+    if(mode==="tournament"){
+      // Simplified: name + rebuy count only
+      $("players").innerHTML=state.players.map(p=>{
+        const rc=p.buyins.length;
+        return`<div class="player" data-p="${p.id}" id="player_${p.id}"><div class="phd"><div class="pname"><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" ${state.locked?"disabled":""} style="font-weight:600;background:transparent;border-color:transparent;padding:5px 8px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'"/></div><div class="pactions"><span class="muted" style="font-size:12px">${rc} buy-in${rc>1?"s":""} (${fmtUsd(rc*state.buyinUsd)})</span><button class="btn small" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="removeRebuy" data-p="${p.id}" ${state.locked||rc<=1?"disabled":""}>− Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>✕</button></div></div></div>`;
+      }).join("");
+      // Update placement selects
+      [1,2,3].forEach(i=>{const sel=$("place"+i);const cur=state["place"+i];sel.innerHTML='<option value="">Select player</option>'+state.players.map(p=>`<option value="${p.id}" ${p.id===cur?"selected":""}>${esc(p.name)}</option>`).join("");sel.disabled=!!state.locked});
+      renderTournamentSummary();
+    } else {
+      // Cash game: full chip UI
+      $("players").innerHTML=state.players.map(p=>{
+        const isCol=collapsedPlayers.has(p.id);
+        const bh=p.buyins.map((b,i)=>{const t=i===0?"Buy-in 1":`Rebuy ${i}`,du=ufc(b.counts,state.chipValues);return`<div class="miniCard"><div class="miniHd"><b>${t}</b><button class="btn small danger" data-act="delBuyin" data-p="${p.id}" data-b="${b.id}" ${(state.locked||p.buyins.length===1)?"disabled":""}>Remove</button></div><div class="miniBd"><div class="chips">${COLORS.map(c=>colorCell(c,state.chipValues[c],b.counts[c],"buyin",p.id,b.id)).join("")}</div><div class="note" id="disp_${p.id}_${b.id}">Dispensed: <b>${du.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(du))}</b>)</div></div></div>`}).join("");
+        const ou=ufc(p.cashout,state.chipValues);
+        return`<div class="player ${isCol?"is-collapsed":""}" data-p="${p.id}" id="player_${p.id}"><div class="phd"><span class="chevron" data-act="togglePlayer" data-p="${p.id}">▼</span><div class="pname"><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" ${state.locked?"disabled":""} style="font-weight:600;background:transparent;border-color:transparent;padding:5px 8px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'"/><div class="pSummaryInline">${shortSummary(p)}</div></div><div class="pactions"><button class="btn small" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>Remove</button></div></div><div class="pbd ${isCol?"collapsed":""}"><div class="outblock"><label>Buy-ins & Rebuys</label></div>${bh}<div class="cashoutSection"><label>Cashout (chips OUT)</label><div class="chips" style="margin-top:6px">${COLORS.map(c=>colorCell(c,state.chipValues[c],p.cashout[c],"cashout",p.id,"")).join("")}</div><div class="note" id="cashnote_${p.id}">Cashout: <b>${ou.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(ou))}</b>)</div></div><div class="outblock"><label>Summary</label><pre id="out_${p.id}">${esc(outputBlockText(p))}</pre></div></div></div>`;
+      }).join("");
+    }
+  }
+
+  function renderTournamentSummary(){
+    const t=calcTournament();
+    const tbody=$("tourneySummaryBody");
+    const medals=["🥇","🥈","🥉"];
+    tbody.innerHTML=t.results.map((r,i)=>{
+      if(!r)return`<tr><td>${medals[i]}</td><td class="muted">Not selected</td><td></td><td></td><td></td><td></td><td></td></tr>`;
+      const cls=r.net>0?"good":(r.net<0?"bad":"muted");
+      return`<tr><td>${medals[i]}</td><td>${esc(r.name)}</td><td class="num">${r.buyins}</td><td class="num">${fmtUsd(r.prize)}</td><td class="num">${fmtUsd(r.rf)}</td><td class="num">${fmtUsd(r.payout)}</td><td class="num ${cls}">${r.net>=0?"+":""}${fmtUsd(r.net)}</td></tr>`;
     }).join("");
+    const losers=state.players.filter(p=>![state.place1,state.place2,state.place3].includes(p.id));
+    losers.forEach(p=>{const bt=p.buyins.length*state.buyinUsd;tbody.innerHTML+=`<tr><td></td><td>${esc(p.name)}</td><td class="num">${p.buyins.length}</td><td class="num">$0.00</td><td class="num">$0.00</td><td class="num">$0.00</td><td class="num bad">-${fmtUsd(bt)}</td></tr>`});
+    $("tourneyInfoText").textContent=`Prize Pool: ${fmtUsd(t.pool)} (${state.players.length} players × avg ${fmtUsd(t.pool/Math.max(1,state.players.length))})\nSplit: ${state.split1}% / ${state.split2}% / ${state.split3}%\nRF Tax: ${Math.round(state.taxRate*100)}% of (prize − buy-in)`;
+    // Footer
+    const totalPay=t.results.reduce((s,r)=>s+(r?r.payout:0),0);
+    const totalRF=t.results.reduce((s,r)=>s+(r?r.rf:0),0);
+    $("t_gross").textContent=fmtUsd(t.pool);$("t_rf").textContent=fmtUsd(totalRF);$("t_final").textContent=fmtUsd(totalPay);
   }
 
   function applyMismatchHighlights(mc){document.querySelectorAll('.cell').forEach(el=>el.className=el.className.replace(/\bhl-\w+/g,''));if(mc)for(const c of mc)document.querySelectorAll(`.cell[data-color="${c}"]`).forEach(el=>el.classList.add('hl-'+c))}
   function setAuditHint(m){const box=$('auditHint');if(!m||!m.length){box.style.display='none';return}box.style.display='block';box.innerHTML='Fix mismatches:<br/>'+m.map(x=>`<span class="chip"><span class="sw ${SW[x.color]}"></span><b>${x.color[0].toUpperCase()+x.color.slice(1)}</b>: ${x.diff>0?"+":""}${x.diff}</span>`).join('')}
 
   function renderAuditAndSummary(){
+    if(mode==="tournament"){renderTournamentSummary();return}
     const{IN,OUT}=calcAudit();
     $("auditBody").innerHTML=COLORS.map(c=>{const d=OUT[c]-IN[c],cls=d===0?"good":(Math.abs(d)<=1?"warn":"bad");return`<tr><td>${c[0].toUpperCase()+c.slice(1)}</td><td class="num">${IN[c]}</td><td class="num">${OUT[c]}</td><td class="num ${cls}">${d}</td></tr>`}).join("");
     let tg=0,trf=0,tf=0;
@@ -454,56 +529,108 @@
     applyMismatchHighlights(mm.map(m=>m.color));setAuditHint(mm);
     const pill=$("pill"),pt=$("pillText");
     if(!hd){pill.className="pill warn";pt.textContent="Audit: pending"}
-    else if(mm.length){pill.className="pill bad";pt.textContent=mm.length===1?`Mismatch: ${mm[0].color[0].toUpperCase()+mm[0].color.slice(1)}`:`Mismatch ×${mm.length}`}
+    else if(mm.length){pill.className="pill bad";pt.textContent=`Mismatch ×${mm.length}`}
     else{pill.className="pill good";pt.textContent="Audit: OK ✓"}
   }
 
-  function updatePlayerComputed(pid){const p=state.players.find(x=>x.id===pid);if(!p)return;const ou=unitsFromCounts(p.cashout,state.chipValues);const cn=$("cashnote_"+pid);if(cn)cn.innerHTML=`Cashout: <b>${ou.toLocaleString()}</b> units (~ <b>${fmtUsd(unitsToUsd(ou))}</b>)`;const op=$("out_"+pid);if(op)op.textContent=outputBlockText(p)}
-  function updateBuyinComputed(pid,bid){const p=state.players.find(x=>x.id===pid);if(!p)return;const b=p.buyins.find(x=>x.id===bid);if(!b)return;const du=unitsFromCounts(b.counts,state.chipValues);const el=$("disp_"+pid+"_"+bid);if(el)el.innerHTML=`Dispensed: <b>${du.toLocaleString()}</b> units (~ <b>${fmtUsd(unitsToUsd(du))}</b>)`}
+  // ── Payouts with swipe ──
+  function buildPayoutLines(){
+    if(mode==="tournament"){
+      const t=calcTournament();const bank=state.players.find(p=>p.id===state.bankId);const bn=bank?.name||"Bank";
+      const lines=[];
+      state.players.forEach(p=>{if(p.id!==state.bankId){const bt=p.buyins.length*state.buyinUsd;lines.push({key:`buyin-${p.id}`,label:`${p.name} → ${bn}`,amount:bt,type:"collect"})}});
+      t.results.forEach((r,i)=>{if(r){const p=state.players.find(x=>x.name.trim()===r.name);if(p&&p.id!==state.bankId)lines.push({key:`pay-${p?.id||i}`,label:`${bn} → ${r.name}`,amount:r.payout,type:"pay"})}});
+      return lines;
+    } else {
+      const bankId=state.bankId||state.players[0]?.id;const bank=state.players.find(p=>p.id===bankId);const bn=bank?.name||"Bank";
+      const lines=[];
+      state.players.forEach(p=>{if(p.id!==bankId){const bt=p.buyins.length*state.buyinUsd;lines.push({key:`buyin-${p.id}`,label:`${p.name} → ${bn}`,amount:bt,type:"collect"})}});
+      state.players.forEach(p=>{const c=calcPlayer(p);if(p.id!==bankId&&c.finalPayout>0)lines.push({key:`pay-${p.id}`,label:`${bn} → ${p.name}`,amount:c.finalPayout,type:"pay"})});
+      return lines;
+    }
+  }
 
-  function renderHistory(){const h=loadHistory(),tb=$("historyBody"),em=$("historyEmpty");if(!h.length){tb.innerHTML="";em.style.display="block";return}em.style.display="none";tb.innerHTML=h.map(s=>{const d=new Date(s.date),ds=d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}),ts=d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});const dr=s.players.map(p=>{const cls=p.net>0.0001?"good":(p.net<-0.0001?"bad":"muted");return`<tr class="sessionDetail" data-detail="${s.id}"><td></td><td>${esc(p.name)}</td><td class="num">${p.buyins}</td><td class="num ${cls}">${p.net>=0?"+":""}${fmtUsd(p.net)}</td><td></td></tr>`}).join("");return`<tr class="sessionRow" data-sid="${s.id}"><td>${ds}<br><span class="muted" style="font-size:10px">${ts}</span></td><td>${esc(s.sessionName)}</td><td class="num">${s.playerCount}</td><td class="num">${fmtUsd(s.totalRF)}</td><td><span class="deleteSession" data-delsession="${s.id}">✕</span></td></tr>${dr}`}).join("")}
+  function renderPayouts(){
+    const card=$("payoutCard");card.style.display=state.locked?"block":"none";
+    if(!state.locked)return;
+    const lines=buildPayoutLines();
+    $("payoutLines").innerHTML=lines.map(l=>{
+      const isPaid=!!paidMap[l.key];
+      return`<div class="payLine ${isPaid?"paid":""}" data-paykey="${l.key}"><div class="payBg ${isPaid?"toUnpay":"toBePaid"}">${isPaid?"← Swipe to unpay":"Paid ✓ →"}</div><div class="payContent"><div><span style="font-size:12px;font-weight:600">${esc(l.label)}</span><br><span class="muted" style="font-size:11px">${l.type==="collect"?"Buy-in":"Payout"}</span></div><div style="text-align:right"><span style="font-weight:700">${fmtUsd(l.amount)}</span>${isPaid?'<br><span class="paidBadge">PAID</span>':''}</div></div></div>`;
+    }).join("");
+    // Attach swipe handlers
+    document.querySelectorAll(".payLine").forEach(el=>{
+      let sx=0,cx=0;
+      el.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;cx=sx},{passive:true});
+      el.addEventListener("touchmove",e=>{cx=e.touches[0].clientX;const dx=cx-sx;const content=el.querySelector(".payContent");content.style.transform=`translateX(${Math.max(-80,Math.min(80,dx))}px)`;content.style.transition="none"},{passive:true});
+      el.addEventListener("touchend",()=>{const dx=cx-sx;const content=el.querySelector(".payContent");content.style.transition="transform .2s";content.style.transform="";const key=el.dataset.paykey;
+        if(dx>60&&!paidMap[key]){paidMap[key]=true;savePaid();renderPayouts();toast("Marked as paid ✓")}
+        else if(dx<-60&&paidMap[key]){delete paidMap[key];savePaid();renderPayouts();toast("Unmarked")}
+      });
+    });
+  }
 
-  function renderStats(){const h=loadHistory();$("statsSessionCount").textContent=`${h.length} session${h.length!==1?"s":""}`;if(!h.length){$("statsBody").innerHTML="";$("statsEmpty").style.display="block";return}$("statsEmpty").style.display="none";const map={};for(const s of h)for(const p of s.players){const k=p.name.trim().toLowerCase();if(!map[k])map[k]={name:p.name.trim(),sessions:0,wins:0,totalNet:0,best:-Infinity,worst:Infinity};const m=map[k];m.sessions++;m.totalNet+=p.net;if(p.net>0.0001)m.wins++;if(p.net>m.best)m.best=p.net;if(p.net<m.worst)m.worst=p.net;m.name=p.name.trim()}const stats=Object.values(map).sort((a,b)=>b.totalNet-a.totalNet);$("statsBody").innerHTML=stats.map(s=>{const wp=s.sessions?Math.round(s.wins/s.sessions*100):0,avg=s.sessions?s.totalNet/s.sessions:0,nc=s.totalNet>0.0001?"statPositive":(s.totalNet<-0.0001?"statNegative":"statNeutral");return`<tr><td>${esc(s.name)}</td><td class="num">${s.sessions}</td><td class="num">${s.wins}</td><td class="num">${wp}%</td><td class="num ${nc}">${s.totalNet>=0?"+":""}${fmtUsd(s.totalNet)}</td><td class="num">${avg>=0?"+":""}${fmtUsd(avg)}</td><td class="num">${s.best>=0?"+":""}${fmtUsd(s.best)}</td><td class="num">${fmtUsd(s.worst)}</td></tr>`}).join("")}
+  // ── History & Stats ──
+  function archiveCurrentSession(){
+    const players=state.players.map(p=>{
+      if(mode==="tournament"){
+        const t=calcTournament();const r=t.results.find(x=>x&&x.name===p.name.trim());
+        return{name:p.name.trim(),buyins:p.buyins.length,gross:r?r.prize:0,rfTax:r?r.rf:0,final:r?r.payout:0,net:r?r.net:-(p.buyins.length*state.buyinUsd)};
+      }else{const c=calcPlayer(p);return{name:p.name.trim(),buyins:c.buyinsCount,gross:c.gross,rfTax:c.rfTax,final:c.finalPayout,net:c.netProfit}}
+    });
+    const totalRF=players.reduce((s,p)=>s+p.rfTax,0);
+    const entry={id:uid(),date:new Date().toISOString(),sessionName:(state.sessionName||"").trim()||"Untitled",mode,buyinUsd:state.buyinUsd,playerCount:players.length,totalRF,players};
+    const h=loadHistory();if(h[0]&&Math.abs(new Date(h[0].date)-new Date(entry.date))<30000){toast("Already archived");return false}
+    h.unshift(entry);saveHistory(h);return true;
+  }
 
-  function buildSuggestedPayoutText(){const bid=state.bankId||state.players[0]?.id,bank=state.players.find(p=>p.id===bid),bn=bank?.name||"Bank",co=[],pa=[];let trf=0;for(const p of state.players){const c=calcPlayer(p);trf+=c.rfTax;if(p.id!==bid){co.push({name:p.name,amt:p.buyins.length*state.buyinUsd,buyins:p.buyins.length});pa.push({name:p.name,amt:c.finalPayout})}}const bi=co.reduce((s,x)=>s+x.amt,0),bo=pa.reduce((s,x)=>s+x.amt,0);const l=[`Suggested payouts`,`Bank: ${bn}`,"","Collect:"];co.forEach(x=>l.push(`  ${x.name} → ${bn}: ${fmtUsd(x.amt)}`));l.push(`  = ${fmtUsd(bi)}`,"","Pay:");pa.forEach(x=>l.push(`  ${bn} → ${x.name}: ${fmtUsd(x.amt)}`));l.push(`  = ${fmtUsd(bo)}`,"",`RF fund: ${fmtUsd(trf)}`,`Check: ${fmtUsd(bi)} − ${fmtUsd(bo)} = ${fmtUsd(bi-bo)}`);return l.join("\n")}
-  function buildPayoutText(){const bid=state.bankId||state.players[0]?.id,bank=state.players.find(p=>p.id===bid),bn=bank?.name||"Bank",l=[];if((state.sessionName||"").trim())l.push(state.sessionName.trim());l.push(`Bank: ${bn}`,"","Buy-ins:");let bi=0;for(const p of state.players){const b=p.buyins.length,a=b*state.buyinUsd;bi+=a;l.push(p.id===bid?`  ${p.name}: (Bank) ${b}×${fmtUsd(state.buyinUsd)}`:`  ${p.name} → ${bn}: ${fmtUsd(a)}`)}l.push("","Payouts:");let bo=0;for(const p of state.players){const c=calcPlayer(p);bo+=c.finalPayout;l.push(p.id===bid?`  ${bn}: keeps ${fmtUsd(c.finalPayout)}`:`  ${bn} → ${p.name}: ${fmtUsd(c.finalPayout)}`)}const trf=state.players.reduce((s,p)=>s+calcPlayer(p).rfTax,0);l.push("",`RF fund: ${fmtUsd(trf)}`,`Check: ${fmtUsd(bi)} − ${fmtUsd(bo)} = ${fmtUsd(bi-bo)}`);return l.join("\n")}
+  function renderHistory(){const h=loadHistory(),tb=$("historyBody"),em=$("historyEmpty");if(!h.length){tb.innerHTML="";em.style.display="block";return}em.style.display="none";tb.innerHTML=h.map(s=>{const d=new Date(s.date),ds=d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}),ts=d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});const dr=s.players.map(p=>{const cls=p.net>0?"good":(p.net<0?"bad":"muted");return`<tr class="sessionDetail" data-detail="${s.id}"><td></td><td>${esc(p.name)}</td><td class="num ${cls}">${p.net>=0?"+":""}${fmtUsd(p.net)}</td><td></td><td></td></tr>`}).join("");return`<tr class="sessionRow" data-sid="${s.id}"><td>${ds}<br><span class="muted" style="font-size:10px">${ts}</span></td><td>${esc(s.sessionName)}</td><td class="num"><span class="modeBadge ${(s.mode||"cash")==="tournament"?"tourney":"cash"}">${(s.mode||"cash")==="tournament"?"🏆":"♠"}</span></td><td class="num">${s.playerCount}</td><td><span class="deleteSession" data-delsession="${s.id}">✕</span></td></tr>${dr}`}).join("")}
 
-  function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderHistory();renderStats();$("payoutCard").style.display=state.locked?"block":"none";$("payoutSuggested").textContent=state.locked?buildSuggestedPayoutText():"";$("payoutText").textContent=state.locked?buildPayoutText():"";save()}
+  function renderStats(){const h=loadHistory();$("statsSessionCount").textContent=`${h.length} session${h.length!==1?"s":""}`;if(!h.length){$("statsBody").innerHTML="";$("statsEmpty").style.display="block";return}$("statsEmpty").style.display="none";const map={};for(const s of h)for(const p of s.players){const k=p.name.trim().toLowerCase();if(!map[k])map[k]={name:p.name.trim(),sessions:0,wins:0,totalNet:0};const m=map[k];m.sessions++;m.totalNet+=p.net;if(p.net>0.0001)m.wins++;m.name=p.name.trim()}const stats=Object.values(map).sort((a,b)=>b.totalNet-a.totalNet);$("statsBody").innerHTML=stats.map(s=>{const wp=s.sessions?Math.round(s.wins/s.sessions*100):0,avg=s.sessions?s.totalNet/s.sessions:0,nc=s.totalNet>0?"statPositive":(s.totalNet<0?"statNegative":"statNeutral");return`<tr><td>${esc(s.name)}</td><td class="num">${s.sessions}</td><td class="num">${s.wins}</td><td class="num">${wp}%</td><td class="num ${nc}">${s.totalNet>=0?"+":""}${fmtUsd(s.totalNet)}</td><td class="num">${avg>=0?"+":""}${fmtUsd(avg)}</td></tr>`}).join("")}
 
-  function tap(el,fn){el.addEventListener("click",e=>{e.preventDefault?.();fn(e)})}
+  function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderHistory();renderStats();save()}
 
+  // ── Events ──
   $("sessionName").addEventListener("input",e=>{if(!state.locked){state.sessionName=e.target.value;save()}});
-  $("buyinUsd").addEventListener("input",e=>{if(!state.locked){state.buyinUsd=Number(e.target.value)||DEFAULTS.buyinUsd;renderAuditAndSummary();save();state.players.forEach(p=>updatePlayerComputed(p.id))}});
-  $("taxRate").addEventListener("input",e=>{if(!state.locked){state.taxRate=Number(e.target.value)||0;renderAuditAndSummary();save();state.players.forEach(p=>updatePlayerComputed(p.id))}});
+  $("buyinUsd").addEventListener("input",e=>{if(!state.locked){state.buyinUsd=Number(e.target.value)||DEFAULTS.buyinUsd;renderAllFull()}});
+  $("taxRate").addEventListener("input",e=>{if(!state.locked){state.taxRate=Number(e.target.value)||0;renderAllFull()}});
   $("bankSelect").addEventListener("change",e=>{if(!state.locked){state.bankId=e.target.value;save();renderAllFull()}});
   for(const c of COLORS)$("v_"+c).addEventListener("input",e=>{if(!state.locked){state.chipValues[c]=Number(e.target.value)||DEFAULTS.chipValues[c];renderAllFull()}});
+  ["split1","split2","split3"].forEach(id=>$(id).addEventListener("input",e=>{if(!state.locked){state[id]=Number(e.target.value)||0;renderAllFull()}}));
+  [1,2,3].forEach(i=>$("place"+i).addEventListener("change",e=>{state["place"+i]=e.target.value;save();renderAllFull()}));
 
-  tap($("addPlayer"),()=>{if(!state.locked){state.players.unshift(makePlayer(`Player ${state.players.length+1}`));renderAllFull();toast("Player added")}});
-  tap($("resetAll"),()=>{if(!state.locked&&confirm("Reset session? (History preserved)")){localStorage.removeItem(KEY);state=defaultState();collapsedPlayers.clear();renderAllFull();toast("Session reset")}});
-  tap($("lockSession"),()=>{const was=!state.locked;state.locked=!state.locked;save();if(state.locked&&was&&archiveCurrentSession()){toast("Locked & archived 🔒");renderAllFull();return}renderAllFull();toast(state.locked?"Locked 🔒":"Unlocked 🔓")});
-  tap($("archiveSession"),()=>{if(archiveCurrentSession()){renderHistory();renderStats();toast("Archived ✓")}});
-  tap($("clearHistory"),()=>{if(confirm("Delete ALL history?")){saveHistory([]);renderHistory();renderStats();toast("History cleared")}});
-  tap($("startOnline"),()=>startOnlineSession());
-  tap($("stopOnline"),()=>{if(confirm("End online session?"))stopOnlineSession()});
-  tap($("copyCode"),()=>{if(onlineSessionCode)navigator.clipboard?.writeText(onlineSessionCode).then(()=>toast("Code copied"))});
-  tap($("copyLink"),()=>{if(onlineSessionCode)navigator.clipboard?.writeText(getPlayerPageUrl(onlineSessionCode)).then(()=>toast("Link copied ✓"))});
+  $("addPlayer").addEventListener("click",()=>{if(!state.locked){state.players.push(makePlayer(`Player ${state.players.length+1}`));renderAllFull();toast("Player added")}});
+  $("resetAll").addEventListener("click",()=>{if(!state.locked&&confirm("Reset session?")){localStorage.removeItem(KEY);state=defaultState();collapsedPlayers.clear();paidMap={};savePaid();renderAllFull();toast("Reset")}});
+  $("lockSession").addEventListener("click",()=>{const was=!state.locked;state.locked=!state.locked;save();if(state.locked&&was&&archiveCurrentSession()){toast("Locked & archived 🔒");renderAllFull();return}renderAllFull();toast(state.locked?"Locked 🔒":"Unlocked 🔓")});
+  $("archiveSession").addEventListener("click",()=>{if(archiveCurrentSession()){renderHistory();renderStats();toast("Archived ✓")}});
+  $("clearHistory").addEventListener("click",()=>{if(confirm("Delete ALL history?")){saveHistory([]);renderHistory();renderStats();toast("Cleared")}});
+  $("startOnline").addEventListener("click",startOnlineSession);
+  $("stopOnline").addEventListener("click",()=>{if(confirm("End online?"))stopOnlineSession()});
+  $("copyCode").addEventListener("click",()=>{if(onlineSessionCode)navigator.clipboard?.writeText(onlineSessionCode).then(()=>toast("Code copied"))});
+  $("copyLink").addEventListener("click",()=>{if(onlineSessionCode)navigator.clipboard?.writeText(getPlayerPageUrl(onlineSessionCode)).then(()=>toast("Link copied"))});
 
-  let rulesCol=false;tap($("toggleRules"),()=>{rulesCol=!rulesCol;$("rulesBody").style.display=rulesCol?"none":"block";$("toggleRules").textContent=rulesCol?"Expand":"Collapse"});
-  tap($("toTop"),()=>window.scrollTo({top:0,behavior:"smooth"}));
-  tap($("saveRoster"),()=>{const n=state.players.map(p=>p.name.trim()).filter(Boolean);localStorage.setItem(ROSTER_KEY,JSON.stringify(n));toast(`Roster saved (${n.length})`)});
-  tap($("loadRoster"),()=>{let n=[];try{n=JSON.parse(localStorage.getItem(ROSTER_KEY)||"[]")}catch{}if(!Array.isArray(n)||!n.length){toast("No roster");return}state.players=n.map(x=>makePlayer(x));renderAllFull();toast(`Roster loaded (${n.length})`)});
-  tap($("copyAll"),()=>{const l=[];if(state.sessionName.trim())l.push(state.sessionName.trim());for(const p of state.players){l.push(p.name,outputBlockText(p),"")}navigator.clipboard?.writeText(l.join("\n")).then(()=>toast("Copied ✓"))});
-  tap($("copyPayouts"),()=>{navigator.clipboard?.writeText((buildSuggestedPayoutText()+"\n\n"+buildPayoutText()).trim()).then(()=>toast("Payouts copied ✓"))});
+  let rulesCol=false;$("toggleRules").addEventListener("click",()=>{rulesCol=!rulesCol;$("rulesBody").style.display=rulesCol?"none":"block";$("toggleRules").textContent=rulesCol?"Expand":"Collapse"});
+  $("toTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+  $("saveRoster").addEventListener("click",()=>{const n=state.players.map(p=>p.name.trim()).filter(Boolean);localStorage.setItem(ROSTER_KEY,JSON.stringify(n));toast(`Saved (${n.length})`)});
+  $("loadRoster").addEventListener("click",()=>{let n=[];try{n=JSON.parse(localStorage.getItem(ROSTER_KEY)||"[]")}catch{}if(!n.length){toast("No roster");return}state.players=n.map(x=>makePlayer(x));renderAllFull();toast(`Loaded (${n.length})`)});
+  $("copyAll").addEventListener("click",()=>{const l=[state.sessionName.trim()];if(mode==="tournament"){const t=calcTournament();t.results.forEach((r,i)=>{if(r)l.push(`${i+1}. ${r.name}: ${fmtUsd(r.payout)} (net ${r.net>=0?"+":""}${fmtUsd(r.net)})`)})}else state.players.forEach(p=>{l.push(p.name,outputBlockText(p),"")});navigator.clipboard?.writeText(l.join("\n")).then(()=>toast("Copied"))});
+  $("copyPayouts").addEventListener("click",()=>{const lines=buildPayoutLines().map(l=>`${l.label}: ${fmtUsd(l.amount)}${paidMap[l.key]?" ✓ PAID":""}`);navigator.clipboard?.writeText(lines.join("\n")).then(()=>toast("Copied"))});
 
-  document.addEventListener("input",e=>{if(state.locked)return;const t=e.target,kind=t?.getAttribute?.("data-kind"),pid=t?.getAttribute?.("data-p");if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){p.name=t.value;renderAuditAndSummary();renderJumpNav();save();return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);updateBuyinComputed(pid,bid);updatePlayerComputed(pid);renderAuditAndSummary();save()}}if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);updatePlayerComputed(pid);renderAuditAndSummary();save()}},{passive:true});
+  document.addEventListener("input",e=>{if(state.locked)return;const t=e.target,kind=t?.getAttribute?.("data-kind"),pid=t?.getAttribute?.("data-p");if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){p.name=t.value;renderAuditAndSummary();renderJumpNav();save();return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}}if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}},{passive:true});
 
-  document.addEventListener("click",e=>{const t=e.target.closest(".sbtn");if(!t||state.locked)return;const step=Number(t.getAttribute("data-step"))||0,kind=t.getAttribute("data-kind"),pid=t.getAttribute("data-p"),color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);const inp=t.parentElement.querySelector("input");if(inp)inp.value=b.counts[color];updateBuyinComputed(pid,bid);updatePlayerComputed(pid);renderAuditAndSummary();save()}}if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);const inp=t.parentElement.querySelector("input");if(inp)inp.value=p.cashout[color];updatePlayerComputed(pid);renderAuditAndSummary();save()}},true);
+  document.addEventListener("click",e=>{const t=e.target.closest(".sbtn");if(!t||state.locked)return;const step=Number(t.dataset.step)||0,kind=t.dataset.kind,pid=t.dataset.p,color=t.dataset.c,bid=t.dataset.b;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary()}}if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary()}},true);
 
-  document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const act=t.getAttribute("data-act"),pid=t.getAttribute("data-p");if(act==="togglePlayer"){if(collapsedPlayers.has(pid))collapsedPlayers.delete(pid);else collapsedPlayers.add(pid);const el=document.getElementById("player_"+pid);if(el){el.classList.toggle("is-collapsed",collapsedPlayers.has(pid));el.querySelector(".pbd")?.classList.toggle("collapsed",collapsedPlayers.has(pid))}return}if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();toast(`${p.name} removed`)}}if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){p.buyins.push({id:uid(),counts:{black:0,purple:0,yellow:0,pink:0,orange:0}});renderAllFull();toast("Rebuy added")}}if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.getAttribute("data-b"));renderAllFull()}}},true);
+  document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const act=t.dataset.act,pid=t.dataset.p;
+    if(act==="togglePlayer"){if(collapsedPlayers.has(pid))collapsedPlayers.delete(pid);else collapsedPlayers.add(pid);const el=document.getElementById("player_"+pid);if(el){el.classList.toggle("is-collapsed");el.querySelector(".pbd")?.classList.toggle("collapsed")}return}
+    if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();toast(`${p.name} removed`)}}
+    if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){p.buyins.push({id:uid(),counts:{black:0,purple:0,yellow:0,pink:0,orange:0}});renderAllFull();toast("Rebuy added")}}
+    if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();toast("Rebuy removed")}}
+    if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull()}}
+  },true);
 
-  document.addEventListener("click",e=>{const t=e.target.closest("[data-jump]");if(t){const pid=t.getAttribute("data-jump"),el=document.getElementById("player_"+pid);if(el){if(collapsedPlayers.has(pid)){collapsedPlayers.delete(pid);el.classList.remove("is-collapsed");el.querySelector(".pbd")?.classList.remove("collapsed")}el.scrollIntoView({behavior:"smooth",block:"start"})}}},true);
-  document.addEventListener("click",e=>{const row=e.target.closest(".sessionRow");if(row&&!e.target.closest(".deleteSession")){const sid=row.getAttribute("data-sid");document.querySelectorAll(`.sessionDetail[data-detail="${sid}"]`).forEach(r=>r.classList.toggle("open"))}},true);
-  document.addEventListener("click",e=>{const t=e.target.closest("[data-delsession]");if(t&&confirm("Delete session?")){const h=loadHistory().filter(s=>s.id!==t.getAttribute("data-delsession"));saveHistory(h);renderHistory();renderStats();toast("Deleted")}},true);
+  document.addEventListener("click",e=>{const t=e.target.closest("[data-jump]");if(t){const el=document.getElementById("player_"+t.dataset.jump);if(el){collapsedPlayers.delete(t.dataset.jump);el.classList.remove("is-collapsed");el.querySelector(".pbd")?.classList.remove("collapsed");el.scrollIntoView({behavior:"smooth"})}}},true);
+  document.addEventListener("click",e=>{const row=e.target.closest(".sessionRow");if(row&&!e.target.closest(".deleteSession"))document.querySelectorAll(`.sessionDetail[data-detail="${row.dataset.sid}"]`).forEach(r=>r.classList.toggle("open"))},true);
+  document.addEventListener("click",e=>{const t=e.target.closest("[data-delsession]");if(t&&confirm("Delete?")){saveHistory(loadHistory().filter(s=>s.id!==t.dataset.delsession));renderHistory();renderStats();toast("Deleted")}},true);
 
   state=sanitize(state);renderAllFull();
 })();
