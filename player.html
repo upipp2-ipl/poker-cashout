@@ -18,7 +18,7 @@
     .pullIndicator .pullIcon{display:inline-block;margin-right:6px;transition:transform .2s}
     .pullIndicator.ready .pullIcon{transform:rotate(180deg)}
     .pullIndicator.refreshing .pullIcon{animation:spin .6s linear infinite}
-    .iplHeader{text-align:center;padding:20px 14px 10px}
+    .iplHeader{text-align:center;padding:20px 14px 10px;padding-top:calc(20px + env(safe-area-inset-top))}
     .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:28px;font-weight:800;letter-spacing:1px}
     .suit{font-size:20px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
     .iplSub{color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.5px}
