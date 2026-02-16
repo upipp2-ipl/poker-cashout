@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
   <title>IPL – Poker Cashout Admin</title>
   <style>
     [data-theme="dark"]{--bg:#1a1f2e;--bg2:#242938;--bg3:#2d3348;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);--card:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));--card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);--hover:rgba(255,255,255,.04);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;--b:#3b4557;--p:#7c3aed;--y:#f59e0b;--pk:#ec4899;--o:#f97316;--sh:0 4px 20px rgba(0,0,0,.25)}
@@ -13,7 +13,7 @@
     .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:28px;font-weight:800;letter-spacing:1px}
     .suit{font-size:20px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
     .iplSub{color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.5px}
-    .wrap{max-width:1050px;margin:0 auto;padding:0 14px 120px}
+    .wrap{max-width:1050px;margin:0 auto;padding:0 14px 160px}
     .top{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh);margin-bottom:14px}
     .topPills{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
     h1{margin:0;font-size:15px}.sub{color:var(--muted);font-size:11px;margin-top:2px}
@@ -37,7 +37,7 @@
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}.row>*{flex:1}
     label{display:block;color:var(--muted);font-size:11px;margin-bottom:5px;font-weight:500}
     input,select,button{font:inherit}
-    input,select{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);outline:none;font-size:14px}
+    input,select{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);outline:none;font-size:16px}
     input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(122,167,255,.10)}
     input[type="number"]{appearance:textfield}
     input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
@@ -74,7 +74,7 @@
     [data-theme="light"] .cell[data-color="pink"]{background:rgba(236,72,153,.05);border-color:rgba(236,72,153,.15)}
     [data-theme="light"] .cell[data-color="orange"]{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.15)}
     .stepper{display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--input-border);background:var(--input-bg)}
-    .stepper input{border:none;border-radius:0;text-align:center;padding:7px 2px;min-width:0;flex:1;background:transparent;font-size:13px}
+    .stepper input{border:none;border-radius:0;text-align:center;padding:7px 2px;min-width:0;flex:1;background:transparent;font-size:16px}
     .stepper input:focus{box-shadow:none}
     .stepper .sbtn{display:flex;align-items:center;justify-content:center;width:32px;min-width:32px;background:var(--hover);color:var(--muted);cursor:pointer;user-select:none;touch-action:manipulation;font-size:16px;font-weight:700;border:none;transition:all .12s}
     .stepper .sbtn:hover{color:var(--text)}.stepper .sbtn:active{background:rgba(122,167,255,.15)}
@@ -171,6 +171,7 @@
   <div class="iplSub">Innovation Poker League</div>
 </div>
 <div class="wrap">
+  <!-- Mode Toggle -->
   <div class="modeToggle" id="modeToggle">
     <button class="modeBtn active" data-mode="cash" type="button">♠ Cash Game</button>
     <button class="modeBtn" data-mode="tournament" type="button">🏆 Tournament</button>
@@ -186,6 +187,7 @@
     </div>
   </div>
 
+  <!-- Timer (tournament only) -->
   <div class="card timerCard hidden" id="timerCard" style="margin-bottom:14px">
     <div class="hd"><h2>⏱ Blinds Timer</h2>
       <div class="btnbar">
@@ -202,6 +204,7 @@
     </div>
   </div>
 
+  <!-- Online Session -->
   <div class="card onlineCard hidden" id="onlineCard">
     <div class="hd"><h2>Online Session</h2><div class="btnbar">
       <button class="btn small live" id="startOnline" type="button">Start Online</button>
@@ -225,6 +228,7 @@
     </div>
   </div>
 
+  <!-- Session & Rules -->
   <div class="grid" style="margin-top:14px">
     <div class="card">
       <div class="hd"><h2>Session & Rules</h2><div class="btnbar">
@@ -240,6 +244,7 @@
           <div><label>RF tax rate</label><input id="taxRate" type="number" step="0.01" inputmode="decimal"/></div>
         </div>
         <div class="row" style="margin-top:8px"><div><label>Bank / Admin</label><select id="bankSelect"></select></div></div>
+        <!-- Cash Game chip values -->
         <div id="chipValuesSection">
           <div class="sep"></div>
           <label>Chip values (units per chip)</label>
@@ -251,6 +256,7 @@
             <div><label>Orange</label><input id="v_orange" type="number" step="1" inputmode="numeric"/></div>
           </div>
         </div>
+        <!-- Tournament prize split + chip pack -->
         <div id="prizeSplitSection" class="hidden">
           <div class="sep"></div>
           <label>Prize split (%)</label>
@@ -281,6 +287,7 @@
     <div class="card">
       <div class="hd"><h2>Players (<span id="playerCount">0</span>)</h2><div class="btnbar"><button class="btn" id="addPlayer" type="button">+ Add player</button></div></div>
       <div class="bd"><div id="jumpNav" class="jumpNav"></div><div id="players" class="players"></div>
+        <!-- Tournament Placements -->
         <div id="placementSection" class="hidden" style="margin-top:14px">
           <label style="font-weight:700;color:var(--warn);font-size:13px">🏆 Placements</label>
           <div class="placeSelect">
@@ -293,11 +300,13 @@
     </div>
   </div>
 
+  <!-- Audit (cash only) -->
   <div class="grid" id="cashAuditGrid">
     <div class="card"><div class="hd"><h2>Audit: IN vs OUT</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Color</th><th class="num">IN</th><th class="num">OUT</th><th class="num">Diff</th></tr></thead><tbody id="auditBody"></tbody></table></div></div></div>
     <div class="card"><div class="hd"><h2>Summary</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Buy-ins</th><th class="num">Gross</th><th class="num">RF tax</th><th class="num">Final</th><th class="num">Net</th></tr></thead><tbody id="summaryBody"></tbody></table></div></div></div>
   </div>
 
+  <!-- Tournament Summary -->
   <div class="card hidden" id="tournamentSummary" style="margin-top:14px">
     <div class="hd"><h2>🏆 Tournament Summary</h2></div>
     <div class="bd"><div class="tablewrap"><table>
@@ -308,6 +317,7 @@
     </div>
   </div>
 
+  <!-- Payouts with swipe -->
   <div class="card" id="payoutCard" style="margin-top:14px;display:none">
     <div class="hd"><h2>Payouts</h2><div class="btnbar"><button class="btn small" id="copyPayouts" type="button">Copy payouts</button></div></div>
     <div class="bd">
@@ -316,6 +326,7 @@
     </div>
   </div>
 
+  <!-- Stats & History -->
   <div class="card" style="margin-top:14px"><div class="hd histHd"><h2>Player Stats (All-Time)</h2><span class="muted" id="statsSessionCount" style="font-size:11px"></span></div>
     <div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Sessions</th><th class="num">Wins</th><th class="num">Win%</th><th class="num">Net</th><th class="num">Avg</th></tr></thead><tbody id="statsBody"></tbody></table></div><div id="statsEmpty" class="emptyState" style="display:none">No sessions archived yet.</div></div>
   </div>
@@ -456,36 +467,8 @@
   // ── Firebase ──
   function generateCode(){const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let c="";for(let i=0;i<4;i++)c+=ch[Math.floor(Math.random()*ch.length)];return c}
   function getPlayerPageUrl(code){return window.location.href.replace(/\/[^/]*$/,"/")+`player.html?code=${code}`}
-  
-  // NEW: Sync buyin amounts to allow "Net Profit" display on phones
-  function getBuyinMap(){
-    const map={};
-    state.players.forEach(p=>{
-      // Use dollar amount for Cash, or count for Tournament (though mostly for Cash mode)
-      map[p.name.trim()] = p.buyins.length * state.buyinUsd;
-    });
-    return map;
-  }
-  
-  function updateOnlineBuyins(){
-     if(!onlineSessionCode) return;
-     db.ref("sessions/"+onlineSessionCode+"/config/buyins").set(getBuyinMap());
-  }
+  function startOnlineSession(){const names=state.players.map(p=>p.name.trim()).filter(Boolean);if(!names.length){toast("Add players first");return}const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names");return}const code=generateCode();onlineSessionCode=code;db.ref("sessions/"+code).set({config:{sessionName:state.sessionName||"Poker Night",buyinUsd:state.buyinUsd,taxRate:state.taxRate,chipValues:clone(state.chipValues),playerNames:names,createdAt:Date.now()},cashouts:Object.fromEntries(names.map(n=>[n,{submitted:false,black:0,purple:0,yellow:0,pink:0,orange:0}]))}).then(()=>{$("onlineOff").style.display="none";$("onlineOn").style.display="block";$("sessionCodeDisplay").textContent=code;const url=getPlayerPageUrl(code);$("playerLinkDisplay").textContent=url;$("qrWrap").innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}" width="180" height="180"/>`;$("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";$("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`;      toast("Online: "+code);listenForCashouts(code);syncBuyinsToFirebase()})}
 
-  function startOnlineSession(){const names=state.players.map(p=>p.name.trim()).filter(Boolean);if(!names.length){toast("Add players first");return}const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names");return}const code=generateCode();onlineSessionCode=code;
-    db.ref("sessions/"+code).set({
-      config:{
-        sessionName:state.sessionName||"Poker Night",
-        buyinUsd:state.buyinUsd,
-        taxRate:state.taxRate,
-        chipValues:clone(state.chipValues),
-        playerNames:names,
-        buyins: getBuyinMap(), // Send initial buyins
-        createdAt:Date.now()
-      },
-      cashouts:Object.fromEntries(names.map(n=>[n,{submitted:false,black:0,purple:0,yellow:0,pink:0,orange:0}]))
-    }).then(()=>{$("onlineOff").style.display="none";$("onlineOn").style.display="block";$("sessionCodeDisplay").textContent=code;const url=getPlayerPageUrl(code);$("playerLinkDisplay").textContent=url;$("qrWrap").innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}" width="180" height="180"/>`;$("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";$("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`;toast("Online: "+code);listenForCashouts(code)})
-  }
   function stopOnlineSession(){if(firebaseListener&&onlineSessionCode){db.ref("sessions/"+onlineSessionCode+"/cashouts").off("value",firebaseListener);firebaseListener=null}onlineSessionCode=null;$("onlineOff").style.display="block";$("onlineOn").style.display="none";$("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";$("liveBadge").style.display="none";toast("Online ended")}
   function listenForCashouts(code){firebaseListener=db.ref("sessions/"+code+"/cashouts").on("value",snap=>{const data=snap.val();if(!data)return;const names=Object.keys(data);let sub=0;$("statusGrid").innerHTML=names.map(n=>{const d=data[n],is=!!d.submitted;if(is)sub++;return`<div class="statusItem ${is?"submitted":"pending"}"><span class="sDot"></span>${esc(n)}</div>`}).join("");$("submitCount").textContent=sub;$("submitTotal").textContent=names.length;let ch=false;for(const p of state.players){const pn=p.name.trim();if(data[pn]&&data[pn].submitted)COLORS.forEach(c=>{const nv=clamp(data[pn][c]||0);if(p.cashout[c]!==nv){p.cashout[c]=nv;ch=true}})}if(ch){toast("Cashout received ✓");save();renderPlayersFull();renderAuditAndSummary()}})}
 
@@ -595,29 +578,25 @@
       const isPaid=!!paidMap[l.key];
       return`<div class="payLine ${isPaid?"paid":""}" data-paykey="${l.key}"><div class="payBg ${isPaid?"toUnpay":"toBePaid"}">${isPaid?"← Swipe to unpay":"Paid ✓ →"}</div><div class="payContent"><div><span style="font-size:12px;font-weight:600">${esc(l.label)}</span><br><span class="muted" style="font-size:11px">${l.type==="collect"?"Buy-in":"Payout"}</span></div><div style="text-align:right"><span style="font-weight:700">${fmtUsd(l.amount)}</span>${isPaid?'<br><span class="paidBadge">PAID</span>':''}</div></div></div>`;
     }).join("");
-    // Attach swipe handlers with scroll protection
+    // Attach swipe handlers
     document.querySelectorAll(".payLine").forEach(el=>{
-      let sx=0,sy=0,cx=0,cy=0;
-      el.addEventListener("touchstart",e=>{
-        sx=e.touches[0].clientX; sy=e.touches[0].clientY;
-        cx=sx; cy=sy;
-      },{passive:true});
+      let sx=0,sy=0,cx=0,swiping=false;
+      el.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;cx=sx;swiping=true},{passive:true});
       el.addEventListener("touchmove",e=>{
-        cx=e.touches[0].clientX; cy=e.touches[0].clientY;
-        const dx=cx-sx; const dy=cy-sy;
-        // If vertical scroll is more prominent than horizontal, ignore swipe
-        if(Math.abs(dy) > Math.abs(dx)) return;
-        
+        if(!swiping)return;
+        const dy=e.touches[0].clientY-sy;
+        const dx=e.touches[0].clientX-sx;
+        // If vertical movement dominates, cancel swipe and allow scroll
+        if(Math.abs(dy)>Math.abs(dx)){swiping=false;const content=el.querySelector(".payContent");content.style.transition="transform .2s";content.style.transform="";return}
+        cx=e.touches[0].clientX;
         const content=el.querySelector(".payContent");
-        content.style.transform=`translateX(${Math.max(-80,Math.min(80,dx))}px)`;
-        content.style.transition="none";
+        content.style.transform=`translateX(${Math.max(-80,Math.min(80,dx))}px)`;content.style.transition="none";
       },{passive:true});
       el.addEventListener("touchend",()=>{
-        const dx=cx-sx;
-        const content=el.querySelector(".payContent");
-        content.style.transition="transform .2s";
-        content.style.transform="";
-        const key=el.dataset.paykey;
+        const content=el.querySelector(".payContent");content.style.transition="transform .2s";content.style.transform="";
+        if(!swiping){swiping=false;return}
+        swiping=false;
+        const dx=cx-sx;const key=el.dataset.paykey;
         if(dx>60&&!paidMap[key]){paidMap[key]=true;savePaid();renderPayouts();toast("Marked as paid ✓")}
         else if(dx<-60&&paidMap[key]){delete paidMap[key];savePaid();renderPayouts();toast("Unmarked")}
       });
@@ -684,23 +663,27 @@
 
   document.addEventListener("input",e=>{if(state.locked)return;const t=e.target,kind=t?.getAttribute?.("data-kind"),pid=t?.getAttribute?.("data-p");
     if(kind==="tpack"){const color=t.getAttribute("data-c");if(color){state.tourneyPack[color]=Math.max(0,Number(t.value)||0);save();renderTourneyChipPack()}return}
-    if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){p.name=t.value;renderAuditAndSummary();renderJumpNav();save();return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary();updateOnlineBuyins()}}if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}},{passive:true});
+    if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){p.name=t.value;renderAuditAndSummary();renderJumpNav();save();return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}}    if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary();if(onlineSessionCode)setAdminOverride(p.name.trim())}},{passive:true});
 
   document.addEventListener("click",e=>{const t=e.target.closest(".sbtn");if(!t||state.locked)return;const step=Number(t.dataset.step)||0,kind=t.dataset.kind,pid=t.dataset.p,color=t.dataset.c,bid=t.dataset.b;
     if(kind==="tpack"&&color){state.tourneyPack[color]=Math.max(0,(state.tourneyPack[color]||0)+step);t.parentElement.querySelector("input").value=state.tourneyPack[color];save();renderTourneyChipPack();return}
-    const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary();updateOnlineBuyins()}}if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary()}},true);
+    const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary()}}    if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary();if(onlineSessionCode)setAdminOverride(p.name.trim())}},true);
 
   document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const act=t.dataset.act,pid=t.dataset.p;
     if(act==="togglePlayer"){if(collapsedPlayers.has(pid))collapsedPlayers.delete(pid);else collapsedPlayers.add(pid);const el=document.getElementById("player_"+pid);if(el){el.classList.toggle("is-collapsed");el.querySelector(".pbd")?.classList.toggle("collapsed")}return}
-    if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();updateOnlineBuyins();toast(`${p.name} removed`)}}
-    if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){const counts=mode==="tournament"?clone(state.tourneyPack):{black:0,purple:0,yellow:0,pink:0,orange:0};p.buyins.push({id:uid(),counts});renderAllFull();updateOnlineBuyins();toast("Rebuy added")}}
-    if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();updateOnlineBuyins();toast("Rebuy removed")}}
-    if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull();updateOnlineBuyins()}}
+    if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();toast(`${p.name} removed`)}}
+    if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){const counts=mode==="tournament"?clone(state.tourneyPack):{black:0,purple:0,yellow:0,pink:0,orange:0};p.buyins.push({id:uid(),counts});renderAllFull();syncBuyinsToFirebase();toast("Rebuy added")}}
+    if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();syncBuyinsToFirebase();toast("Rebuy removed")}}
+    if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull();syncBuyinsToFirebase()}}
   },true);
 
   document.addEventListener("click",e=>{const t=e.target.closest("[data-jump]");if(t){const el=document.getElementById("player_"+t.dataset.jump);if(el){collapsedPlayers.delete(t.dataset.jump);el.classList.remove("is-collapsed");el.querySelector(".pbd")?.classList.remove("collapsed");el.scrollIntoView({behavior:"smooth"})}}},true);
   document.addEventListener("click",e=>{const row=e.target.closest(".sessionRow");if(row&&!e.target.closest(".deleteSession"))document.querySelectorAll(`.sessionDetail[data-detail="${row.dataset.sid}"]`).forEach(r=>r.classList.toggle("open"))},true);
   document.addEventListener("click",e=>{const t=e.target.closest("[data-delsession]");if(t&&confirm("Delete?")){saveHistory(loadHistory().filter(s=>s.id!==t.dataset.delsession));renderHistory();renderStats();toast("Deleted")}},true);
+
+  // Auto-select on focus, restore 0 on blur for number inputs
+  document.addEventListener("focus",e=>{const t=e.target;if(t&&t.type==="number"&&t.closest(".stepper,.chips,.row")){t.select()}},true);
+  document.addEventListener("blur",e=>{const t=e.target;if(t&&t.type==="number"&&t.closest(".stepper,.chips,.row")){if(t.value===""||t.value===null)t.value="0"}},true);
 
   state=sanitize(state);renderAllFull();
 })();

@@ -2,23 +2,11 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
   <title>IPL – Poker Cashout</title>
   <style>
-    [data-theme="dark"]{
-      --bg:#1a1f2e;--bg2:#242938;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);
-      --card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);
-      --hover:rgba(255,255,255,.04);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;
-      --b:#3b4557;--p:#7c3aed;--y:#f59e0b;--pk:#ec4899;--o:#f97316;
-      --sh:0 4px 20px rgba(0,0,0,.25);
-    }
-    [data-theme="light"]{
-      --bg:#f0f2f7;--bg2:#ffffff;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);
-      --card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);
-      --hover:rgba(0,0,0,.03);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;
-      --b:#6b7280;--p:#7c3aed;--y:#d97706;--pk:#db2777;--o:#ea580c;
-      --sh:0 2px 12px rgba(0,0,0,.06);
-    }
+    [data-theme="dark"]{--bg:#1a1f2e;--bg2:#242938;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);--card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);--hover:rgba(255,255,255,.04);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;--b:#3b4557;--p:#7c3aed;--y:#f59e0b;--pk:#ec4899;--o:#f97316;--sh:0 4px 20px rgba(0,0,0,.25)}
+    [data-theme="light"]{--bg:#f0f2f7;--bg2:#ffffff;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);--card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);--hover:rgba(0,0,0,.03);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;--b:#6b7280;--p:#7c3aed;--y:#d97706;--pk:#db2777;--o:#ea580c;--sh:0 2px 12px rgba(0,0,0,.06)}
     *{box-sizing:border-box}
     body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 14px 20px;transition:background .3s,color .3s}
     .iplHeader{text-align:center;padding:20px 14px 10px}
@@ -42,7 +30,7 @@
     .btn[disabled]{opacity:.5;cursor:not-allowed}
     .sep{height:1px;background:var(--line);margin:16px 0}
     .note{color:var(--muted);font-size:11px;line-height:1.4;margin-top:8px}
-    .muted{color:var(--muted)}.good{color:var(--good)}
+    .muted{color:var(--muted)}.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
     .hidden{display:none!important}
     .step{margin-bottom:16px}.stepLabel{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:8px;font-weight:600}
     .infoBanner{padding:10px 12px;border-radius:10px;border:1px solid rgba(122,167,255,.15);background:rgba(122,167,255,.04);margin-bottom:16px;font-size:13px}
@@ -68,10 +56,11 @@
     .stepper input:focus{box-shadow:none}
     .stepper .sbtn{display:flex;align-items:center;justify-content:center;width:44px;min-width:44px;background:var(--hover);color:var(--muted);cursor:pointer;user-select:none;touch-action:manipulation;font-size:20px;font-weight:700;border:none;transition:all .12s}
     .stepper .sbtn:hover{color:var(--text)}.stepper .sbtn:active{background:rgba(122,167,255,.15)}
-    .totalBar{padding:12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);margin:16px 0;text-align:center}
-    .totalBar .k{font-size:10px;color:var(--muted)}.totalBar .v{font-size:20px;font-weight:800;margin-top:2px}
-    .netProfit{font-size:12px;margin-top:2px;font-weight:600}
-    .netProfit.good{color:var(--good)}.netProfit.bad{color:var(--bad)}
+    /* Results bar */
+    .resultsBar{padding:14px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);margin:16px 0}
+    .resultsBar .row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
+    .resultsBar .row.big{font-size:16px;font-weight:800;padding:8px 0 2px}
+    .resultsBar .lbl{color:var(--muted)}.resultsBar .val{font-weight:600}
     .successCard{text-align:center;padding:32px 16px}
     .successCard .icon{font-size:48px;margin-bottom:12px}
     .successCard h2{margin:0 0 8px;font-size:18px}
@@ -83,13 +72,19 @@
     .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .errorBox{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,92,122,.25);background:rgba(255,92,122,.06);color:var(--bad);font-size:13px;margin-top:10px;display:none}
+    .warnBox{padding:10px 12px;border-radius:10px;border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.06);color:var(--warn);font-size:13px;margin-top:10px;display:none}
     .themeToggle{position:fixed;top:12px;right:12px;z-index:100;width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:var(--sh)}
     .debugPanel{position:fixed;bottom:0;left:0;right:0;z-index:999;max-height:30vh;overflow-y:auto;background:rgba(0,0,0,.92);border-top:1px solid rgba(255,255,255,.15);font-family:ui-monospace,monospace;font-size:10px;padding:8px;display:none}
     .debugPanel.open{display:block}
     .debugToggle{position:fixed;bottom:8px;right:8px;z-index:1000;width:32px;height:32px;border-radius:50%;background:var(--bg2);border:1px solid var(--card-border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;box-shadow:var(--sh)}
     .debugToggle.has-error{color:var(--bad);border-color:rgba(255,92,122,.30)}
     .dline{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);word-break:break-all;color:#ccc}
-    .dline.ok{color:var(--good)}.dline.err{color:var(--bad)}.dline.info{color:var(--accent)}.dline.data{color:#888}
+    .dline.ok{color:#2bd576}.dline.err{color:#ff5c7a}.dline.info{color:#7aa7ff}.dline.data{color:#888}
+    .nameOption{padding:8px 0;display:flex;justify-content:space-between;align-items:center}
+    .nameOption .tag{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600}
+    .nameOption .tag.claimed{background:rgba(255,92,122,.12);color:var(--bad)}
+    .nameOption .tag.adminLock{background:rgba(245,158,11,.12);color:var(--warn)}
+    .nameOption .tag.yours{background:rgba(43,213,118,.12);color:var(--good)}
   </style>
 </head>
 <body>
@@ -99,20 +94,13 @@
 <div class="debugPanel" id="debugPanel"></div>
 
 <div class="iplHeader">
-  <div class="iplLogo">
-    <span class="suit blk">♠</span><span class="suit red">♥</span>
-    IPL
-    <span class="suit red">♦</span><span class="suit blk">♣</span>
-  </div>
+  <div class="iplLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div>
   <div class="iplSub">Innovation Poker League</div>
 </div>
 
 <div class="wrap">
   <div class="card">
-    <div class="hd">
-      <h1>Poker Cashout</h1>
-      <div class="sub">Enter your chip count at the end of the game</div>
-    </div>
+    <div class="hd"><h1>Poker Cashout</h1><div class="sub">Enter your chip count at the end of the game</div></div>
     <div class="bd" id="joinScreen">
       <div class="step">
         <div class="stepLabel">Step 1 — Join Session</div>
@@ -129,17 +117,21 @@
         <div class="stepLabel">Step 2 — Who are you?</div>
         <label>Pick your name</label>
         <select id="nameSelect" style="font-size:16px"><option value="">Choose your name…</option></select>
+        <div id="nameWarn" class="warnBox"></div>
       </div>
       <button class="btn" id="confirmName" type="button" disabled>Continue</button>
     </div>
     <div class="bd hidden" id="chipScreen">
       <div id="chipPlayerName" style="font-size:15px;font-weight:700;margin-bottom:4px"></div>
       <div class="note" style="margin-top:0;margin-bottom:14px">Count your chips by color and enter the totals</div>
+      <div id="adminLockWarn" class="warnBox" style="display:none;margin-bottom:12px">The host has already entered your cashout. Your submission is disabled. Contact the host if this is wrong.</div>
       <div class="chips" id="chipInputs"></div>
-      <div class="totalBar">
-        <div class="k">Your cashout value</div>
-        <div class="v" id="chipTotal">$0.00</div>
-        <div class="netProfit" id="netProfitDisplay" style="display:none"></div>
+      <div class="resultsBar" id="resultsBar">
+        <div class="row"><span class="lbl">Cashout value</span><span class="val" id="rCashout">$0.00</span></div>
+        <div class="row"><span class="lbl">Buy-ins</span><span class="val" id="rBuyins">1 × $50.00 = $50.00</span></div>
+        <div class="row"><span class="lbl">RF tax</span><span class="val" id="rTax">$0.00</span></div>
+        <div class="sep" style="margin:6px 0"></div>
+        <div class="row big"><span class="lbl">Your net</span><span class="val" id="rNet">$0.00</span></div>
       </div>
       <button class="btn good" id="submitChips" type="button">Submit Cashout</button>
       <div id="submitError" class="errorBox"></div>
@@ -161,32 +153,23 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script>
 (()=>{
-  // Theme
-  const THEME_KEY="poker_theme";
+  const THEME_KEY="poker_theme",DEVICE_KEY="poker_device_id";
   let theme=localStorage.getItem(THEME_KEY)||"dark";
   function applyTheme(){document.documentElement.setAttribute("data-theme",theme);document.getElementById("themeToggle").textContent=theme==="dark"?"☀️":"🌙";localStorage.setItem(THEME_KEY,theme)}
   applyTheme();
   document.getElementById("themeToggle").addEventListener("click",()=>{theme=theme==="dark"?"light":"dark";applyTheme()});
 
-  // Unique Device ID for name locking
-  function getDeviceId(){
-    let id = localStorage.getItem("poker_device_id");
-    if(!id){
-       id = Math.random().toString(36).substring(2) + Date.now().toString(36);
-       localStorage.setItem("poker_device_id", id);
-    }
-    return id;
-  }
-  const DEVICE_ID = getDeviceId();
+  // Device ID — persistent per browser
+  let deviceId=localStorage.getItem(DEVICE_KEY);
+  if(!deviceId){deviceId=crypto.randomUUID?crypto.randomUUID():(Math.random().toString(36).slice(2)+Date.now().toString(36));localStorage.setItem(DEVICE_KEY,deviceId)}
 
-  // Debug
   const debugEl=document.getElementById("debugPanel"),debugBtn=document.getElementById("debugToggle");
   let debugOpen=false;
   debugBtn.addEventListener("click",()=>{debugOpen=!debugOpen;debugEl.classList.toggle("open",debugOpen)});
   function dlog(msg,type="info"){const d=document.createElement("div");d.className="dline "+type;d.textContent=`[${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}] ${msg}`;debugEl.appendChild(d);debugEl.scrollTop=debugEl.scrollHeight;if(type==="err")debugBtn.classList.add("has-error");console.log(`[${type}]`,msg)}
 
-  let app,db;
-  try{app=firebase.initializeApp({apiKey:"AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",authDomain:"poker-cashout-bde23.firebaseapp.com",databaseURL:"https://poker-cashout-bde23-default-rtdb.firebaseio.com",projectId:"poker-cashout-bde23",storageBucket:"poker-cashout-bde23.firebasestorage.app",messagingSenderId:"1054875878552",appId:"1:1054875878552:web:94d610f9d20a18bed07ced"});db=firebase.database();dlog("Firebase OK","ok")}catch(err){dlog("Firebase FAILED: "+err.message,"err");return}
+  let db;
+  try{firebase.initializeApp({apiKey:"AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",authDomain:"poker-cashout-bde23.firebaseapp.com",databaseURL:"https://poker-cashout-bde23-default-rtdb.firebaseio.com",projectId:"poker-cashout-bde23",storageBucket:"poker-cashout-bde23.firebasestorage.app",messagingSenderId:"1054875878552",appId:"1:1054875878552:web:94d610f9d20a18bed07ced"});db=firebase.database();dlog("Firebase OK","ok");dlog("Device: "+deviceId.slice(0,8)+"…","data")}catch(err){dlog("Firebase FAILED: "+err.message,"err");return}
 
   const COLORS=["black","purple","yellow","pink","orange"],SW={black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
   const $=id=>document.getElementById(id),clamp=v=>Number.isFinite(v)?v:0;
@@ -195,10 +178,11 @@
   function showError(id,msg){const el=$(id);el.textContent=msg;el.style.display=msg?"block":"none"}
 
   let sessionCode="",sessionData=null,selectedPlayer="",chipCounts={black:0,purple:0,yellow:0,pink:0,orange:0};
-  let currentBuyins = {}; // Map of PlayerName -> BuyinAmount
+  let playerBuyinCount=1,isAdminLocked=false;
 
   function showScreen(id){["joinScreen","nameScreen","chipScreen","successScreen"].forEach(s=>$(s).classList.toggle("hidden",s!==id));dlog("Screen: "+id,"info")}
 
+  // ── Step 1: Join ──
   $("joinBtn").addEventListener("click",async()=>{
     showError("joinError","");
     const raw=$("codeInput").value.trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
@@ -206,43 +190,38 @@
     dlog("Joining: "+raw,"info");$("joinBtn").innerHTML='<span class="spinner"></span> Joining…';$("joinBtn").disabled=true;
     try{
       const snap=await db.ref("sessions/"+raw+"/config").once("value"),data=snap.val();
-      dlog("Response: "+(data?"found":"null"),data?"ok":"err");
-      if(!data||!data.playerNames||!Array.isArray(data.playerNames)){dlog("Not found","err");showError("joinError","Session not found. Check the code.");$("joinBtn").innerHTML="Join Session";$("joinBtn").disabled=false;return}
+      if(!data||!data.playerNames||!Array.isArray(data.playerNames)){dlog("Not found","err");showError("joinError","Session not found.");$("joinBtn").innerHTML="Join Session";$("joinBtn").disabled=false;return}
       sessionCode=raw;sessionData=data;
-      
-      // Listen for buyin updates
-      db.ref("sessions/"+raw+"/config/buyins").on("value", bSnap => {
-          currentBuyins = bSnap.val() || {};
-          updateTotal(); // Update display if we are already on chip screen
-      });
-
       $("sessionInfo").innerHTML=`<div class="k">Session</div><div class="v">${data.sessionName||raw}</div><div style="margin-top:6px;font-size:12px;color:var(--muted)">Buy-in: ${fmtUsd(data.buyinUsd||50)} · Players: ${data.playerNames.length}</div>`;
-      
-      // Check existing cashouts to see if names are claimed
-      let submittedMap={};
-      try{
-        const cs=await db.ref("sessions/"+raw+"/cashouts").once("value"),cd=cs.val();
-        if(cd) submittedMap = cd;
-      }catch(e){}
+
+      // Fetch cashout data to check claims, admin locks, submissions
+      const cashSnap=await db.ref("sessions/"+raw+"/cashouts").once("value");
+      const cashData=cashSnap.val()||{};
 
       const sel=$("nameSelect");sel.innerHTML='<option value="">Choose your name…</option>';
       data.playerNames.forEach(n=>{
-        const opt=document.createElement("option");
-        opt.value=n;
-        
-        const entry = submittedMap[n];
-        const isSubmitted = entry && entry.submitted;
-        const isClaimed = entry && entry.claimed;
-        const ownerId = entry && entry.deviceId;
-        
-        // Lock logic: If claimed by someone else, disable it
-        if(isClaimed && ownerId && ownerId !== DEVICE_ID) {
-            opt.textContent = n + " (Locked)";
-            opt.disabled = true;
-        } else if (isSubmitted) {
-            opt.textContent = n + " ✓ (submitted)";
-        } else {
-            opt.textContent = n;
+        const opt=document.createElement("option");opt.value=n;
+        const cd=cashData[n]||{};
+        const isClaimed=!!cd.claimedBy;
+        const isMyDevice=cd.claimedBy===deviceId;
+        const isSubmitted=!!cd.submitted;
+        const isAdminOvr=!!cd.adminOverride;
+
+        if(isAdminOvr){
+          opt.textContent=n+" 🔒 (host entered)";
+          opt.disabled=true;
+        }else if(isSubmitted&&!isMyDevice){
+          opt.textContent=n+" ✓ (submitted)";
+          opt.disabled=true;
+        }else if(isClaimed&&!isMyDevice){
+          opt.textContent=n+" (in use by another player)";
+          opt.disabled=true;
+        }else if(isMyDevice&&isSubmitted){
+          opt.textContent=n+" ✓ (your submission)";
+        }else if(isMyDevice){
+          opt.textContent=n+" (your claim)";
+        }else{
+          opt.textContent=n;
         }
         sel.appendChild(opt);
       });
@@ -252,75 +231,151 @@
   });
   $("codeInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("joinBtn").click()});
 
-  $("nameSelect").addEventListener("change",()=>{$("confirmName").disabled=!$("nameSelect").value});
+  // ── Step 2: Pick name ──
+  $("nameSelect").addEventListener("change",()=>{$("confirmName").disabled=!$("nameSelect").value;showError("nameWarn","")});
+
   $("confirmName").addEventListener("click",async()=>{
     selectedPlayer=$("nameSelect").value;if(!selectedPlayer)return;
-    dlog("Player: "+selectedPlayer,"info");$("chipPlayerName").textContent=selectedPlayer;chipCounts={black:0,purple:0,yellow:0,pink:0,orange:0};
-    try{const snap=await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).once("value"),ex=snap.val();if(ex&&ex.submitted){COLORS.forEach(c=>{chipCounts[c]=clamp(ex[c]||0)});dlog("Pre-filled","ok");toast("Previous submission loaded")}}catch(e){dlog("No prev: "+e.message,"data")}
-    renderChipInputs();showScreen("chipScreen");
+    dlog("Player: "+selectedPlayer,"info");
+
+    // Claim the name in Firebase
+    try{
+      const ref=db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer);
+      const snap=await ref.once("value");
+      const existing=snap.val()||{};
+
+      // Check admin override
+      if(existing.adminOverride){
+        showError("nameWarn","The host has already entered your cashout. Contact the host.");
+        return;
+      }
+
+      // Check if claimed by another device
+      if(existing.claimedBy&&existing.claimedBy!==deviceId&&!existing.submitted){
+        // Another device claimed but didn't submit — allow override after warning
+        dlog("Overriding stale claim","info");
+      }
+
+      // Write claim
+      await ref.update({claimedBy:deviceId,claimTime:Date.now()});
+      dlog("Name claimed","ok");
+    }catch(err){dlog("Claim error: "+err.message,"err")}
+
+    $("chipPlayerName").textContent=selectedPlayer;
+    chipCounts={black:0,purple:0,yellow:0,pink:0,orange:0};
+    isAdminLocked=false;
+
+    // Read existing data + buy-in count
+    try{
+      const snap=await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).once("value");
+      const ex=snap.val()||{};
+
+      // Check admin override
+      if(ex.adminOverride){
+        isAdminLocked=true;
+        COLORS.forEach(c=>{chipCounts[c]=clamp(ex[c]||0)});
+        dlog("Admin locked — read only","warn");
+      }else if(ex.submitted){
+        COLORS.forEach(c=>{chipCounts[c]=clamp(ex[c]||0)});
+        dlog("Pre-filled from previous submission","ok");
+        toast("Previous submission loaded");
+      }
+
+      // Read buy-in count
+      playerBuyinCount=clamp(ex.buyinCount||1);
+      if(playerBuyinCount<1)playerBuyinCount=1;
+      dlog("Buy-ins: "+playerBuyinCount,"data");
+    }catch(err){dlog("Read error: "+err.message,"err")}
+
+    renderChipInputs();
+    showScreen("chipScreen");
   });
 
+  // ── Step 3: Chips ──
   function renderChipInputs(){
     const cv=sessionData?.chipValues||{};
-    $("chipInputs").innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="colorInfo"><span class="sw ${SW[c]}"></span><div><div class="cname">${c[0].toUpperCase()+c.slice(1)}</div><div class="cval">${(cv[c]||0).toLocaleString()} units</div></div></div><div class="stepper"><button class="sbtn" type="button" data-step="-1" data-c="${c}">−</button><input type="number" step="1" inputmode="numeric" data-c="${c}" value="${chipCounts[c]}" placeholder="0"/><button class="sbtn" type="button" data-step="1" data-c="${c}">+</button></div></div>`).join("");
-    updateTotal();
+    const dis=isAdminLocked?"disabled":"";
+    $("chipInputs").innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="colorInfo"><span class="sw ${SW[c]}"></span><div><div class="cname">${c[0].toUpperCase()+c.slice(1)}</div><div class="cval">${(cv[c]||0).toLocaleString()} units</div></div></div><div class="stepper"><button class="sbtn" type="button" data-step="-1" data-c="${c}" ${dis}>−</button><input type="number" step="1" inputmode="numeric" data-c="${c}" value="${chipCounts[c]}" placeholder="0" ${dis}/><button class="sbtn" type="button" data-step="1" data-c="${c}" ${dis}>+</button></div></div>`).join("");
+    $("adminLockWarn").style.display=isAdminLocked?"block":"none";
+    $("submitChips").disabled=isAdminLocked;
+    $("submitChips").textContent=isAdminLocked?"Locked by host":"Submit Cashout";
+    updateResults();
   }
-  
-  function updateTotal(){
+
+  function updateResults(){
     const cv=sessionData?.chipValues||{};
-    const units = COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0);
-    const gross = units/1000;
-    $("chipTotal").textContent=fmtUsd(gross);
-    
-    // Calculate Net Profit
-    const buyinAmt = currentBuyins[selectedPlayer] || 0;
-    const net = gross - buyinAmt;
-    const netEl = $("netProfitDisplay");
-    
-    if(buyinAmt > 0) {
-        netEl.style.display = "block";
-        netEl.className = "netProfit " + (net >= 0 ? "good" : "bad");
-        netEl.textContent = `Buy-in: ${fmtUsd(buyinAmt)} · Net: ${net>=0?"+":""}${fmtUsd(net)}`;
-    } else {
-        netEl.style.display = "none";
-    }
+    const buyinUsd=sessionData?.buyinUsd||50;
+    const taxRate=sessionData?.taxRate||0.30;
+    const units=COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0);
+    const gross=units/1000;
+    const totalBuyin=playerBuyinCount*buyinUsd;
+    const taxable=Math.max(0,gross-totalBuyin);
+    const rf=taxable*taxRate;
+    const finalPay=gross-rf;
+    const net=finalPay-totalBuyin;
+
+    $("rCashout").textContent=fmtUsd(gross);
+    $("rBuyins").textContent=`${playerBuyinCount} × ${fmtUsd(buyinUsd)} = ${fmtUsd(totalBuyin)}`;
+    $("rTax").textContent=fmtUsd(rf);
+    const netEl=$("rNet");
+    netEl.textContent=(net>=0?"+":"")+fmtUsd(net);
+    netEl.className="val "+(net>0.01?"good":(net<-0.01?"bad":""));
   }
 
-  document.addEventListener("click",e=>{const btn=e.target.closest(".sbtn");if(!btn)return;e.preventDefault();const step=Number(btn.getAttribute("data-step"))||0,c=btn.getAttribute("data-c");if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.max(0,(chipCounts[c]||0)+step);const inp=btn.parentElement.querySelector("input");if(inp)inp.value=chipCounts[c];updateTotal()});
-  document.addEventListener("input",e=>{const c=e.target?.getAttribute?.("data-c");if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.max(0,parseInt(e.target.value,10)||0);updateTotal()});
+  document.addEventListener("click",e=>{const btn=e.target.closest(".sbtn");if(!btn||isAdminLocked)return;e.preventDefault();const step=Number(btn.dataset.step)||0,c=btn.dataset.c;if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.max(0,(chipCounts[c]||0)+step);btn.parentElement.querySelector("input").value=chipCounts[c];updateResults()});
+  document.addEventListener("input",e=>{const c=e.target?.dataset?.c;if(!c||!COLORS.includes(c)||isAdminLocked)return;chipCounts[c]=Math.max(0,parseInt(e.target.value,10)||0);updateResults()});
 
+  // ── Submit ──
   $("submitChips").addEventListener("click",async()=>{
-    showError("submitError","");$("submitChips").innerHTML='<span class="spinner"></span> Submitting…';$("submitChips").disabled=true;
+    if(isAdminLocked)return;
+    showError("submitError","");
+
+    // Re-check admin override before submitting
     try{
-      // Add Device ID and Claimed status
-      const payload={
-        submitted:true, 
-        timestamp:Date.now(),
-        claimed: true,
-        deviceId: DEVICE_ID
-      };
+      const snap=await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer+"/adminOverride").once("value");
+      if(snap.val()){
+        isAdminLocked=true;renderChipInputs();
+        showError("submitError","The host just entered your cashout. Your submission is blocked.");
+        return;
+      }
+    }catch(e){}
+
+    $("submitChips").innerHTML='<span class="spinner"></span> Submitting…';$("submitChips").disabled=true;
+    try{
+      const payload={submitted:true,timestamp:Date.now(),claimedBy:deviceId};
       COLORS.forEach(c=>{payload[c]=chipCounts[c]});
-      
-      dlog("Submitting: "+JSON.stringify(payload),"data");
-      await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).set(payload);
-      dlog("Submit OK","ok");
-      
-      const cv=sessionData?.chipValues||{},units=COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0);
-      const gross = units/1000;
-      const buyinAmt = currentBuyins[selectedPlayer] || 0;
-      const net = gross - buyinAmt;
-      
-      $("successDetail").innerHTML=`<b>${selectedPlayer}</b><br>Cashout: ${fmtUsd(gross)}<br>Net: <span class="${net>=0?'good':'bad'}">${net>=0?"+":""}${fmtUsd(net)}</span><br><span style="font-size:11px;display:block;margin-top:4px">The host sees this in real-time</span>`;
+      // Preserve buyinCount from admin
+      payload.buyinCount=playerBuyinCount;
+      dlog("Submitting","data");
+      await db.ref("sessions/"+sessionCode+"/cashouts/"+selectedPlayer).update(payload);
+      dlog("OK","ok");
+
+      const cv=sessionData?.chipValues||{};
+      const units=COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0);
+      const gross=units/1000;
+      const totalBuyin=playerBuyinCount*(sessionData?.buyinUsd||50);
+      const taxable=Math.max(0,gross-totalBuyin);
+      const rf=taxable*(sessionData?.taxRate||.30);
+      const net=(gross-rf)-totalBuyin;
+
+      $("successDetail").innerHTML=`<b>${selectedPlayer}</b><br>Cashout: ${fmtUsd(gross)}<br>Net: <span class="${net>=0?"good":"bad"}">${net>=0?"+":""}${fmtUsd(net)}</span><br><span style="font-size:11px;display:block;margin-top:4px">The host sees this in real-time</span>`;
       showScreen("successScreen");toast("Submitted ✓");
-    }catch(err){dlog("Submit FAIL: "+err.message,"err");showError("submitError","Error: "+err.message)}
+    }catch(err){dlog("FAIL: "+err.message,"err");showError("submitError","Error: "+err.message)}
     $("submitChips").innerHTML="Submit Cashout";$("submitChips").disabled=false;
   });
 
-  $("resubmitBtn").addEventListener("click",()=>{renderChipInputs();showScreen("chipScreen")});
+  $("resubmitBtn").addEventListener("click",()=>{
+    if(isAdminLocked){toast("Locked by host");return}
+    renderChipInputs();showScreen("chipScreen");
+  });
 
   const params=new URLSearchParams(window.location.search),urlCode=(params.get("code")||params.get("session")||"").trim().toUpperCase();
   if(urlCode){$("codeInput").value=urlCode;dlog("Auto-code: "+urlCode,"info");setTimeout(()=>$("joinBtn").click(),500)}
-  dlog("Player page ready","ok");
+  // Auto-select on focus, restore 0 on blur
+  document.addEventListener("focus",e=>{const t=e.target;if(t&&t.type==="number"&&t.closest(".stepper,.chips")){t.select()}},true);
+  document.addEventListener("blur",e=>{const t=e.target;if(t&&t.type==="number"&&t.closest(".stepper,.chips")){if(t.value===""||t.value===null)t.value="0"}},true);
+
+  dlog("Ready · Device: "+deviceId.slice(0,8),"ok");
 })();
 </script>
 </body>
