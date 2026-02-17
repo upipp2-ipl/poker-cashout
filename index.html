@@ -517,9 +517,9 @@
     document.addEventListener("touchend",()=>{if(pulling&&ready){ind.classList.remove("pulling","ready");ind.classList.add("refreshing");ind.style.height="40px";pt.textContent="Refreshing…";pi.textContent="⟳";setTimeout(()=>location.reload(),400)}else{ind.style.height="0";ind.classList.remove("pulling","ready")}sy=0;pulling=false;ready=false},{passive:true});
   })();
 
-  // ── Focus/blur for number inputs ──
-  document.addEventListener("focus",e=>{const t=e.target;if(t&&t.type==="number"&&t.closest(".stepper,.chips,.row"))t.select()},true);
-  document.addEventListener("blur",e=>{const t=e.target;if(t&&t.type==="number"&&t.closest(".stepper,.chips,.row")&&(t.value===""||t.value===null))t.value="0"},true);
+  // ── Focus/blur for all inputs ──
+  document.addEventListener("focus",e=>{const t=e.target;if(t&&(t.tagName==="INPUT")&&t.type!=="checkbox")t.select()},true);
+  document.addEventListener("blur",e=>{const t=e.target;if(t&&t.type==="number"&&(t.value===""||t.value===null))t.value="0"},true);
 
   // ── Init ──
   state=sanitize(state);
