@@ -96,8 +96,6 @@
     .debugToggle.has-error{color:var(--bad);border-color:rgba(255,92,122,.30)}
     .dline{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);word-break:break-all;color:#ccc}
     .dline.ok{color:#2bd576}.dline.err{color:#ff5c7a}.dline.info{color:#7aa7ff}.dline.data{color:#888}
-    /* Custom currency symbol */
-    .cs{display:inline-block;width:.7em;height:.65em;vertical-align:-0.05em;margin-right:1px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpolygon points='0,88 0,5 20,5 50,55 80,5 100,5 100,88 80,88 80,32 50,82 20,32 20,88' fill='white'/%3E%3Crect x='0' y='48' width='24' height='9' fill='white'/%3E%3Crect x='76' y='48' width='24' height='9' fill='white'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpolygon points='0,88 0,5 20,5 50,55 80,5 100,5 100,88 80,88 80,32 50,82 20,32 20,88' fill='white'/%3E%3Crect x='0' y='48' width='24' height='9' fill='white'/%3E%3Crect x='76' y='48' width='24' height='9' fill='white'/%3E%3C/svg%3E") center/contain no-repeat}
   </style>
 </head>
 <body>
@@ -201,7 +199,7 @@
 
   const COLORS=["black","purple","yellow","pink","orange"],SW={black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
   const $=id=>document.getElementById(id),clamp=v=>Number.isFinite(v)?v:0;
-  const fmtUsd=x=>clamp(x).toLocaleString(undefined,{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtUsd=x=>clamp(x).toLocaleString(undefined,{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\$/g,"₥");
   function toast(msg,dur=2200){const box=$("toastBox"),el=document.createElement("div");el.className="toast";el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},dur)}
   function showError(id,msg){const el=$(id);el.textContent=msg;el.style.display=msg?"block":"none"}
 
@@ -237,7 +235,7 @@
           sel.appendChild(opt);
         });
       }catch(e){dlog("Cashout check err","err")}
-      showScreen("nameScreen");toast("Session found ✓");applyCurrSymbol();
+      showScreen("nameScreen");toast("Session found ✓");
     }catch(err){dlog("Error: "+err.message,"err");showError("joinError","Connection error: "+err.message)}
     $("joinBtn").innerHTML="Join Session";$("joinBtn").disabled=false;
   });
@@ -301,7 +299,7 @@
       const cv=sessionData?.chipValues||{},units=COLORS.reduce((s,c)=>s+clamp(chipCounts[c])*clamp(cv[c]),0),gross=units/1000;
       const tb=playerBuyinCount*(sessionData?.buyinUsd||50),rf=Math.max(0,gross-tb)*(sessionData?.taxRate||.30),net=(gross-rf)-tb;
       $("successDetail").innerHTML=`<b>${selectedPlayer}</b><br>Cashout: ${fmtUsd(gross)}<br>Net: <span class="${net>=0?"good":"bad"}">${net>=0?"+":""}${fmtUsd(net)}</span>`;
-      showScreen("successScreen");toast("Submitted ✓");listenForResults();applyCurrSymbol();
+      showScreen("successScreen");toast("Submitted ✓");listenForResults();
     }catch(err){dlog("FAIL: "+err.message,"err");showError("submitError","Error: "+err.message)}
     $("submitChips").innerHTML="Submit Cashout";$("submitChips").disabled=false;
   });
@@ -323,7 +321,7 @@
         const medal=(data.mode==="tournament"&&p.place>=1&&p.place<=3)?medals[p.place-1]+" ":"";
         return`<div class="resultRow ${isYou?"you":""}"><div><span class="rName">${medal}${p.name}</span>${isYou?' <span style="font-size:10px;color:var(--accent)">(you)</span>':""}</div><div class="rVal ${cls}">${net>=0?"+":""}${fmtUsd(net)}</div></div>`;
       }).join("");
-      showScreen("resultsScreen");toast("Results are in! 🎉");applyCurrSymbol();
+      showScreen("resultsScreen");toast("Results are in! 🎉");
       try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=784;g.gain.value=0.1;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.3)}catch(e){}
     });
   }
