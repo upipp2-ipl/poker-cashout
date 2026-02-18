@@ -95,8 +95,8 @@
     th,td{padding:8px 10px;border-bottom:1px solid var(--line);font-size:12px}
     th{background:var(--input-bg);color:var(--muted);text-align:left;font-weight:600}.num{text-align:right}
     /* FOOTER — FINAL */
-    .footer{position:fixed!important;bottom:0!important;left:0!important;right:0!important;z-index:50!important;margin:0!important;border-radius:0!important;border:none!important;border-top:1px solid var(--card-border)!important;background:var(--bg2)!important;box-shadow:0 -4px 20px rgba(0,0,0,.25)!important;padding-bottom:0!important}
-    .footer::after{content:'';display:block;height:env(safe-area-inset-bottom);background:var(--bg2)}
+    .footer{position:fixed!important;bottom:0!important;left:0!important;right:0!important;z-index:50!important;margin:0!important;border-radius:0!important;border:none!important;border-top:1px solid var(--card-border)!important;background:var(--bg2)!important;box-shadow:0 -4px 20px rgba(0,0,0,.25)!important}
+    @supports(padding-bottom:env(safe-area-inset-bottom)){.footer{padding-bottom:env(safe-area-inset-bottom)!important}}
     .footer .inner{max-width:1050px;margin:0 auto;padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
     .tot{border:1px solid var(--card-border);background:var(--input-bg);padding:6px 9px;border-radius:10px;min-width:130px;flex:1 1 130px}
     .tot .k{font-size:10px;color:var(--muted);font-weight:500}.tot .v{font-size:13px;font-weight:800}
@@ -157,9 +157,24 @@
     .paidBadge{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(43,213,118,.15);color:var(--good);font-weight:600}
     .modeBadge{font-size:9px;padding:2px 5px;border-radius:4px;font-weight:600;text-transform:uppercase}
     .modeBadge.cash{background:rgba(122,167,255,.12);color:var(--accent)}.modeBadge.tourney{background:rgba(245,158,11,.12);color:var(--warn)}
+    /* Custom currency symbol */
+    .cs{display:inline-block;width:.7em;height:.65em;vertical-align:-0.05em;margin-right:1px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpolygon points='0,88 0,5 20,5 50,55 80,5 100,5 100,88 80,88 80,32 50,82 20,32 20,88' fill='white'/%3E%3Crect x='0' y='48' width='24' height='9' fill='white'/%3E%3Crect x='76' y='48' width='24' height='9' fill='white'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpolygon points='0,88 0,5 20,5 50,55 80,5 100,5 100,88 80,88 80,32 50,82 20,32 20,88' fill='white'/%3E%3Crect x='0' y='48' width='24' height='9' fill='white'/%3E%3Crect x='76' y='48' width='24' height='9' fill='white'/%3E%3C/svg%3E") center/contain no-repeat}
     .disclaimer{text-align:center;padding:20px 14px;margin-top:14px;color:var(--muted);font-size:11px;line-height:1.5;opacity:.6}
     .disclaimer .dEmoji{font-size:20px;margin-bottom:6px}
     .resumeBox{display:flex;gap:6px;margin-top:8px}.resumeBox input{flex:1;text-transform:uppercase;letter-spacing:1px;font-weight:700;text-align:center}
+    /* Roster */
+    .rosterWrap{margin-bottom:12px;border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg);overflow:hidden}
+    .rosterHd{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
+    .rosterHd b{font-size:12px;color:var(--muted)}.rosterHd .rChev{font-size:10px;color:var(--muted);transition:transform .2s}
+    .rosterBd{padding:10px 12px;display:none}
+    .rosterBd.open{display:block}
+    .rosterChips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+    .rosterChip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);font-size:12px;cursor:pointer;user-select:none;transition:all .15s}
+    .rosterChip:hover{border-color:var(--accent);background:rgba(122,167,255,.08)}
+    .rosterChip .rc-x{color:var(--bad);font-size:10px;margin-left:4px;cursor:pointer;opacity:.5}
+    .rosterChip .rc-x:hover{opacity:1}
+    .rosterAdd{display:flex;gap:6px;margin-top:8px}
+    .rosterAdd input{flex:1}
   </style>
 </head>
 <body>
@@ -233,7 +248,24 @@
     </div>
     <div class="card">
       <div class="hd"><h2>Players (<span id="playerCount">0</span>)</h2><div class="btnbar"><button class="btn small" id="collapseAll" type="button">Collapse all</button><button class="btn" id="addPlayer" type="button">+ Add player</button></div></div>
-      <div class="bd"><div id="jumpNav" class="jumpNav"></div><div id="players" class="players"></div>
+      <div class="bd">
+        <div class="rosterWrap" id="rosterWrap">
+          <div class="rosterHd" id="rosterToggle"><b>📋 Regular Players</b><span class="rChev" id="rosterChev">▼</span></div>
+          <div class="rosterBd" id="rosterBody">
+            <div class="note" style="margin:0 0 8px">Tap a name to add them to this game. Manage your regular player list here.</div>
+            <div class="rosterChips" id="rosterChips"></div>
+            <div class="rosterAdd">
+              <input id="rosterNewName" type="text" placeholder="New regular player name" autocapitalize="words"/>
+              <button class="btn small" id="rosterAddBtn" type="button">+ Save</button>
+            </div>
+            <div class="sep"></div>
+            <div class="btnbar">
+              <button class="btn small" id="rosterAddAll" type="button">Add all to game</button>
+              <button class="btn small danger" id="rosterClearAll" type="button">Clear roster</button>
+            </div>
+          </div>
+        </div>
+        <div id="jumpNav" class="jumpNav"></div><div id="players" class="players"></div>
         <div id="placementSection" class="hidden" style="margin-top:14px"><label style="font-weight:700;color:var(--warn);font-size:13px">🏆 Placements</label>
           <div class="placeSelect"><div class="placeItem gold"><div class="placeLabel">🥇 1st (50%)</div><select id="place1"><option value="">Select</option></select></div><div class="placeItem silver"><div class="placeLabel">🥈 2nd (30%)</div><select id="place2"><option value="">Select</option></select></div><div class="placeItem bronze"><div class="placeLabel">🥉 3rd (20%)</div><select id="place3"><option value="">Select</option></select></div></div>
         </div>
@@ -445,7 +477,12 @@
   }
   function renderHistory(){const h=loadHistory(),tb=$("historyBody"),em=$("historyEmpty");if(!h.length){tb.innerHTML="";em.style.display="block";return}em.style.display="none";tb.innerHTML=h.map(s=>{const d=new Date(s.date),ds=d.toLocaleDateString(undefined,{month:'short',day:'numeric'}),ts=d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});const dr=s.players.map(p=>{const cls=p.net>0?"good":(p.net<0?"bad":"muted");return`<tr class="sessionDetail" data-detail="${s.id}"><td></td><td>${esc(p.name)}</td><td class="num ${cls}">${p.net>=0?"+":""}${fmtUsd(p.net)}</td><td></td><td></td></tr>`}).join("");return`<tr class="sessionRow" data-sid="${s.id}"><td>${ds} <span class="muted" style="font-size:10px">${ts}</span></td><td>${esc(s.sessionName)}</td><td class="num"><span class="modeBadge ${(s.mode||"cash")==="tournament"?"tourney":"cash"}">${(s.mode||"cash")==="tournament"?"🏆":"♠"}</span></td><td class="num">${s.playerCount}</td><td><span class="deleteSession" data-delsession="${s.id}">✕</span></td></tr>${dr}`}).join("")}
   function renderStats(){const h=loadHistory();$("statsSessionCount").textContent=`${h.length} game${h.length!==1?"s":""}`;if(!h.length){$("statsBody").innerHTML="";$("statsEmpty").style.display="block";return}$("statsEmpty").style.display="none";const map={};for(const s of h)for(const p of s.players){const k=p.name.trim().toLowerCase();if(!map[k])map[k]={name:p.name.trim(),sessions:0,wins:0,totalNet:0};const m=map[k];m.sessions++;m.totalNet+=p.net;if(p.net>0)m.wins++;m.name=p.name.trim()}$("statsBody").innerHTML=Object.values(map).sort((a,b)=>b.totalNet-a.totalNet).map(s=>{const wp=s.sessions?Math.round(s.wins/s.sessions*100):0,avg=s.sessions?s.totalNet/s.sessions:0,nc=s.totalNet>0?"statPositive":(s.totalNet<0?"statNegative":"statNeutral");return`<tr><td>${esc(s.name)}</td><td class="num">${s.sessions}</td><td class="num">${s.wins}</td><td class="num">${wp}%</td><td class="num ${nc}">${s.totalNet>=0?"+":""}${fmtUsd(s.totalNet)}</td><td class="num">${avg>=0?"+":""}${fmtUsd(avg)}</td></tr>`}).join("")}
-  function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderHistory();renderStats();save()}
+  function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderHistory();renderStats();renderRosterChips();save();applyCurrSymbol()}
+
+  // Replace $ with custom currency symbol everywhere
+  function applyCurrSymbol(){
+    document.querySelectorAll('.tot .v, td, .note, .note b, .outblock pre, .payContent, .pSummaryInline, .infoBanner').forEach(el=>{
+      if(!el.innerHTML.includes('
 
   // ── Events ──
   $("sessionName").addEventListener("input",e=>{if(!state.locked){state.sessionName=e.target.value;save()}});
@@ -477,8 +514,240 @@
   $("exportHistory").addEventListener("click",()=>{const h=loadHistory();if(!h.length){toast("Nothing to export");return}const rows=[["Date","Session","Mode","Player","Buy-ins","Gross","RF","Final","Net"]];h.forEach(s=>{const d=new Date(s.date).toLocaleDateString();s.players.forEach(p=>{rows.push([d,s.sessionName,s.mode||"cash",p.name,p.buyins,p.gross?.toFixed(2),p.rfTax?.toFixed(2),p.final?.toFixed(2),p.net?.toFixed(2)])})});const csv=rows.map(r=>r.map(c=>`"${(c??"").toString().replace(/"/g,'""')}"`).join(",")).join("\n");const blob=new Blob([csv],{type:"text/csv"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`ipl-history-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);toast("Exported ✓")});
   let rulesCol=false;$("toggleRules").addEventListener("click",()=>{rulesCol=!rulesCol;$("rulesBody").style.display=rulesCol?"none":"block";$("toggleRules").textContent=rulesCol?"Expand":"Collapse"});
   $("toTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
-  $("saveRoster").addEventListener("click",()=>{const n=state.players.map(p=>p.name.trim()).filter(Boolean);localStorage.setItem(ROSTER_KEY,JSON.stringify(n));toast(`Saved (${n.length})`)});
-  $("loadRoster").addEventListener("click",()=>{let n=[];try{n=JSON.parse(localStorage.getItem(ROSTER_KEY)||"[]")}catch{}if(!n.length){toast("No roster");return}state.players=n.map(x=>makePlayer(x));renderAllFull();toast(`Loaded (${n.length})`)});
+  $("saveRoster").addEventListener("click",()=>{const n=state.players.map(p=>p.name.trim()).filter(Boolean);const existing=loadRoster();const merged=[...new Set([...existing,...n])];saveRoster(merged);renderRosterChips();toast(`Roster updated (${merged.length} players)`)});
+  $("loadRoster").addEventListener("click",()=>{const r=loadRoster();if(!r.length){toast("No roster saved");return}state.players=r.map(x=>makePlayer(x));renderAllFull();toast(`Loaded ${r.length} players`)});
+
+  // ── Roster management ──
+  const ROSTER_V2_KEY="poker_roster_v2";
+  function loadRoster(){try{return JSON.parse(localStorage.getItem(ROSTER_V2_KEY)||"[]")}catch{return[]}}
+  function saveRoster(r){try{localStorage.setItem(ROSTER_V2_KEY,JSON.stringify(r))}catch{}}
+  // Migrate from old roster key if exists
+  (function(){const old=localStorage.getItem(ROSTER_KEY);if(old&&!localStorage.getItem(ROSTER_V2_KEY)){try{const names=JSON.parse(old);if(Array.isArray(names)&&names.length)saveRoster(names)}catch{}}})();
+
+  let rosterOpen=false;
+  $("rosterToggle").addEventListener("click",()=>{rosterOpen=!rosterOpen;$("rosterBody").classList.toggle("open",rosterOpen);$("rosterChev").textContent=rosterOpen?"▲":"▼"});
+
+  function renderRosterChips(){
+    const roster=loadRoster();
+    const currentNames=state.players.map(p=>p.name.trim().toLowerCase());
+    $("rosterChips").innerHTML=roster.length?roster.map(n=>{
+      const inGame=currentNames.includes(n.trim().toLowerCase());
+      return`<div class="rosterChip ${inGame?'':'clickable'}" data-rname="${esc(n)}" style="${inGame?'opacity:.45;border-style:dashed':''}"><span>${esc(n)}</span>${inGame?'<span style="font-size:10px;color:var(--muted)">✓ in game</span>':'<span style="font-size:10px;color:var(--accent)">+ add</span>'}<span class="rc-x" data-rremove="${esc(n)}" title="Remove from roster">✕</span></div>`;
+    }).join(""):'<div class="note" style="margin:0">No regular players saved yet. Add names below or click "Save roster" to save current players.</div>';
+  }
+
+  // Add roster player to current game
+  document.addEventListener("click",e=>{
+    const chip=e.target.closest(".rosterChip");
+    if(!chip||state.locked)return;
+    // Handle remove button
+    const removeBtn=e.target.closest("[data-rremove]");
+    if(removeBtn){
+      const name=removeBtn.dataset.rremove;
+      const roster=loadRoster().filter(n=>n!==name);
+      saveRoster(roster);renderRosterChips();toast(`${name} removed from roster`);
+      return;
+    }
+    // Handle add to game
+    const name=chip.dataset.rname;
+    if(!name)return;
+    const currentNames=state.players.map(p=>p.name.trim().toLowerCase());
+    if(currentNames.includes(name.trim().toLowerCase())){toast(`${name} already in game`);return}
+    const p=makePlayer(name);
+    if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);
+    state.players.push(p);renderAllFull();renderRosterChips();toast(`${name} added to game`);
+  },true);
+
+  $("rosterAddBtn").addEventListener("click",()=>{
+    const input=$("rosterNewName");const name=input.value.trim();
+    if(!name){toast("Enter a name");return}
+    const roster=loadRoster();
+    if(roster.some(n=>n.toLowerCase()===name.toLowerCase())){toast(`${name} already in roster`);return}
+    roster.push(name);saveRoster(roster);
+    input.value="";renderRosterChips();toast(`${name} added to roster`);
+  });
+  $("rosterNewName").addEventListener("keydown",e=>{if(e.key==="Enter")$("rosterAddBtn").click()});
+
+  $("rosterAddAll").addEventListener("click",()=>{
+    if(state.locked)return;
+    const roster=loadRoster();const currentNames=state.players.map(p=>p.name.trim().toLowerCase());
+    let added=0;
+    roster.forEach(n=>{
+      if(!currentNames.includes(n.trim().toLowerCase())){
+        const p=makePlayer(n);
+        if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);
+        state.players.push(p);currentNames.push(n.trim().toLowerCase());added++;
+      }
+    });
+    if(added){renderAllFull();renderRosterChips();toast(`${added} player${added>1?"s":""} added`)}
+    else toast("All roster players already in game");
+  });
+
+  $("rosterClearAll").addEventListener("click",()=>{
+    if(!confirm("Clear entire roster? This removes all saved regular players."))return;
+    saveRoster([]);renderRosterChips();toast("Roster cleared");
+  });
+  $("copyAll").addEventListener("click",()=>{const l=[state.sessionName.trim()];if(mode==="tournament"){const t=calcTournament();t.results.forEach((r,i)=>{if(r)l.push(`${i+1}. ${r.name}: ${fmtUsd(r.payout)} (net ${r.net>=0?"+":""}${fmtUsd(r.net)})`)})}else state.players.forEach(p=>{l.push(p.name,outputBlockText(p),"")});navigator.clipboard?.writeText(l.join("\n")).then(()=>toast("Copied"))});
+  $("copyPayouts").addEventListener("click",()=>{const lines=buildPayoutLines().map(l=>`${l.label}: ${fmtUsd(l.amount)}${paidMap[l.key]?" ✓":""}`);navigator.clipboard?.writeText(lines.join("\n")).then(()=>toast("Copied"))});
+
+  document.addEventListener("input",e=>{if(state.locked)return;const t=e.target,kind=t?.getAttribute?.("data-kind"),pid=t?.getAttribute?.("data-p");
+    if(kind==="tpack"){const color=t.getAttribute("data-c");if(color){state.tourneyPack[color]=Math.max(0,Number(t.value)||0);save();renderTourneyChipPack()}return}
+    if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;
+    if(kind==="name"){p.name=t.value;renderAuditAndSummary();renderJumpNav();save();return}
+    const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");
+    if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}}
+    if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary();if(onlineSessionCode)setAdminOverride(p.name.trim())}
+  },{passive:true});
+
+  document.addEventListener("click",e=>{const t=e.target.closest(".sbtn");if(!t||state.locked)return;const step=Number(t.dataset.step)||0,kind=t.dataset.kind,pid=t.dataset.p,color=t.dataset.c,bid=t.dataset.b;
+    if(kind==="tpack"&&color){state.tourneyPack[color]=Math.max(0,(state.tourneyPack[color]||0)+step);t.parentElement.querySelector("input").value=state.tourneyPack[color];save();renderTourneyChipPack();return}
+    const p=state.players.find(x=>x.id===pid);if(!p)return;
+    if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary()}}
+    if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary();if(onlineSessionCode)setAdminOverride(p.name.trim())}
+  },true);
+
+  document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const act=t.dataset.act,pid=t.dataset.p;
+    if(act==="togglePlayer"){if(collapsedPlayers.has(pid))collapsedPlayers.delete(pid);else collapsedPlayers.add(pid);const el=document.getElementById("player_"+pid);if(el){el.classList.toggle("is-collapsed");el.querySelector(".pbd")?.classList.toggle("collapsed")}return}
+    if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();toast(`${p.name} removed`)}}
+    if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){p.buyins.push({id:uid(),counts:mode==="tournament"?clone(state.tourneyPack):{black:0,purple:0,yellow:0,pink:0,orange:0}});renderAllFull();syncBuyinsToFirebase();toast("Rebuy added")}}
+    if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();syncBuyinsToFirebase();toast("Rebuy removed")}}
+    if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull();syncBuyinsToFirebase()}}
+  },true);
+
+  document.addEventListener("click",e=>{const t=e.target.closest("[data-jump]");if(t){const pid=t.dataset.jump,el=document.getElementById("player_"+pid);if(el){collapsedPlayers.delete(pid);el.classList.remove("is-collapsed");el.querySelector(".pbd")?.classList.remove("collapsed");el.scrollIntoView({behavior:"smooth"})}}},true);
+  document.addEventListener("click",e=>{const row=e.target.closest(".sessionRow");if(row&&!e.target.closest(".deleteSession"))document.querySelectorAll(`.sessionDetail[data-detail="${row.dataset.sid}"]`).forEach(r=>r.classList.toggle("open"))},true);
+  document.addEventListener("click",e=>{const t=e.target.closest("[data-delsession]");if(t&&confirm("Delete?")){saveHistory(loadHistory().filter(s=>s.id!==t.dataset.delsession));renderHistory();renderStats();toast("Deleted")}},true);
+
+  // ── Pull to refresh ──
+  (function(){const ind=$("pullIndicator"),pt=ind.querySelector(".pullText"),pi=ind.querySelector(".pullIcon");let sy=0,pulling=false,ready=false;const TH=80,MX=120;
+    document.addEventListener("touchstart",e=>{if(window.scrollY===0){sy=e.touches[0].clientY;pulling=false;ready=false}},{passive:true});
+    document.addEventListener("touchmove",e=>{if(!sy)return;const dy=e.touches[0].clientY-sy;if(dy>10&&window.scrollY===0){pulling=true;const d=Math.min(dy*.5,MX);ind.style.height=d+"px";ind.classList.add("pulling");ind.classList.remove("refreshing");if(d>=TH*.5){ready=d>=TH*.8;ind.classList.toggle("ready",ready);pt.textContent=ready?"Release to refresh":"Pull to refresh";pi.textContent=ready?"↑":"↓"}}else if(dy<0){sy=0;pulling=false;ind.style.height="0";ind.classList.remove("pulling","ready")}},{passive:true});
+    document.addEventListener("touchend",()=>{if(pulling&&ready){ind.classList.remove("pulling","ready");ind.classList.add("refreshing");ind.style.height="40px";pt.textContent="Refreshing…";pi.textContent="⟳";setTimeout(()=>location.reload(),400)}else{ind.style.height="0";ind.classList.remove("pulling","ready")}sy=0;pulling=false;ready=false},{passive:true});
+  })();
+
+  // ── Focus/blur for all inputs ──
+  document.addEventListener("focus",e=>{const t=e.target;if(t&&(t.tagName==="INPUT")&&t.type!=="checkbox")t.select()},true);
+  document.addEventListener("blur",e=>{const t=e.target;if(t&&t.type==="number"&&(t.value===""||t.value===null))t.value="0"},true);
+
+  // ── Init ──
+  state=sanitize(state);
+  // Check for active session to auto-resume
+  const lastCode=localStorage.getItem(ACTIVE_KEY);
+  if(lastCode){$("resumeCode").value=lastCode}
+  setMode("cash");
+  renderAllFull();
+})();
+</script>
+</body>
+</html>
+))return;
+      el.innerHTML=el.innerHTML.replace(/\$/g,'<span class="cs"></span>');
+    });
+  }
+
+  // ── Events ──
+  $("sessionName").addEventListener("input",e=>{if(!state.locked){state.sessionName=e.target.value;save()}});
+  $("buyinUsd").addEventListener("input",e=>{if(!state.locked){state.buyinUsd=Number(e.target.value)||DEFAULTS.buyinUsd;renderAllFull()}});
+  $("taxRate").addEventListener("input",e=>{if(!state.locked){state.taxRate=Number(e.target.value)||0;renderAllFull()}});
+  $("bankSelect").addEventListener("change",e=>{if(!state.locked){state.bankId=e.target.value;save();renderAllFull()}});
+  for(const c of COLORS)$("v_"+c).addEventListener("input",e=>{if(!state.locked){state.chipValues[c]=Number(e.target.value)||DEFAULTS.chipValues[c];renderAllFull()}});
+  ["split1","split2","split3"].forEach(id=>$(id).addEventListener("input",e=>{if(!state.locked){state[id]=Number(e.target.value)||0;renderAllFull()}}));
+  [1,2,3].forEach(i=>$("place"+i).addEventListener("change",e=>{state["place"+i]=e.target.value;save();renderAllFull()}));
+  $("copyChipPack").addEventListener("click",()=>{if(state.locked)return;const pack=clone(state.tourneyPack);for(const p of state.players)for(const b of p.buyins)for(const c of COLORS)b.counts[c]=pack[c];save();renderAllFull();toast(`Copied to ${state.players.length} players ✓`)});
+  let allCollapsed=false;
+  $("collapseAll").addEventListener("click",()=>{
+    allCollapsed=!allCollapsed;
+    if(allCollapsed){state.players.forEach(p=>collapsedPlayers.add(p.id));$("collapseAll").textContent="Expand all"}
+    else{collapsedPlayers.clear();$("collapseAll").textContent="Collapse all"}
+    document.querySelectorAll(".player").forEach(el=>{const pid=el.dataset.p;el.classList.toggle("is-collapsed",allCollapsed);el.querySelector(".pbd")?.classList.toggle("collapsed",allCollapsed)});
+  });
+  $("addPlayer").addEventListener("click",()=>{if(!state.locked){const p=makePlayer(`Player ${state.players.length+1}`);if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);state.players.push(p);renderAllFull();toast("Added")}});
+  $("resetAll").addEventListener("click",()=>{if(!state.locked&&confirm("Reset session?")){localStorage.removeItem(KEY);state=defaultState();collapsedPlayers.clear();paidMap={};savePaid();renderAllFull();toast("Reset")}});
+  $("lockSession").addEventListener("click",()=>{const was=!state.locked;state.locked=!state.locked;save();if(state.locked&&was){syncResultsToFirebase();if(archiveCurrentSession()){toast("Locked & archived 🔒");renderAllFull();return}}if(!state.locked)allSubmittedSounded=false;renderAllFull();toast(state.locked?"Locked 🔒":"Unlocked 🔓")});
+  $("archiveSession").addEventListener("click",()=>{if(archiveCurrentSession()){renderHistory();renderStats();toast("Archived ✓")}});
+  $("clearHistory").addEventListener("click",()=>{if(confirm("Delete ALL history?")){saveHistory([]);renderHistory();renderStats();toast("Cleared")}});
+  $("startOnline").addEventListener("click",startOnlineSession);
+  $("stopOnline").addEventListener("click",()=>{if(confirm("End online?"))stopOnlineSession()});
+  $("resumeBtn").addEventListener("click",()=>resumeSession($("resumeCode").value));
+  $("resumeCode").addEventListener("keydown",e=>{if(e.key==="Enter")$("resumeBtn").click()});
+  $("copyCode").addEventListener("click",()=>{if(onlineSessionCode)navigator.clipboard?.writeText(onlineSessionCode).then(()=>toast("Code copied"))});
+  $("copyLink").addEventListener("click",()=>{if(onlineSessionCode)navigator.clipboard?.writeText(getPlayerPageUrl(onlineSessionCode)).then(()=>toast("Link copied"))});
+  $("exportHistory").addEventListener("click",()=>{const h=loadHistory();if(!h.length){toast("Nothing to export");return}const rows=[["Date","Session","Mode","Player","Buy-ins","Gross","RF","Final","Net"]];h.forEach(s=>{const d=new Date(s.date).toLocaleDateString();s.players.forEach(p=>{rows.push([d,s.sessionName,s.mode||"cash",p.name,p.buyins,p.gross?.toFixed(2),p.rfTax?.toFixed(2),p.final?.toFixed(2),p.net?.toFixed(2)])})});const csv=rows.map(r=>r.map(c=>`"${(c??"").toString().replace(/"/g,'""')}"`).join(",")).join("\n");const blob=new Blob([csv],{type:"text/csv"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`ipl-history-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);toast("Exported ✓")});
+  let rulesCol=false;$("toggleRules").addEventListener("click",()=>{rulesCol=!rulesCol;$("rulesBody").style.display=rulesCol?"none":"block";$("toggleRules").textContent=rulesCol?"Expand":"Collapse"});
+  $("toTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+  $("saveRoster").addEventListener("click",()=>{const n=state.players.map(p=>p.name.trim()).filter(Boolean);const existing=loadRoster();const merged=[...new Set([...existing,...n])];saveRoster(merged);renderRosterChips();toast(`Roster updated (${merged.length} players)`)});
+  $("loadRoster").addEventListener("click",()=>{const r=loadRoster();if(!r.length){toast("No roster saved");return}state.players=r.map(x=>makePlayer(x));renderAllFull();toast(`Loaded ${r.length} players`)});
+
+  // ── Roster management ──
+  const ROSTER_V2_KEY="poker_roster_v2";
+  function loadRoster(){try{return JSON.parse(localStorage.getItem(ROSTER_V2_KEY)||"[]")}catch{return[]}}
+  function saveRoster(r){try{localStorage.setItem(ROSTER_V2_KEY,JSON.stringify(r))}catch{}}
+  // Migrate from old roster key if exists
+  (function(){const old=localStorage.getItem(ROSTER_KEY);if(old&&!localStorage.getItem(ROSTER_V2_KEY)){try{const names=JSON.parse(old);if(Array.isArray(names)&&names.length)saveRoster(names)}catch{}}})();
+
+  let rosterOpen=false;
+  $("rosterToggle").addEventListener("click",()=>{rosterOpen=!rosterOpen;$("rosterBody").classList.toggle("open",rosterOpen);$("rosterChev").textContent=rosterOpen?"▲":"▼"});
+
+  function renderRosterChips(){
+    const roster=loadRoster();
+    const currentNames=state.players.map(p=>p.name.trim().toLowerCase());
+    $("rosterChips").innerHTML=roster.length?roster.map(n=>{
+      const inGame=currentNames.includes(n.trim().toLowerCase());
+      return`<div class="rosterChip ${inGame?'':'clickable'}" data-rname="${esc(n)}" style="${inGame?'opacity:.45;border-style:dashed':''}"><span>${esc(n)}</span>${inGame?'<span style="font-size:10px;color:var(--muted)">✓ in game</span>':'<span style="font-size:10px;color:var(--accent)">+ add</span>'}<span class="rc-x" data-rremove="${esc(n)}" title="Remove from roster">✕</span></div>`;
+    }).join(""):'<div class="note" style="margin:0">No regular players saved yet. Add names below or click "Save roster" to save current players.</div>';
+  }
+
+  // Add roster player to current game
+  document.addEventListener("click",e=>{
+    const chip=e.target.closest(".rosterChip");
+    if(!chip||state.locked)return;
+    // Handle remove button
+    const removeBtn=e.target.closest("[data-rremove]");
+    if(removeBtn){
+      const name=removeBtn.dataset.rremove;
+      const roster=loadRoster().filter(n=>n!==name);
+      saveRoster(roster);renderRosterChips();toast(`${name} removed from roster`);
+      return;
+    }
+    // Handle add to game
+    const name=chip.dataset.rname;
+    if(!name)return;
+    const currentNames=state.players.map(p=>p.name.trim().toLowerCase());
+    if(currentNames.includes(name.trim().toLowerCase())){toast(`${name} already in game`);return}
+    const p=makePlayer(name);
+    if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);
+    state.players.push(p);renderAllFull();renderRosterChips();toast(`${name} added to game`);
+  },true);
+
+  $("rosterAddBtn").addEventListener("click",()=>{
+    const input=$("rosterNewName");const name=input.value.trim();
+    if(!name){toast("Enter a name");return}
+    const roster=loadRoster();
+    if(roster.some(n=>n.toLowerCase()===name.toLowerCase())){toast(`${name} already in roster`);return}
+    roster.push(name);saveRoster(roster);
+    input.value="";renderRosterChips();toast(`${name} added to roster`);
+  });
+  $("rosterNewName").addEventListener("keydown",e=>{if(e.key==="Enter")$("rosterAddBtn").click()});
+
+  $("rosterAddAll").addEventListener("click",()=>{
+    if(state.locked)return;
+    const roster=loadRoster();const currentNames=state.players.map(p=>p.name.trim().toLowerCase());
+    let added=0;
+    roster.forEach(n=>{
+      if(!currentNames.includes(n.trim().toLowerCase())){
+        const p=makePlayer(n);
+        if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);
+        state.players.push(p);currentNames.push(n.trim().toLowerCase());added++;
+      }
+    });
+    if(added){renderAllFull();renderRosterChips();toast(`${added} player${added>1?"s":""} added`)}
+    else toast("All roster players already in game");
+  });
+
+  $("rosterClearAll").addEventListener("click",()=>{
+    if(!confirm("Clear entire roster? This removes all saved regular players."))return;
+    saveRoster([]);renderRosterChips();toast("Roster cleared");
+  });
   $("copyAll").addEventListener("click",()=>{const l=[state.sessionName.trim()];if(mode==="tournament"){const t=calcTournament();t.results.forEach((r,i)=>{if(r)l.push(`${i+1}. ${r.name}: ${fmtUsd(r.payout)} (net ${r.net>=0?"+":""}${fmtUsd(r.net)})`)})}else state.players.forEach(p=>{l.push(p.name,outputBlockText(p),"")});navigator.clipboard?.writeText(l.join("\n")).then(()=>toast("Copied"))});
   $("copyPayouts").addEventListener("click",()=>{const lines=buildPayoutLines().map(l=>`${l.label}: ${fmtUsd(l.amount)}${paidMap[l.key]?" ✓":""}`);navigator.clipboard?.writeText(lines.join("\n")).then(()=>toast("Copied"))});
 
