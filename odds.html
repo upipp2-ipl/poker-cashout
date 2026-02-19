@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
+  <title>IPL – Poker Odds Calculator</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="theme-color" content="#1a1f2e"/>
+  <style>
+    [data-theme="dark"]{--bg:#1a1f2e;--bg2:#242938;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);--card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--hover:rgba(255,255,255,.04);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;--sh:0 4px 20px rgba(0,0,0,.25);--card-bg:#fff;--card-text:#1a1f2e}
+    [data-theme="light"]{--bg:#f0f2f7;--bg2:#fff;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);--card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--hover:rgba(0,0,0,.03);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;--sh:0 2px 12px rgba(0,0,0,.06);--card-bg:#fff;--card-text:#1a1f2e}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);min-height:100vh;overscroll-behavior-y:none;padding-bottom:40px}
+    .iplHeader{text-align:center;padding:20px 14px 10px;padding-top:calc(20px + env(safe-area-inset-top))}
+    .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:28px;font-weight:800;letter-spacing:1px}
+    .suit{font-size:20px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
+    .iplSub{color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.5px}
+    .wrap{max-width:600px;margin:0 auto;padding:0 14px 20px}
+    .themeToggle{position:fixed;top:12px;right:12px;z-index:100;width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:var(--sh)}
+    .backLink{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:12px;text-decoration:none;margin-bottom:10px;opacity:.7}
+    .backLink:hover{opacity:1}
+    .panel{border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh);overflow:hidden;margin-bottom:14px}
+    .panelHd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+    .panelHd h2{margin:0;font-size:14px;font-weight:700}.panelBd{padding:14px}
+    .note{color:var(--muted);font-size:11px;line-height:1.4;margin-top:6px}
+    .sep{height:1px;background:var(--line);margin:14px 0}
+    .muted{color:var(--muted)}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);cursor:pointer;user-select:none;touch-action:manipulation;font-size:14px;font-weight:600;transition:all .15s}
+    .btn:hover{background:var(--hover)}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .btn.small{padding:6px 10px;font-size:11px}.btn.danger{color:var(--bad)}
+    .btnbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+    label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    .toastBox{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+    .toast{padding:9px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--card-border);color:var(--text);font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(-8px) scale(.96);animation:toastIn .25s ease forwards;pointer-events:auto}
+    .toast.out{animation:toastOut .2s ease forwards}
+    @keyframes toastIn{to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.96)}}
+
+    /* ── Playing Cards ── */
+    .cardSlots{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+    .pcard{width:60px;height:84px;border-radius:8px;border:2px solid var(--card-border);background:var(--card-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;cursor:pointer;user-select:none;transition:all .2s;position:relative;overflow:hidden}
+    .pcard.empty{border-style:dashed;background:var(--input-bg);color:var(--muted);font-size:24px}
+    .pcard.empty:hover{border-color:var(--accent);background:rgba(122,167,255,.06)}
+    .pcard.filled{box-shadow:0 2px 10px rgba(0,0,0,.2)}
+    .pcard.filled:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.3)}
+    .pcard .rank{font-size:18px;line-height:1;color:var(--card-text)}.pcard .suitChar{font-size:22px;line-height:1}
+    .pcard.red .rank,.pcard.red .suitChar{color:#dc2626}
+    .pcard.black .rank,.pcard.black .suitChar{color:#1a1f2e}
+    .pcard .removeX{position:absolute;top:2px;right:4px;font-size:10px;color:var(--muted);opacity:0;transition:opacity .15s}
+    .pcard:hover .removeX{opacity:.7}
+    @keyframes dealIn{from{opacity:0;transform:translateY(-30px) rotateY(90deg)}to{opacity:1;transform:translateY(0) rotateY(0)}}
+    .pcard.deal{animation:dealIn .35s ease-out}
+
+    /* ── Card Picker ── */
+    .picker{display:none;margin-top:12px;padding:12px;border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg)}
+    .picker.open{display:block}
+    .pickerLabel{font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center;font-weight:600}
+    .rankRow{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
+    .rankBtn{width:36px;height:36px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);color:var(--text);font-weight:700;font-size:14px;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center}
+    .rankBtn:hover{border-color:var(--accent);background:rgba(122,167,255,.1)}
+    .rankBtn.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .suitRow{display:flex;gap:8px;justify-content:center;margin-top:8px}
+    .suitBtn{width:48px;height:48px;border-radius:10px;border:2px solid var(--card-border);background:var(--hover);font-size:24px;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center}
+    .suitBtn:hover{border-color:var(--accent)}.suitBtn.red{color:#dc2626}.suitBtn.blk{color:#222}
+    .suitBtn.selected{border-color:var(--accent);background:rgba(122,167,255,.12);transform:scale(1.1)}
+    .suitBtn.used{opacity:.25;cursor:not-allowed;pointer-events:none}
+
+    /* ── Opponents ── */
+    .oppRow{display:flex;align-items:center;gap:12px;justify-content:center;margin:10px 0}
+    .oppBtn{width:40px;height:40px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .oppBtn:hover{background:var(--hover)}.oppBtn:active{background:rgba(122,167,255,.15)}
+    .oppNum{font-size:32px;font-weight:800;min-width:50px;text-align:center}
+
+    /* ── Results ── */
+    .resultsWrap{text-align:center}
+    .bigPct{font-size:48px;font-weight:900;line-height:1}
+    .bigLabel{font-size:12px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+    .barWrap{height:28px;border-radius:14px;overflow:hidden;display:flex;margin:16px 0;background:var(--input-bg);border:1px solid var(--card-border)}
+    .barWin{background:var(--good);transition:width .6s ease}.barTie{background:var(--warn);transition:width .6s ease}.barLose{background:var(--bad);transition:width .6s ease}
+    .statRow{display:flex;justify-content:space-around;gap:10px;margin:14px 0}
+    .statBox{text-align:center;flex:1}.statBox .sv{font-size:22px;font-weight:800}.statBox .sl{font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+
+    /* ── Hand Strength ── */
+    .handBadge{display:inline-block;padding:6px 14px;border-radius:8px;font-size:14px;font-weight:700;margin:8px 0}
+    .handBadge.strong{background:rgba(43,213,118,.15);color:var(--good);border:1px solid rgba(43,213,118,.3)}
+    .handBadge.medium{background:rgba(245,158,11,.12);color:var(--warn);border:1px solid rgba(245,158,11,.25)}
+    .handBadge.weak{background:rgba(255,92,122,.12);color:var(--bad);border:1px solid rgba(255,92,122,.25)}
+
+    /* ── Outs ── */
+    .outsGrid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0}
+    .outCard{width:40px;height:56px;border-radius:6px;border:1px solid var(--card-border);background:var(--card-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+    .outCard.red{color:#dc2626}.outCard.black{color:#222}
+
+    /* ── Advice ── */
+    .adviceBox{padding:14px;border-radius:12px;border:1px solid var(--card-border);background:var(--input-bg);text-align:center;margin-top:12px}
+    .adviceBox .emoji{font-size:28px;margin-bottom:6px}
+    .adviceBox .advText{font-size:13px;font-weight:600}
+    .adviceBox .advDetail{font-size:11px;color:var(--muted);margin-top:4px}
+
+    .disclaimer{text-align:center;padding:20px 14px;color:var(--muted);font-size:11px;line-height:1.5;opacity:.5}
+  </style>
+</head>
+<body>
+<div class="toastBox" id="toastBox"></div>
+<button class="themeToggle" id="themeToggle" type="button">🌙</button>
+
+<div class="iplHeader"><div class="iplLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div><div class="iplSub">Innovation Poker League</div></div>
+
+<div class="wrap">
+  <a href="index.html" class="backLink">← Back to Admin</a>
+
+  <!-- Your Hand -->
+  <div class="panel">
+    <div class="panelHd"><h2>🃏 Your Hand</h2><button class="btn small danger" id="clearAll" type="button">Clear all</button></div>
+    <div class="panelBd">
+      <label>Your 2 hole cards</label>
+      <div class="cardSlots" id="holeCards">
+        <div class="pcard empty" data-slot="hole-0" data-idx="0">+</div>
+        <div class="pcard empty" data-slot="hole-1" data-idx="1">+</div>
+      </div>
+      <div class="sep"></div>
+      <label>Community cards (flop / turn / river)</label>
+      <div class="cardSlots" id="communityCards">
+        <div class="pcard empty" data-slot="comm-0" data-idx="0">+</div>
+        <div class="pcard empty" data-slot="comm-1" data-idx="1">+</div>
+        <div class="pcard empty" data-slot="comm-2" data-idx="2">+</div>
+        <div class="pcard empty" data-slot="comm-3" data-idx="3">+</div>
+        <div class="pcard empty" data-slot="comm-4" data-idx="4">+</div>
+      </div>
+      <div id="picker" class="picker"></div>
+    </div>
+  </div>
+
+  <!-- Opponents -->
+  <div class="panel">
+    <div class="panelHd"><h2>👥 Opponents</h2></div>
+    <div class="panelBd">
+      <div class="oppRow">
+        <button class="oppBtn" id="oppMinus" type="button">−</button>
+        <div class="oppNum" id="oppNum">3</div>
+        <button class="oppBtn" id="oppPlus" type="button">+</button>
+      </div>
+      <div class="note" style="text-align:center">Number of other players in the hand</div>
+    </div>
+  </div>
+
+  <!-- Calculate -->
+  <div class="btnbar" style="margin-bottom:14px">
+    <button class="btn primary" id="calcBtn" type="button" style="width:100%;max-width:300px;padding:14px;font-size:16px">🎲 Calculate Odds</button>
+  </div>
+
+  <!-- Results -->
+  <div class="panel" id="resultsPanel" style="display:none">
+    <div class="panelHd"><h2>📊 Results</h2><span class="muted" id="simCount" style="font-size:11px"></span></div>
+    <div class="panelBd">
+      <div class="resultsWrap">
+        <div class="bigPct" id="winPct">-</div>
+        <div class="bigLabel">Win Probability</div>
+
+        <div class="barWrap">
+          <div class="barWin" id="barWin" style="width:0"></div>
+          <div class="barTie" id="barTie" style="width:0"></div>
+          <div class="barLose" id="barLose" style="width:0"></div>
+        </div>
+
+        <div class="statRow">
+          <div class="statBox"><div class="sv good" id="sWin">0%</div><div class="sl">Win</div></div>
+          <div class="statBox"><div class="sv warn" id="sTie">0%</div><div class="sl">Tie</div></div>
+          <div class="statBox"><div class="sv bad" id="sLose">0%</div><div class="sl">Lose</div></div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div style="text-align:center">
+        <label style="text-align:center">Current Hand Strength</label>
+        <div class="handBadge" id="handBadge">-</div>
+      </div>
+
+      <div class="sep"></div>
+
+      <label style="text-align:center">Outs (cards that improve your hand)</label>
+      <div class="outsGrid" id="outsGrid"></div>
+      <div class="note" style="text-align:center" id="outsNote"></div>
+
+      <div class="adviceBox" id="adviceBox">
+        <div class="emoji" id="advEmoji">🤔</div>
+        <div class="advText" id="advText">-</div>
+        <div class="advDetail" id="advDetail">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">🃏 For entertainment only. Poker involves skill, psychology, and luck.<br>These odds assume random opponent hands. Real odds vary based on betting patterns, position, and reads.<br>Don't blame us if you go all-in with 7-2 offsuit. ♠♥♦♣</div>
+</div>
+
+<script>
+(()=>{
+  const THEME_KEY="poker_theme";
+  let theme=localStorage.getItem(THEME_KEY)||"dark";
+  function applyTheme(){document.documentElement.setAttribute("data-theme",theme);document.getElementById("themeToggle").textContent=theme==="dark"?"☀️":"🌙";localStorage.setItem(THEME_KEY,theme)}
+  applyTheme();document.getElementById("themeToggle").addEventListener("click",()=>{theme=theme==="dark"?"light":"dark";applyTheme()});
+  function toast(msg){const box=document.getElementById("toastBox"),el=document.createElement("div");el.className="toast";el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},2200)}
+
+  const RANKS=["2","3","4","5","6","7","8","9","T","J","Q","K","A"];
+  const SUITS=["s","h","d","c"];
+  const SUIT_SYM={s:"♠",h:"♥",d:"♦",c:"♣"};
+  const SUIT_COLOR={s:"black",h:"red",d:"red",c:"black"};
+  const RANK_VAL={};RANKS.forEach((r,i)=>RANK_VAL[r]=i+2);
+
+  let holeCards=[null,null];
+  let commCards=[null,null,null,null,null];
+  let opponents=3;
+  let pickerTarget=null; // {type:'hole'|'comm', idx:number}
+  let pickerRank=null;
+
+  function usedCards(){return[...holeCards,...commCards].filter(Boolean)}
+
+  function renderCard(el,card){
+    if(!card){el.className="pcard empty";el.innerHTML="+";return}
+    const col=SUIT_COLOR[card[1]];
+    el.className=`pcard filled ${col} deal`;
+    el.innerHTML=`<span class="rank">${card[0]==="T"?"10":card[0]}</span><span class="suitChar">${SUIT_SYM[card[1]]}</span><span class="removeX">✕</span>`;
+  }
+
+  function renderAllCards(){
+    document.querySelectorAll("#holeCards .pcard").forEach((el,i)=>renderCard(el,holeCards[i]));
+    document.querySelectorAll("#communityCards .pcard").forEach((el,i)=>renderCard(el,commCards[i]));
+  }
+
+  function openPicker(type,idx){
+    pickerTarget={type,idx};pickerRank=null;
+    const picker=document.getElementById("picker");
+    const used=usedCards();
+    picker.innerHTML=`
+      <div class="pickerLabel">Select a card for ${type==="hole"?"Hand":"Community"} slot ${idx+1}</div>
+      <div class="rankRow">${RANKS.map(r=>`<div class="rankBtn" data-rank="${r}">${r==="T"?"10":r}</div>`).join("")}</div>
+      <div class="suitRow" id="suitPicker" style="display:none"></div>
+    `;
+    picker.classList.add("open");
+    picker.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+
+  function showSuitPicker(){
+    const used=usedCards();
+    const sp=document.getElementById("suitPicker");
+    sp.style.display="flex";
+    sp.innerHTML=SUITS.map(s=>{
+      const cardId=pickerRank+s;
+      const isUsed=used.includes(cardId);
+      return`<div class="suitBtn ${SUIT_COLOR[s]} ${isUsed?"used":""}" data-suit="${s}">${SUIT_SYM[s]}</div>`;
+    }).join("");
+  }
+
+  function selectCard(rank,suit){
+    const card=rank+suit;
+    if(pickerTarget.type==="hole")holeCards[pickerTarget.idx]=card;
+    else commCards[pickerTarget.idx]=card;
+    renderAllCards();
+    document.getElementById("picker").classList.remove("open");
+    pickerTarget=null;pickerRank=null;
+  }
+
+  // Card slot clicks
+  document.addEventListener("click",e=>{
+    const slot=e.target.closest(".pcard");
+    if(!slot)return;
+    const slotId=slot.dataset.slot;
+    if(!slotId)return;
+    const[type,idx]=slotId.split("-");
+    const arr=type==="hole"?holeCards:commCards;
+    if(arr[idx]){
+      // Remove card
+      arr[idx]=null;renderAllCards();
+      document.getElementById("picker").classList.remove("open");
+      return;
+    }
+    // Enforce order for community cards
+    if(type==="comm"&&Number(idx)>0&&!arr[Number(idx)-1]){toast("Fill cards left to right");return}
+    openPicker(type,Number(idx));
+  });
+
+  // Rank clicks
+  document.addEventListener("click",e=>{
+    const rb=e.target.closest(".rankBtn");
+    if(!rb)return;
+    document.querySelectorAll(".rankBtn").forEach(b=>b.classList.remove("selected"));
+    rb.classList.add("selected");
+    pickerRank=rb.dataset.rank;
+    showSuitPicker();
+  });
+
+  // Suit clicks
+  document.addEventListener("click",e=>{
+    const sb=e.target.closest(".suitBtn");
+    if(!sb||sb.classList.contains("used"))return;
+    selectCard(pickerRank,sb.dataset.suit);
+  });
+
+  // Opponents
+  document.getElementById("oppMinus").addEventListener("click",()=>{if(opponents>1){opponents--;document.getElementById("oppNum").textContent=opponents}});
+  document.getElementById("oppPlus").addEventListener("click",()=>{if(opponents<9){opponents++;document.getElementById("oppNum").textContent=opponents}});
+
+  // Clear all
+  document.getElementById("clearAll").addEventListener("click",()=>{holeCards=[null,null];commCards=[null,null,null,null,null];renderAllCards();document.getElementById("resultsPanel").style.display="none";document.getElementById("picker").classList.remove("open")});
+
+  // ── Poker Hand Evaluation ──
+  function handRank(cards){
+    // Returns [rank, ...kickers] where rank: 0=high,1=pair,2=2pair,3=trips,4=straight,5=flush,6=full,7=quads,8=stflush
+    const vals=cards.map(c=>RANK_VAL[c[0]]).sort((a,b)=>b-a);
+    const suits=cards.map(c=>c[1]);
+    const counts={};vals.forEach(v=>{counts[v]=(counts[v]||0)+1});
+    const groups=Object.entries(counts).map(([v,c])=>({v:Number(v),c})).sort((a,b)=>b.c-a.c||b.v-a.v);
+
+    // Flush
+    const suitCounts={};suits.forEach(s=>{suitCounts[s]=(suitCounts[s]||0)+1});
+    const flushSuit=Object.entries(suitCounts).find(([,c])=>c>=5)?.[0];
+    let flushCards=null;
+    if(flushSuit)flushCards=cards.filter(c=>c[1]===flushSuit).map(c=>RANK_VAL[c[0]]).sort((a,b)=>b-a).slice(0,5);
+
+    // Straight
+    function findStraight(vs){
+      const unique=[...new Set(vs)].sort((a,b)=>b-a);
+      if(unique.includes(14))unique.push(1); // Ace low
+      for(let i=0;i<=unique.length-5;i++){
+        if(unique[i]-unique[i+4]===4){
+          let ok=true;for(let j=1;j<5;j++)if(unique[i]-unique[i+j]!==j){ok=false;break}
+          if(ok)return unique[i];
+        }
+      }
+      return 0;
+    }
+    const straightHigh=findStraight(vals);
+
+    // Straight flush
+    if(flushCards){
+      const sfHigh=findStraight(flushCards);
+      if(sfHigh)return[8,sfHigh];
+    }
+
+    // Quads
+    if(groups[0].c===4)return[7,groups[0].v,groups[1].v];
+    // Full house
+    if(groups[0].c===3&&groups[1].c>=2)return[6,groups[0].v,groups[1].v];
+    // Flush
+    if(flushCards)return[5,...flushCards];
+    // Straight
+    if(straightHigh)return[4,straightHigh];
+    // Trips
+    if(groups[0].c===3)return[3,groups[0].v,groups[1].v,groups[2].v];
+    // Two pair
+    if(groups[0].c===2&&groups[1].c===2)return[2,groups[0].v,groups[1].v,groups[2].v];
+    // Pair
+    if(groups[0].c===2)return[1,groups[0].v,groups[1].v,groups[2].v,groups[3].v];
+    // High card
+    return[0,...vals.slice(0,5)];
+  }
+
+  function bestHand(holeCards,community){
+    const all=[...holeCards,...community];
+    let best=null;
+    // All 5-card combos from 7 cards
+    for(let i=0;i<all.length;i++)for(let j=i+1;j<all.length;j++){
+      const five=all.filter((_,k)=>k!==i&&k!==j);
+      if(five.length===5){
+        const r=handRank(five);
+        if(!best||compareHands(r,best)>0)best=r;
+      }
+    }
+    return best;
+  }
+
+  function compareHands(a,b){
+    for(let i=0;i<Math.max(a.length,b.length);i++){
+      if((a[i]||0)>(b[i]||0))return 1;
+      if((a[i]||0)<(b[i]||0))return-1;
+    }
+    return 0;
+  }
+
+  const HAND_NAMES=["High Card","Pair","Two Pair","Three of a Kind","Straight","Flush","Full House","Four of a Kind","Straight Flush"];
+
+  function getHandStrength(rank){
+    if(rank>=7)return"strong";if(rank>=4)return"strong";if(rank>=2)return"medium";return"weak";
+  }
+
+  // ── Monte Carlo Simulation ──
+  function simulate(hole,comm,numOpp,sims=15000){
+    const deck=[];
+    for(const r of RANKS)for(const s of SUITS)deck.push(r+s);
+    const used=new Set([...hole,...comm]);
+    const remaining=deck.filter(c=>!used.has(c));
+    let wins=0,ties=0,losses=0;
+
+    for(let sim=0;sim<sims;sim++){
+      // Shuffle remaining
+      const shuffled=[...remaining];
+      for(let i=shuffled.length-1;i>0;i--){const j=Math.random()*i|0;[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]}
+      let idx=0;
+
+      // Complete community
+      const fullComm=[...comm];
+      while(fullComm.length<5)fullComm.push(shuffled[idx++]);
+
+      // My best hand
+      const myBest=bestHand(hole,fullComm);
+
+      // Opponents
+      let myWin=true,anyTie=false;
+      for(let o=0;o<numOpp;o++){
+        const oppHole=[shuffled[idx++],shuffled[idx++]];
+        const oppBest=bestHand(oppHole,fullComm);
+        const cmp=compareHands(myBest,oppBest);
+        if(cmp<0){myWin=false;anyTie=false;break}
+        if(cmp===0)anyTie=true;
+      }
+      if(myWin&&!anyTie)wins++;
+      else if(myWin&&anyTie)ties++;
+      else losses++;
+    }
+    return{wins,ties,losses,total:sims,winPct:wins/sims*100,tiePct:ties/sims*100,losePct:losses/sims*100};
+  }
+
+  // ── Outs Calculation ──
+  function findOuts(hole,comm){
+    if(comm.length>=5)return[];
+    const deck=[];for(const r of RANKS)for(const s of SUITS)deck.push(r+s);
+    const used=new Set([...hole,...comm]);
+    const remaining=deck.filter(c=>!used.has(c));
+    const currentBest=bestHand(hole,comm);
+    const outs=[];
+    for(const card of remaining){
+      const newComm=[...comm,card];
+      const newBest=bestHand(hole,newComm);
+      if(newBest[0]>currentBest[0])outs.push(card);
+    }
+    return outs;
+  }
+
+  // ── Advice ──
+  function getAdvice(winPct,handRankVal,outsCount,commLength){
+    if(winPct>=70)return{emoji:"🔥",text:"Strong! Consider raising",detail:`${winPct.toFixed(1)}% win rate — you're in a great position`};
+    if(winPct>=50)return{emoji:"💪",text:"Good hand — bet or call",detail:`Above average. ${outsCount} outs to improve further`};
+    if(winPct>=35)return{emoji:"🤔",text:"Decent — call if pot odds are right",detail:`${winPct.toFixed(1)}% to win. Consider pot size vs bet`};
+    if(winPct>=20)return{emoji:"😬",text:"Risky — need good pot odds to call",detail:`${outsCount} outs. Only call if pot is offering ${Math.round(100/winPct)}:1 or better`};
+    return{emoji:"🏃",text:"Fold or bluff",detail:`Only ${winPct.toFixed(1)}% chance. Save your chips unless you're bluffing`};
+  }
+
+  // ── Calculate Button ──
+  document.getElementById("calcBtn").addEventListener("click",()=>{
+    if(!holeCards[0]||!holeCards[1]){toast("Select both hole cards first");return}
+    const comm=commCards.filter(Boolean);
+    const btn=document.getElementById("calcBtn");
+    btn.innerHTML="🎲 Calculating…";btn.disabled=true;
+
+    setTimeout(()=>{
+      const result=simulate(holeCards,comm,opponents);
+      const currentHand=bestHand(holeCards,comm.length?comm:holeCards);
+      const handName=HAND_NAMES[currentHand[0]];
+      const strength=getHandStrength(currentHand[0]);
+      const outs=findOuts(holeCards,comm);
+      const advice=getAdvice(result.winPct,currentHand[0],outs.length,comm.length);
+
+      // Render results
+      const panel=document.getElementById("resultsPanel");
+      panel.style.display="block";
+
+      document.getElementById("winPct").textContent=result.winPct.toFixed(1)+"%";
+      document.getElementById("winPct").className="bigPct "+(result.winPct>=50?"good":(result.winPct>=30?"warn":"bad"));
+      document.getElementById("simCount").textContent=`${result.total.toLocaleString()} simulations`;
+
+      document.getElementById("barWin").style.width=result.winPct+"%";
+      document.getElementById("barTie").style.width=result.tiePct+"%";
+      document.getElementById("barLose").style.width=result.losePct+"%";
+
+      document.getElementById("sWin").textContent=result.winPct.toFixed(1)+"%";
+      document.getElementById("sTie").textContent=result.tiePct.toFixed(1)+"%";
+      document.getElementById("sLose").textContent=result.losePct.toFixed(1)+"%";
+
+      const badge=document.getElementById("handBadge");
+      badge.textContent=handName;badge.className=`handBadge ${strength}`;
+
+      // Outs
+      const outsGrid=document.getElementById("outsGrid");
+      if(outs.length&&comm.length<5){
+        outsGrid.innerHTML=outs.slice(0,20).map(c=>`<div class="outCard ${SUIT_COLOR[c[1]]}"><span>${c[0]==="T"?"10":c[0]}</span><span>${SUIT_SYM[c[1]]}</span></div>`).join("");
+        document.getElementById("outsNote").textContent=`${outs.length} out${outs.length!==1?"s":""} · ~${(outs.length/(52-2-comm.length)*100).toFixed(1)}% to hit on next card`;
+      }else{
+        outsGrid.innerHTML="";
+        document.getElementById("outsNote").textContent=comm.length>=5?"All cards dealt":"No cards improve your hand rank";
+      }
+
+      // Advice
+      document.getElementById("advEmoji").textContent=advice.emoji;
+      document.getElementById("advText").textContent=advice.text;
+      document.getElementById("advDetail").textContent=advice.detail;
+
+      panel.scrollIntoView({behavior:"smooth",block:"start"});
+      btn.innerHTML="🎲 Calculate Odds";btn.disabled=false;
+    },50);
+  });
+
+  renderAllCards();
+})();
+</script>
+</body>
+</html>
