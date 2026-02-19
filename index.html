@@ -121,6 +121,22 @@
     .modeBadge{font-size:9px;padding:2px 5px;border-radius:4px;font-weight:600;text-transform:uppercase}.modeBadge.cash{background:rgba(122,167,255,.12);color:var(--accent)}.modeBadge.tourney{background:rgba(245,158,11,.12);color:var(--warn)}
     .disclaimer{text-align:center;padding:20px 14px;margin-top:14px;color:var(--muted);font-size:11px;line-height:1.5;opacity:.6}.disclaimer .dEmoji{font-size:20px;margin-bottom:6px}
     .resumeBox{display:flex;gap:6px;margin-top:8px}.resumeBox input{flex:1;text-transform:uppercase;letter-spacing:1px;font-weight:700;text-align:center}
+    /* PIN Lock */
+    .pinOverlay{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+    .pinOverlay.hidden{display:none}
+    .pinBox{max-width:320px;width:100%;text-align:center}
+    .pinBox .pinLogo{font-size:28px;font-weight:800;letter-spacing:1px;margin-bottom:4px}
+    .pinBox .pinSub{color:var(--muted);font-size:12px;margin-bottom:24px}
+    .pinDots{display:flex;gap:12px;justify-content:center;margin:20px 0}
+    .pinDot{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted);transition:all .15s}
+    .pinDot.filled{background:var(--accent);border-color:var(--accent)}
+    .pinDot.wrong{background:var(--bad);border-color:var(--bad);animation:shake .4s}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+    .pinPad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto}
+    .pinKey{height:52px;border-radius:12px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:20px;font-weight:700;cursor:pointer;user-select:none;touch-action:manipulation;display:flex;align-items:center;justify-content:center;transition:all .12s}
+    .pinKey:hover{background:var(--hover)}.pinKey:active{background:rgba(122,167,255,.15)}
+    .pinKey.wide{grid-column:span 1}
+    .pinMsg{color:var(--muted);font-size:11px;margin-top:16px;min-height:16px}
     .rosterWrap{margin-bottom:12px;border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg);overflow:hidden}
     .rosterHd{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}.rosterHd b{font-size:12px;color:var(--muted)}.rosterHd .rChev{font-size:10px;color:var(--muted);transition:transform .2s}
     .rosterBd{padding:10px 12px;display:none}.rosterBd.open{display:block}
@@ -132,6 +148,20 @@
 </head>
 <body>
 <div class="toastBox" id="toastBox"></div>
+<div class="pinOverlay hidden" id="pinOverlay">
+  <div class="pinBox">
+    <div class="pinLogo"><span style="opacity:.7;font-size:20px">♠♥</span> IPL <span style="opacity:.7;font-size:20px">♦♣</span></div>
+    <div class="pinSub" id="pinTitle">Enter admin PIN</div>
+    <div class="pinDots"><div class="pinDot" id="pd0"></div><div class="pinDot" id="pd1"></div><div class="pinDot" id="pd2"></div><div class="pinDot" id="pd3"></div></div>
+    <div class="pinPad">
+      <div class="pinKey" data-pk="1">1</div><div class="pinKey" data-pk="2">2</div><div class="pinKey" data-pk="3">3</div>
+      <div class="pinKey" data-pk="4">4</div><div class="pinKey" data-pk="5">5</div><div class="pinKey" data-pk="6">6</div>
+      <div class="pinKey" data-pk="7">7</div><div class="pinKey" data-pk="8">8</div><div class="pinKey" data-pk="9">9</div>
+      <div class="pinKey" data-pk="clear">✕</div><div class="pinKey" data-pk="0">0</div><div class="pinKey" data-pk="back">←</div>
+    </div>
+    <div class="pinMsg" id="pinMsg"></div>
+  </div>
+</div>
 <div class="pullIndicator" id="pullIndicator"><span class="pullIcon">↓</span><span class="pullText">Pull to refresh</span></div>
 <div class="iplHeader"><div class="iplLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div><div class="iplSub">Innovation Poker League</div></div>
 <div class="wrap">
@@ -152,7 +182,7 @@
         <div class="row" style="margin-top:8px"><div><label>Bank / Admin</label><select id="bankSelect"></select></div></div>
         <div id="chipValuesSection"><div class="sep"></div><label>Chip values (units per chip)</label><div class="row"><div><label>Black</label><input id="v_black" type="number" step="1" inputmode="numeric"/></div><div><label>Purple</label><input id="v_purple" type="number" step="1" inputmode="numeric"/></div><div><label>Yellow</label><input id="v_yellow" type="number" step="1" inputmode="numeric"/></div><div><label>Pink</label><input id="v_pink" type="number" step="1" inputmode="numeric"/></div><div><label>Orange</label><input id="v_orange" type="number" step="1" inputmode="numeric"/></div></div></div>
         <div id="prizeSplitSection" class="hidden"><div class="sep"></div><label>Prize split (%)</label><div class="row"><div><label>🥇 1st</label><input id="split1" type="number" value="50" inputmode="numeric"/></div><div><label>🥈 2nd</label><input id="split2" type="number" value="30" inputmode="numeric"/></div><div><label>🥉 3rd</label><input id="split3" type="number" value="20" inputmode="numeric"/></div></div><div class="sep"></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><label style="margin:0;font-weight:700;color:var(--warn)">🎰 Tournament Chip Pack</label><button class="btn small gold" id="copyChipPack" type="button">Copy to all</button></div><div class="note" style="margin-top:4px;margin-bottom:8px">Set starting chips, then copy to all.</div><div class="chips" id="tourneyChipPack"></div><div class="note" id="tourneyPackValue"></div></div>
-        <div class="sep"></div><div class="btnbar"><button class="btn" id="saveRoster" type="button">Save roster</button><button class="btn" id="loadRoster" type="button">Load roster</button><button class="btn" id="copyAll" type="button">Copy outputs</button></div>
+        <div class="sep"></div><div class="btnbar"><button class="btn" id="saveRoster" type="button">Save roster</button><button class="btn" id="loadRoster" type="button">Load roster</button><button class="btn" id="copyAll" type="button">Copy outputs</button><button class="btn small" id="pinSetBtn" type="button">🔑 PIN</button></div>
         <div id="auditHint" class="auditHint" style="display:none"></div>
       </div></div>
     <div class="card"><div class="hd"><h2>Players (<span id="playerCount">0</span>)</h2><div class="btnbar"><button class="btn small" id="collapseAll" type="button">Collapse all</button><button class="btn" id="addPlayer" type="button">+ Add player</button></div></div>
@@ -166,7 +196,7 @@
   <div class="card" id="payoutCard" style="margin-top:14px;display:none"><div class="hd"><h2>Payouts</h2><div class="btnbar"><button class="btn small" id="copyPayouts" type="button">Copy payouts</button></div></div><div class="bd"><div class="note" style="margin:0 0 8px">Swipe right → paid. Swipe left → undo.</div><div id="payoutLines"></div></div></div>
   <div class="card" style="margin-top:14px"><div class="hd histHd"><h2>Player Stats</h2><span class="muted" id="statsSessionCount" style="font-size:11px"></span></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Games</th><th class="num">Wins</th><th class="num">Win%</th><th class="num">Net</th><th class="num">Avg</th></tr></thead><tbody id="statsBody"></tbody></table></div><div id="statsEmpty" class="emptyState" style="display:none">No sessions yet.</div></div></div>
   <div class="card" style="margin-top:14px"><div class="hd histHd"><h2>History</h2><div class="btnbar"><button class="btn small" id="exportHistory" type="button">Export CSV</button><button class="btn small danger" id="clearHistory" type="button">Clear</button></div></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Session</th><th class="num">Mode</th><th class="num">#</th><th></th></tr></thead><tbody id="historyBody"></tbody></table></div><div id="historyEmpty" class="emptyState" style="display:none">No sessions yet.</div></div></div>
-  <div class="disclaimer"><div class="dEmoji">🃏</div><b>Innovation Poker League</b> — where bluffs are bold and the math is real.<br>Data accuracy depends on honest submissions (yes, we're looking at you).<br>Not affiliated with any casino. Just friends, chips & vibes. ♠♥♦♣</div>
+  <div class="disclaimer"><div class="dEmoji">🃏</div><b>Innovation Poker League</b> — where bluffs are bold and the math is real.<br>Data accuracy depends on honest submissions (yes, we're looking at you).<br>Not affiliated with any casino. Just friends, chips & vibes. ♠♥♦♣<br><br><a href="odds.html" style="color:var(--accent);text-decoration:none;font-weight:600">🎲 Poker Odds Calculator →</a></div>
 </div>
 <div class="footer"><div class="inner"><div class="totwrap"><div class="tot"><div class="k" id="footK1">Total Gross</div><div class="v" id="t_gross">₥0.00</div></div><div class="tot"><div class="k">RF fund</div><div class="v" id="t_rf">₥0.00</div></div><div class="tot"><div class="k" id="footK3">Total Final</div><div class="v" id="t_final">₥0.00</div></div></div><button class="btn" id="toTop" type="button">↑</button></div></div>
 <div id="lockedOverlay" class="lockedOverlay"><b>Session locked.</b> <span class="muted">Unlock to edit.</span></div>
@@ -335,6 +365,72 @@
   // Pull to refresh
   (function(){const ind=$("pullIndicator"),pt=ind.querySelector(".pullText"),pi=ind.querySelector(".pullIcon");let sy=0,pulling=false,ready=false;const TH=80,MX=120;document.addEventListener("touchstart",e=>{if(window.scrollY===0){sy=e.touches[0].clientY;pulling=false;ready=false}},{passive:true});document.addEventListener("touchmove",e=>{if(!sy)return;const dy=e.touches[0].clientY-sy;if(dy>10&&window.scrollY===0){pulling=true;const d=Math.min(dy*.5,MX);ind.style.height=d+"px";ind.classList.add("pulling");ind.classList.remove("refreshing");if(d>=TH*.5){ready=d>=TH*.8;ind.classList.toggle("ready",ready);pt.textContent=ready?"Release to refresh":"Pull to refresh";pi.textContent=ready?"↑":"↓"}}else if(dy<0){sy=0;pulling=false;ind.style.height="0";ind.classList.remove("pulling","ready")}},{passive:true});document.addEventListener("touchend",()=>{if(pulling&&ready){ind.classList.remove("pulling","ready");ind.classList.add("refreshing");ind.style.height="40px";pt.textContent="Refreshing…";pi.textContent="⟳";setTimeout(()=>location.reload(),400)}else{ind.style.height="0";ind.classList.remove("pulling","ready")}sy=0;pulling=false;ready=false},{passive:true})})();
 
+  // ── PIN System ──
+  const PIN_KEY="poker_admin_pin";
+  let pinMode="verify"; // "verify" | "set" | "confirm" | "change"
+  let pinBuffer="";
+  let pinNew="";
+
+  function getPin(){return localStorage.getItem(PIN_KEY)||""}
+  function setPin(p){if(p)localStorage.setItem(PIN_KEY,p);else localStorage.removeItem(PIN_KEY)}
+
+  function showPinOverlay(md,msg){
+    pinMode=md;pinBuffer="";pinNew="";
+    $("pinOverlay").classList.remove("hidden");
+    $("pinTitle").textContent=md==="verify"?"Enter admin PIN":md==="set"?"Create a 4-digit PIN":md==="confirm"?"Confirm your PIN":"Enter new PIN";
+    if(msg)$("pinMsg").textContent=msg;else $("pinMsg").textContent="";
+    updatePinDots();
+  }
+
+  function hidePinOverlay(){$("pinOverlay").classList.add("hidden");pinBuffer="";pinNew=""}
+
+  function updatePinDots(wrong){
+    for(let i=0;i<4;i++){
+      const d=$("pd"+i);
+      d.className="pinDot"+(i<pinBuffer.length?" filled":"")+(wrong?" wrong":"");
+    }
+  }
+
+  function handlePinDigit(d){
+    if(d==="clear"){pinBuffer="";updatePinDots();return}
+    if(d==="back"){pinBuffer=pinBuffer.slice(0,-1);updatePinDots();return}
+    if(pinBuffer.length>=4)return;
+    pinBuffer+=d;
+    updatePinDots();
+
+    if(pinBuffer.length===4){
+      setTimeout(()=>{
+        if(pinMode==="verify"){
+          if(pinBuffer===getPin()){hidePinOverlay();toast("Welcome back 🔓")}
+          else{updatePinDots(true);$("pinMsg").textContent="Wrong PIN. Try again.";setTimeout(()=>{pinBuffer="";updatePinDots()},500)}
+        }
+        else if(pinMode==="set"){
+          pinNew=pinBuffer;pinBuffer="";pinMode="confirm";
+          $("pinTitle").textContent="Confirm your PIN";$("pinMsg").textContent="";updatePinDots();
+        }
+        else if(pinMode==="confirm"){
+          if(pinBuffer===pinNew){setPin(pinNew);hidePinOverlay();toast("PIN set ✓")}
+          else{updatePinDots(true);$("pinMsg").textContent="PINs don't match. Start over.";setTimeout(()=>{pinMode="set";pinBuffer="";pinNew="";$("pinTitle").textContent="Create a 4-digit PIN";$("pinMsg").textContent="";updatePinDots()},600)}
+        }
+        else if(pinMode==="change"){
+          if(pinBuffer===getPin()){pinBuffer="";pinMode="set";$("pinTitle").textContent="Create new PIN";$("pinMsg").textContent="";updatePinDots()}
+          else{updatePinDots(true);$("pinMsg").textContent="Wrong current PIN.";setTimeout(()=>{pinBuffer="";updatePinDots()},500)}
+        }
+      },150);
+    }
+  }
+
+  document.addEventListener("click",e=>{const k=e.target.closest("[data-pk]");if(k)handlePinDigit(k.dataset.pk)});
+
+  $("pinSetBtn").addEventListener("click",()=>{
+    const hasPin=!!getPin();
+    if(!hasPin){showPinOverlay("set")}
+    else{
+      if(confirm("Change PIN? (or Cancel then long-press to remove)")){showPinOverlay("change","Enter your current PIN first")}
+      else if(confirm("Remove PIN entirely?")){setPin("");toast("PIN removed")}
+    }
+  });
+
   // Focus/blur
   document.addEventListener("focus",e=>{const t=e.target;if(t&&t.tagName==="INPUT"&&t.type!=="checkbox")t.select()},true);
   document.addEventListener("blur",e=>{const t=e.target;if(t&&t.type==="number"&&(t.value===""||t.value===null))t.value="0"},true);
@@ -342,6 +438,9 @@
   // Init
   state=sanitize(state);const lastCode=localStorage.getItem(ACTIVE_KEY);if(lastCode)$("resumeCode").value=lastCode;
   setMode("cash");renderAllFull();
+
+  // Check PIN on load
+  if(getPin()){showPinOverlay("verify")}
 })();
 </script>
 </body>
