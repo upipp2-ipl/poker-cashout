@@ -140,9 +140,16 @@
     .rosterWrap{margin-bottom:12px;border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg);overflow:hidden}
     .rosterHd{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}.rosterHd b{font-size:12px;color:var(--muted)}.rosterHd .rChev{font-size:10px;color:var(--muted);transition:transform .2s}
     .rosterBd{padding:10px 12px;display:none}.rosterBd.open{display:block}
-    .rosterChips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-    .rosterChip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);font-size:12px;cursor:pointer;user-select:none;transition:all .15s}.rosterChip:hover{border-color:var(--accent)}
-    .rosterChip .rc-x{color:var(--bad);font-size:10px;margin-left:4px;opacity:.5}.rosterChip .rc-x:hover{opacity:1}
+    .rosterChips{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+    .rosterChip{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);font-size:13px;transition:all .15s}
+    .rosterChip .rc-name{flex:1;font-weight:500}
+    .rosterChip .rc-name input{background:transparent;border:1px solid transparent;padding:4px 6px;border-radius:6px;font-size:13px;font-weight:500;width:100%}
+    .rosterChip .rc-name input:focus{border-color:var(--accent);background:var(--input-bg)}
+    .rosterChip .rc-add{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(122,167,255,.25);background:rgba(122,167,255,.08);color:var(--accent)}
+    .rosterChip .rc-add:hover{background:rgba(122,167,255,.15)}
+    .rosterChip .rc-add.disabled{opacity:.4;cursor:default;border-style:dashed}
+    .rosterChip .rc-del{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,92,122,.20);background:rgba(255,92,122,.06);color:var(--bad)}
+    .rosterChip .rc-del:hover{background:rgba(255,92,122,.15)}
     .rosterAdd{display:flex;gap:6px;margin-top:8px}.rosterAdd input{flex:1}
   </style>
 </head>
@@ -157,7 +164,7 @@
       <div class="pinKey" data-pk="1">1</div><div class="pinKey" data-pk="2">2</div><div class="pinKey" data-pk="3">3</div>
       <div class="pinKey" data-pk="4">4</div><div class="pinKey" data-pk="5">5</div><div class="pinKey" data-pk="6">6</div>
       <div class="pinKey" data-pk="7">7</div><div class="pinKey" data-pk="8">8</div><div class="pinKey" data-pk="9">9</div>
-      <div class="pinKey" data-pk="clear">✕</div><div class="pinKey" data-pk="0">0</div><div class="pinKey" data-pk="back">←</div>
+      <div class="pinKey" data-pk="cancel" style="font-size:13px">Cancel</div><div class="pinKey" data-pk="0">0</div><div class="pinKey" data-pk="back">←</div>
     </div>
     <div class="pinMsg" id="pinMsg"></div>
   </div>
@@ -307,7 +314,7 @@
 
   function renderStats(){const h=loadHistory();$("statsSessionCount").textContent=`${h.length} game${h.length!==1?"s":""}`;if(!h.length){$("statsBody").innerHTML="";$("statsEmpty").style.display="block";return}$("statsEmpty").style.display="none";const map={};for(const s of h)for(const p of s.players){const k=p.name.trim().toLowerCase();if(!map[k])map[k]={name:p.name.trim(),sessions:0,wins:0,totalNet:0};const m=map[k];m.sessions++;m.totalNet+=p.net;if(p.net>0)m.wins++;m.name=p.name.trim()}$("statsBody").innerHTML=Object.values(map).sort((a,b)=>b.totalNet-a.totalNet).map(s=>{const wp=s.sessions?Math.round(s.wins/s.sessions*100):0,avg=s.sessions?s.totalNet/s.sessions:0,nc=s.totalNet>0?"statPositive":(s.totalNet<0?"statNegative":"statNeutral");return`<tr><td>${esc(s.name)}</td><td class="num">${s.sessions}</td><td class="num">${s.wins}</td><td class="num">${wp}%</td><td class="num ${nc}">${s.totalNet>=0?"+":""}${fmtUsd(s.totalNet)}</td><td class="num">${avg>=0?"+":""}${fmtUsd(avg)}</td></tr>`}).join("")}
 
-  function renderRosterChips(){const roster=loadRoster(),cur=state.players.map(p=>p.name.trim().toLowerCase());$("rosterChips").innerHTML=roster.length?roster.map(n=>{const inG=cur.includes(n.trim().toLowerCase());return`<div class="rosterChip" data-rname="${esc(n)}" style="${inG?'opacity:.45;border-style:dashed':''}"><span>${esc(n)}</span>${inG?'<span style="font-size:10px;color:var(--muted)">✓</span>':'<span style="font-size:10px;color:var(--accent)">+</span>'}<span class="rc-x" data-rremove="${esc(n)}">✕</span></div>`}).join(""):'<div class="note" style="margin:0">No regular players saved. Add below or click "Save roster".</div>'}
+  function renderRosterChips(){const roster=loadRoster(),cur=state.players.map(p=>p.name.trim().toLowerCase());$("rosterChips").innerHTML=roster.length?roster.map((n,i)=>{const inG=cur.includes(n.trim().toLowerCase());return`<div class="rosterChip" data-ridx="${i}"><div class="rc-name"><input type="text" value="${esc(n)}" data-rname-idx="${i}" placeholder="Player name"/></div><div class="rc-add ${inG?"disabled":""}" data-radd="${i}">${inG?"✓ In game":"+ Add"}</div><div class="rc-del" data-rdel="${i}">Delete</div></div>`}).join(""):'<div class="note" style="margin:0">No regular players saved. Add below or click "Save roster".</div>'}
 
   function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderHistory();renderStats();renderRosterChips();save()}
 
@@ -341,7 +348,36 @@
   $("saveRoster").addEventListener("click",()=>{const n=state.players.map(p=>p.name.trim()).filter(Boolean);const existing=loadRoster();const merged=[...new Set([...existing,...n])];saveRosterData(merged);renderRosterChips();toast(`Roster updated (${merged.length})`)});
   $("loadRoster").addEventListener("click",()=>{const r=loadRoster();if(!r.length){toast("No roster");return}state.players=r.map(x=>makePlayer(x));renderAllFull();toast(`Loaded ${r.length}`)});
   let rosterOpen=false;$("rosterToggle").addEventListener("click",()=>{rosterOpen=!rosterOpen;$("rosterBody").classList.toggle("open",rosterOpen);$("rosterChev").textContent=rosterOpen?"▲":"▼"});
-  document.addEventListener("click",e=>{const chip=e.target.closest(".rosterChip");if(!chip||state.locked)return;const rb=e.target.closest("[data-rremove]");if(rb){saveRosterData(loadRoster().filter(n=>n!==rb.dataset.rremove));renderRosterChips();toast("Removed from roster");return}const name=chip.dataset.rname;if(!name)return;if(state.players.some(p=>p.name.trim().toLowerCase()===name.trim().toLowerCase())){toast("Already in game");return}const p=makePlayer(name);if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);state.players.push(p);renderAllFull();renderRosterChips();toast(`${name} added`)},true);
+  document.addEventListener("click",e=>{
+    // Roster: Add to game
+    const addBtn=e.target.closest("[data-radd]");
+    if(addBtn&&!addBtn.classList.contains("disabled")&&!state.locked){
+      const roster=loadRoster();const idx=Number(addBtn.dataset.radd);const name=roster[idx];
+      if(!name)return;
+      if(state.players.some(p=>p.name.trim().toLowerCase()===name.trim().toLowerCase())){toast("Already in game");return}
+      const p=makePlayer(name);if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);
+      state.players.push(p);renderAllFull();toast(`${name} added`);return;
+    }
+    // Roster: Delete
+    const delBtn=e.target.closest("[data-rdel]");
+    if(delBtn){
+      const roster=loadRoster();const idx=Number(delBtn.dataset.rdel);
+      const name=roster[idx];
+      roster.splice(idx,1);saveRosterData(roster);renderRosterChips();toast(`${name} removed from roster`);return;
+    }
+  },true);
+
+  // Roster: rename on blur
+  document.addEventListener("change",e=>{
+    const inp=e.target.closest("[data-rname-idx]");
+    if(!inp)return;
+    const idx=Number(inp.dataset.rnameIdx);
+    const newName=inp.value.trim();
+    const roster=loadRoster();
+    if(!newName){toast("Name can't be empty");inp.value=roster[idx]||"";return}
+    if(roster.some((n,i)=>i!==idx&&n.toLowerCase()===newName.toLowerCase())){toast("Name already in roster");inp.value=roster[idx]||"";return}
+    roster[idx]=newName;saveRosterData(roster);renderRosterChips();toast(`Renamed to ${newName}`);
+  },true);
   $("rosterAddBtn").addEventListener("click",()=>{const inp=$("rosterNewName"),name=inp.value.trim();if(!name){toast("Enter a name");return}const r=loadRoster();if(r.some(n=>n.toLowerCase()===name.toLowerCase())){toast("Already in roster");return}r.push(name);saveRosterData(r);inp.value="";renderRosterChips();toast(`${name} saved`)});
   $("rosterNewName").addEventListener("keydown",e=>{if(e.key==="Enter")$("rosterAddBtn").click()});
   $("rosterAddAll").addEventListener("click",()=>{if(state.locked)return;const r=loadRoster(),cur=state.players.map(p=>p.name.trim().toLowerCase());let n=0;r.forEach(nm=>{if(!cur.includes(nm.trim().toLowerCase())){const p=makePlayer(nm);if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);state.players.push(p);cur.push(nm.trim().toLowerCase());n++}});if(n){renderAllFull();renderRosterChips();toast(`${n} added`)}else toast("All in game already")});
@@ -377,7 +413,7 @@
   function showPinOverlay(md,msg){
     pinMode=md;pinBuffer="";pinNew="";
     $("pinOverlay").classList.remove("hidden");
-    $("pinTitle").textContent=md==="verify"?"Enter admin PIN":md==="set"?"Create a 4-digit PIN":md==="confirm"?"Confirm your PIN":"Enter new PIN";
+    $("pinTitle").textContent=md==="verify"?"Enter admin PIN":md==="set"?"Create a 4-digit PIN":md==="confirm"?"Confirm your PIN":md==="remove"?"Enter PIN to remove it":"Enter current PIN";
     if(msg)$("pinMsg").textContent=msg;else $("pinMsg").textContent="";
     updatePinDots();
   }
@@ -392,7 +428,12 @@
   }
 
   function handlePinDigit(d){
-    if(d==="clear"){pinBuffer="";updatePinDots();return}
+    if(d==="cancel"){
+      // If verifying (PIN exists, must enter), don't allow cancel
+      if(pinMode==="verify"){$("pinMsg").textContent="PIN required to access admin";return}
+      // Otherwise cancel setup/change
+      hidePinOverlay();toast("Cancelled");return;
+    }
     if(d==="back"){pinBuffer=pinBuffer.slice(0,-1);updatePinDots();return}
     if(pinBuffer.length>=4)return;
     pinBuffer+=d;
@@ -416,6 +457,10 @@
           if(pinBuffer===getPin()){pinBuffer="";pinMode="set";$("pinTitle").textContent="Create new PIN";$("pinMsg").textContent="";updatePinDots()}
           else{updatePinDots(true);$("pinMsg").textContent="Wrong current PIN.";setTimeout(()=>{pinBuffer="";updatePinDots()},500)}
         }
+        else if(pinMode==="remove"){
+          if(pinBuffer===getPin()){setPin("");hidePinOverlay();toast("PIN removed ✓")}
+          else{updatePinDots(true);$("pinMsg").textContent="Wrong PIN.";setTimeout(()=>{pinBuffer="";updatePinDots()},500)}
+        }
       },150);
     }
   }
@@ -424,10 +469,15 @@
 
   $("pinSetBtn").addEventListener("click",()=>{
     const hasPin=!!getPin();
-    if(!hasPin){showPinOverlay("set")}
-    else{
-      if(confirm("Change PIN? (or Cancel then long-press to remove)")){showPinOverlay("change","Enter your current PIN first")}
-      else if(confirm("Remove PIN entirely?")){setPin("");toast("PIN removed")}
+    if(!hasPin){
+      showPinOverlay("set","Create a PIN to protect admin access");
+    }else{
+      const action=prompt("Type CHANGE to change PIN, or REMOVE to remove it:");
+      if(!action)return;
+      if(action.trim().toUpperCase()==="CHANGE"){showPinOverlay("change","Enter your current PIN first")}
+      else if(action.trim().toUpperCase()==="REMOVE"){
+        showPinOverlay("remove","Enter your current PIN to remove it");
+      }
     }
   });
 
