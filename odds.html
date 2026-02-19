@@ -307,7 +307,8 @@
 
   // ── Poker Hand Evaluation ──
   function handRank(cards){
-    // Returns [rank, ...kickers] where rank: 0=high,1=pair,2=2pair,3=trips,4=straight,5=flush,6=full,7=quads,8=stflush
+    if(!cards||cards.length<5)return[0,0];
+    // Returns [rank, ...kickers]
     const vals=cards.map(c=>RANK_VAL[c[0]]).sort((a,b)=>b-a);
     const suits=cards.map(c=>c[1]);
     const counts={};vals.forEach(v=>{counts[v]=(counts[v]||0)+1});
@@ -357,18 +358,18 @@
     return[0,...vals.slice(0,5)];
   }
 
-  function bestHand(holeCards,community){
-    const all=[...holeCards,...community];
+  function bestHand(hole,community){
+    const all=[...hole,...community];
+    if(all.length<5)return[0,0];
     let best=null;
-    // All 5-card combos from 7 cards
-    for(let i=0;i<all.length;i++)for(let j=i+1;j<all.length;j++){
-      const five=all.filter((_,k)=>k!==i&&k!==j);
-      if(five.length===5){
-        const r=handRank(five);
-        if(!best||compareHands(r,best)>0)best=r;
-      }
+    // All C(n,5) combos
+    const n=all.length;
+    for(let a=0;a<n-4;a++)for(let b=a+1;b<n-3;b++)for(let c=b+1;c<n-2;c++)for(let d=c+1;d<n-1;d++)for(let e=d+1;e<n;e++){
+      const five=[all[a],all[b],all[c],all[d],all[e]];
+      const r=handRank(five);
+      if(!best||compareHands(r,best)>0)best=r;
     }
-    return best;
+    return best||[0,0];
   }
 
   function compareHands(a,b){
@@ -386,7 +387,7 @@
   }
 
   // ── Monte Carlo Simulation ──
-  function simulate(hole,comm,numOpp,sims=15000){
+  function simulate(hole,comm,numOpp,sims=3000){
     const deck=[];
     for(const r of RANKS)for(const s of SUITS)deck.push(r+s);
     const used=new Set([...hole,...comm]);
@@ -431,8 +432,7 @@
     const currentBest=bestHand(hole,comm);
     const outs=[];
     for(const card of remaining){
-      const newComm=[...comm,card];
-      const newBest=bestHand(hole,newComm);
+      const newBest=bestHand(hole,[...comm,card]);
       if(newBest[0]>currentBest[0])outs.push(card);
     }
     return outs;
@@ -456,8 +456,8 @@
 
     setTimeout(()=>{
       const result=simulate(holeCards,comm,opponents);
-      const currentHand=bestHand(holeCards,comm.length?comm:holeCards);
-      const handName=HAND_NAMES[currentHand[0]];
+      const currentHand=bestHand(holeCards,comm.length?comm:[]);
+      const handName=HAND_NAMES[currentHand[0]]||"High Card";
       const strength=getHandStrength(currentHand[0]);
       const outs=findOuts(holeCards,comm);
       const advice=getAdvice(result.winPct,currentHand[0],outs.length,comm.length);
