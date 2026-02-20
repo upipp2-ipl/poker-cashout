@@ -72,6 +72,7 @@
     .tablewrap{overflow:auto;border:1px solid var(--card-border);border-radius:12px}
     table{width:100%;border-collapse:separate;border-spacing:0}th,td{padding:8px 10px;border-bottom:1px solid var(--line);font-size:12px}
     th{background:var(--input-bg);color:var(--muted);text-align:left;font-weight:600}.num{text-align:right}
+    td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     /* FOOTER */
     .footer{position:fixed!important;bottom:0!important;left:0!important;right:0!important;z-index:50!important;margin:0!important;border-radius:0!important;border:none!important;border-top:1px solid var(--card-border)!important;background:var(--bg2)!important;box-shadow:0 -4px 20px rgba(0,0,0,.25)!important}
     @supports(padding-bottom:env(safe-area-inset-bottom)){.footer{padding-bottom:env(safe-area-inset-bottom)!important}}
@@ -93,7 +94,7 @@
     .pSummaryInline{display:none;font-size:11px;color:var(--muted);margin-top:3px}.player.is-collapsed .pSummaryInline{display:block}
     .chevron{display:inline-block;width:18px;height:18px;border-radius:5px;background:var(--hover);text-align:center;line-height:18px;font-size:11px;color:var(--muted);cursor:pointer;user-select:none;transition:transform .2s;flex-shrink:0}
     .player.is-collapsed .chevron{transform:rotate(-90deg)}
-    .jumpNav{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}.jumpNav .jbtn{padding:5px 9px;border-radius:8px;font-size:11px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);cursor:pointer;transition:all .15s}.jumpNav .jbtn:hover{color:var(--text);border-color:var(--accent)}
+    .jumpNav{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}    .jumpNav .jbtn{padding:5px 9px;border-radius:8px;font-size:11px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);cursor:pointer;transition:all .15s;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.jumpNav .jbtn:hover{color:var(--text);border-color:var(--accent)}
     .auditHint{margin-top:10px;padding:10px;border-radius:12px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);font-size:11px}.auditHint b{color:var(--text)}.auditHint .chip{display:inline-flex;align-items:center;gap:5px;margin-right:8px;margin-top:5px}.auditHint .sw{width:10px;height:10px;border-radius:3px;display:inline-block}
     .hl-black{outline:2px solid rgba(90,160,255,.7)}.hl-purple{outline:2px solid rgba(167,139,250,.7)}.hl-yellow{outline:2px solid rgba(250,204,21,.7)}.hl-pink{outline:2px solid rgba(244,114,182,.7)}.hl-orange{outline:2px solid rgba(251,146,60,.7)}
     .histHd{border-bottom-color:var(--line)}.statPositive{color:var(--good);font-weight:700}.statNegative{color:var(--bad);font-weight:700}.statNeutral{color:var(--muted);font-weight:700}
@@ -144,8 +145,8 @@
     .rosterBd{padding:10px 12px;display:none}.rosterBd.open{display:block}
     .rosterChips{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
     .rosterChip{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);font-size:13px;transition:all .15s}
-    .rosterChip .rc-name{flex:1;font-weight:500}
-    .rosterChip .rc-name input{background:transparent;border:1px solid transparent;padding:4px 6px;border-radius:6px;font-size:13px;font-weight:500;width:100%}
+    .rosterChip .rc-name{flex:1;font-weight:500;overflow:hidden}
+    .rosterChip .rc-name input{background:transparent;border:1px solid transparent;padding:4px 6px;border-radius:6px;font-size:13px;font-weight:500;width:100%;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
     .rosterChip .rc-name input:focus{border-color:var(--accent);background:var(--input-bg)}
     .rosterChip .rc-add{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(122,167,255,.25);background:rgba(122,167,255,.08);color:var(--accent)}
     .rosterChip .rc-add:hover{background:rgba(122,167,255,.15)}
@@ -153,10 +154,17 @@
     .rosterChip .rc-del{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,92,122,.20);background:rgba(255,92,122,.06);color:var(--bad)}
     .rosterChip .rc-del:hover{background:rgba(255,92,122,.15)}
     .rosterAdd{display:flex;gap:6px;margin-top:8px}.rosterAdd input{flex:1}
+    /* Offline banner */
+    .offlineBanner{position:fixed;top:0;left:0;right:0;z-index:300;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));background:#dc2626;color:#fff;text-align:center;font-size:13px;font-weight:600;display:none;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+    .offlineBanner.show{display:block}
+    /* Long name overflow */
+    .statusItem{padding:8px;border-radius:8px;border:1px solid var(--card-border);background:var(--input-bg);font-size:12px;display:flex;align-items:center;gap:6px;overflow:hidden}
+    .statusItem span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   </style>
 </head>
 <body>
 <div class="toastBox" id="toastBox"></div>
+<div class="offlineBanner" id="offlineBanner">⚠️ No internet connection — changes won't sync</div>
 <div class="pinOverlay hidden" id="pinOverlay">
   <div class="pinBox">
     <div class="pinLogo"><span style="opacity:.7;font-size:20px">♠♥</span> IPL <span style="opacity:.7;font-size:20px">♦♣</span></div>
@@ -212,11 +220,15 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <script>
 (()=>{
   firebase.initializeApp({apiKey:"AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",authDomain:"poker-cashout-bde23.firebaseapp.com",databaseURL:"https://poker-cashout-bde23-default-rtdb.firebaseio.com",projectId:"poker-cashout-bde23",storageBucket:"poker-cashout-bde23.firebasestorage.app",messagingSenderId:"1054875878552",appId:"1:1054875878552:web:94d610f9d20a18bed07ced"});
   const db=firebase.database();
+  let adminUid=null;
+  // Anonymous auth
+  firebase.auth().signInAnonymously().then(cred=>{adminUid=cred.user.uid;console.log("Auth OK:",adminUid)}).catch(err=>{console.error("Auth failed:",err);toast("Auth error — online features may not work")});
   const KEY="poker_admin_v13",ROSTER_KEY="poker_admin_roster_v1",ROSTER_V2_KEY="poker_roster_v2",HISTORY_KEY="poker_admin_history_v2",THEME_KEY="poker_theme",PAY_KEY="poker_payments",ACTIVE_KEY="poker_active_session";
   const COLORS=["black","purple","yellow","pink","orange"],SW={black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
   const DEFAULTS={buyinUsd:50,taxRate:.30,chipValues:{black:100,purple:500,yellow:1000,pink:5000,orange:10000},defaultPack:{black:15,purple:3,yellow:12,pink:3,orange:2}};
@@ -291,7 +303,13 @@
   // Firebase online
   function generateCode(){const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let c="";for(let i=0;i<4;i++)c+=ch[Math.floor(Math.random()*ch.length)];return c}
   function getPlayerPageUrl(code){return window.location.href.replace(/\/[^/]*$/,"/")+`player.html?code=${code}`}
-  function startOnlineSession(){const names=state.players.map(p=>p.name.trim()).filter(Boolean);if(!names.length){toast("Add players first");return}const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names: "+dupes.join(", "));return}$("startOnline").innerHTML="Starting…";$("startOnline").disabled=true;const code=generateCode();onlineSessionCode=code;localStorage.setItem(ACTIVE_KEY,code);const cashouts={};names.forEach(n=>{cashouts[n]={submitted:false,buyinCount:1,timestamp:Date.now(),black:0,purple:0,yellow:0,pink:0,orange:0}});db.ref("sessions/"+code).set({config:{sessionName:state.sessionName||"Poker Night",buyinUsd:state.buyinUsd,taxRate:state.taxRate,chipValues:clone(state.chipValues),playerNames:names,createdAt:Date.now()},cashouts,admin_state:{state:JSON.stringify(state),mode,updatedAt:Date.now()}}).then(()=>{showOnlineUI(code);toast("Online: "+code);listenForCashouts(code);syncBuyinsToFirebase()}).catch(err=>{toast("Error: "+err.message);onlineSessionCode=null}).finally(()=>{$("startOnline").innerHTML="Start Online";$("startOnline").disabled=false})}
+  function startOnlineSession(){const names=state.players.map(p=>p.name.trim()).filter(Boolean);if(!names.length){toast("Add players first");return}const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names: "+dupes.join(", "));return}$("startOnline").innerHTML="Starting…";$("startOnline").disabled=true;const code=generateCode();onlineSessionCode=code;localStorage.setItem(ACTIVE_KEY,code);const cashouts={};names.forEach(n=>{cashouts[n]={submitted:false,buyinCount:1,timestamp:Date.now(),black:0,purple:0,yellow:0,pink:0,orange:0}});    db.ref("sessions/"+code+"/config").set({sessionName:state.sessionName||"Poker Night",buyinUsd:state.buyinUsd,taxRate:state.taxRate,chipValues:clone(state.chipValues),playerNames:names,createdAt:Date.now()}).then(()=>{
+      return db.ref("sessions/"+code+"/adminUid").set(adminUid);
+    }).then(()=>{
+      return db.ref("sessions/"+code+"/cashouts").set(cashouts);
+    }).then(()=>{
+      return db.ref("sessions/"+code+"/admin_state").set({state:JSON.stringify(state),mode,updatedAt:Date.now()});
+    }).then(()=>{showOnlineUI(code);toast("Online: "+code);listenForCashouts(code);syncBuyinsToFirebase()}).catch(err=>{toast("Error: "+err.message);onlineSessionCode=null}).finally(()=>{$("startOnline").innerHTML="Start Online";$("startOnline").disabled=false})}
 
   function showOnlineUI(code){$("onlineOff").style.display="none";$("onlineOn").style.display="block";$("sessionCodeDisplay").textContent=code;const url=getPlayerPageUrl(code);$("playerLinkDisplay").textContent=url;$("qrWrap").innerHTML="";try{const cv=document.createElement("canvas");cv.style.borderRadius="10px";new QRious({element:cv,value:url,size:180,backgroundAlpha:1,foreground:"#1a1f2e",background:"#ffffff",level:"M"});$("qrWrap").appendChild(cv)}catch(e){}$("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";$("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`}
 
@@ -299,7 +317,10 @@
 
   function listenForCashouts(code){firebaseListener=db.ref("sessions/"+code+"/cashouts").on("value",snap=>{const data=snap.val();if(!data)return;const names=Object.keys(data);let sub=0;$("statusGrid").innerHTML=names.map(n=>{const d=data[n],is=!!d.submitted,ia=!!d.adminOverride;if(is||ia)sub++;return`<div class="statusItem ${(is||ia)?"submitted":"pending"}"><span class="sDot"></span>${esc(n)}${ia?' <span style="font-size:9px;color:var(--warn)">(admin)</span>':''}</div>`}).join("");$("submitCount").textContent=sub;$("submitTotal").textContent=names.length;if(sub>0&&sub===names.length&&!allSubmittedSounded){allSubmittedSounded=true;try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=f;g.gain.value=.15;o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+i*.15);o.stop(ctx.currentTime+i*.15+.2)})}catch{}toast("🎉 All submitted!")}let ch=false;for(const p of state.players){const pn=p.name.trim(),pd=data[pn];if(pd&&pd.submitted&&!pd.adminOverride)COLORS.forEach(c=>{const nv=clamp(pd[c]||0);if(p.cashout[c]!==nv){p.cashout[c]=nv;ch=true}})}if(ch){toast("Cashout received ✓");save();renderPlayersFull();renderAuditAndSummary()}})}
 
-  async function resumeSession(code){code=code.trim().toUpperCase();if(!code)return;toast("Resuming…");try{const snap=await db.ref("sessions/"+code+"/admin_state").once("value");const data=snap.val();if(!data||!data.state){toast("No state found for "+code);return}state=sanitize(JSON.parse(data.state));if(data.mode)mode=data.mode;save();onlineSessionCode=code;localStorage.setItem(ACTIVE_KEY,code);showOnlineUI(code);listenForCashouts(code);setMode(mode);toast("Resumed: "+code+" ✓")}catch(err){toast("Failed: "+err.message)}}
+  async function resumeSession(code){code=code.trim().toUpperCase();if(!code)return;toast("Resuming…");try{const snap=await db.ref("sessions/"+code+"/admin_state").once("value");const data=snap.val();if(!data||!data.state){toast("No state found for "+code);return}state=sanitize(JSON.parse(data.state));if(data.mode)mode=data.mode;save();
+    // Reclaim admin ownership
+    if(adminUid)await db.ref("sessions/"+code+"/adminUid").set(adminUid);
+    onlineSessionCode=code;localStorage.setItem(ACTIVE_KEY,code);showOnlineUI(code);listenForCashouts(code);setMode(mode);toast("Resumed: "+code+" ✓")}catch(err){toast("Failed: "+err.message)}}
 
   // Rendering
   function colorCell(col,vu,ct,kind,pid,bid){const d=state.locked?"disabled":"";return`<div class="cell" data-color="${col}"><div class="ctop"><span class="sw ${SW[col]}"></span><span class="cname">${col[0].toUpperCase()+col.slice(1)}</span><span class="cval">${vu.toLocaleString()}</span></div><div class="stepper"><button class="sbtn" data-step="-1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" ${d}>−</button><input type="number" step="1" inputmode="numeric" min="0" max="999" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" value="${ct??0}" ${d}/><button class="sbtn" data-step="1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" ${d}>+</button></div></div>`}
@@ -333,8 +354,8 @@
 
   // Events
   $("sessionName").addEventListener("input",e=>{if(!state.locked){state.sessionName=e.target.value;save()}});
-  $("buyinUsd").addEventListener("input",e=>{if(!state.locked){state.buyinUsd=Number(e.target.value)||DEFAULTS.buyinUsd;renderAllFull()}});
-  $("taxRate").addEventListener("input",e=>{if(!state.locked){state.taxRate=Number(e.target.value)||0;renderAllFull()}});
+  $("buyinUsd").addEventListener("input",e=>{if(!state.locked){state.buyinUsd=Math.min(10000,Math.max(1,Number(e.target.value)||DEFAULTS.buyinUsd));renderAllFull()}});
+  $("taxRate").addEventListener("input",e=>{if(!state.locked){state.taxRate=Math.min(1,Math.max(0,Number(e.target.value)||0));renderAllFull()}});
   $("bankSelect").addEventListener("change",e=>{if(!state.locked){state.bankId=e.target.value;save();renderAllFull()}});
   for(const c of COLORS)$("v_"+c).addEventListener("input",e=>{if(!state.locked){state.chipValues[c]=Number(e.target.value)||DEFAULTS.chipValues[c];renderAllFull()}});
   ["split1","split2","split3"].forEach(id=>$(id).addEventListener("input",e=>{if(!state.locked){state[id]=Number(e.target.value)||0;renderAllFull()}}));
@@ -405,7 +426,7 @@
 
   document.addEventListener("click",e=>{const t=e.target.closest(".sbtn");if(!t||state.locked)return;const step=Number(t.dataset.step)||0,kind=t.dataset.kind,pid=t.dataset.p,color=t.dataset.c,bid=t.dataset.b;if(kind==="tpack"&&color){state.tourneyPack[color]=Math.max(0,(state.tourneyPack[color]||0)+step);t.parentElement.querySelector("input").value=state.tourneyPack[color];save();renderTourneyChipPack();return}const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary()}}if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary();if(onlineSessionCode)setAdminOverride(p.name.trim())}},true);
 
-  document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const act=t.dataset.act,pid=t.dataset.p;if(act==="togglePlayer"){if(collapsedPlayers.has(pid))collapsedPlayers.delete(pid);else collapsedPlayers.add(pid);const el=document.getElementById("player_"+pid);if(el){el.classList.toggle("is-collapsed");el.querySelector(".pbd")?.classList.toggle("collapsed")}return}if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();toast(`${p.name} removed`)}}if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){p.buyins.push({id:uid(),counts:mode==="tournament"?clone(state.tourneyPack):{black:0,purple:0,yellow:0,pink:0,orange:0}});renderAllFull();syncBuyinsToFirebase();toast("Rebuy added")}}if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();syncBuyinsToFirebase();toast("Rebuy removed")}}if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull();syncBuyinsToFirebase()}}},true);
+  document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const act=t.dataset.act,pid=t.dataset.p;if(act==="togglePlayer"){if(collapsedPlayers.has(pid))collapsedPlayers.delete(pid);else collapsedPlayers.add(pid);const el=document.getElementById("player_"+pid);if(el){el.classList.toggle("is-collapsed");el.querySelector(".pbd")?.classList.toggle("collapsed")}return}if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();toast(`${p.name} removed`)}}    if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){if(p.buyins.length>=20){toast("Max 20 buy-ins per player");return}p.buyins.push({id:uid(),counts:mode==="tournament"?clone(state.tourneyPack):{black:0,purple:0,yellow:0,pink:0,orange:0}});renderAllFull();syncBuyinsToFirebase();toast("Rebuy added")}}if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();syncBuyinsToFirebase();toast("Rebuy removed")}}if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull();syncBuyinsToFirebase()}}},true);
 
   document.addEventListener("click",e=>{const t=e.target.closest("[data-jump]");if(t){const pid=t.dataset.jump,el=document.getElementById("player_"+pid);if(el){collapsedPlayers.delete(pid);el.classList.remove("is-collapsed");el.querySelector(".pbd")?.classList.remove("collapsed");el.scrollIntoView({behavior:"smooth"})}}},true);
   document.addEventListener("click",e=>{const row=e.target.closest(".sessionRow");if(row&&!e.target.closest(".deleteSession"))document.querySelectorAll(`.sessionDetail[data-detail="${row.dataset.sid}"]`).forEach(r=>r.classList.toggle("open"))},true);
@@ -455,8 +476,12 @@
     if(pinBuffer.length===4){
       setTimeout(()=>{
         if(pinMode==="verify"){
-          if(pinBuffer===getPin()){hidePinOverlay();toast("Welcome back 🔓")}
-          else{updatePinDots(true);$("pinMsg").textContent="Wrong PIN. Try again.";setTimeout(()=>{pinBuffer="";updatePinDots()},500)}
+          // Brute force protection
+          if(Date.now()<pinLockUntil){const secs=Math.ceil((pinLockUntil-Date.now())/1000);updatePinDots(true);$("pinMsg").textContent=`Locked out. Wait ${secs}s`;setTimeout(()=>{pinBuffer="";updatePinDots()},500);return}
+          if(pinBuffer===getPin()){pinAttempts=0;hidePinOverlay();toast("Welcome back 🔓")}
+          else{pinAttempts++;if(pinAttempts>=5){pinLockUntil=Date.now()+30000;updatePinDots(true);$("pinMsg").textContent="Too many attempts. Locked for 30 seconds.";setTimeout(()=>{pinBuffer="";updatePinDots()},500);// Countdown
+            const iv=setInterval(()=>{const s=Math.ceil((pinLockUntil-Date.now())/1000);if(s<=0){$("pinMsg").textContent="Try again";clearInterval(iv)}else $("pinMsg").textContent=`Locked. Wait ${s}s`},1000)}
+          else{updatePinDots(true);$("pinMsg").textContent=`Wrong PIN (${5-pinAttempts} attempts left)`;setTimeout(()=>{pinBuffer="";updatePinDots()},500)}}
         }
         else if(pinMode==="set"){
           pinNew=pinBuffer;pinBuffer="";pinMode="confirm";

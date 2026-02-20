@@ -112,7 +112,7 @@
 
   <!-- Your Hand -->
   <div class="panel">
-    <div class="panelHd"><h2>🃏 Your Hand</h2><button class="btn small danger" id="clearAll" type="button">Clear all</button></div>
+    <div class="panelHd"><h2>🃏 Your Hand</h2><div style="display:flex;gap:6px"><button class="btn small" id="loadLast" type="button">Load last</button><button class="btn small danger" id="clearAll" type="button">Clear</button></div></div>
     <div class="panelBd">
       <label>Your 2 hole cards</label>
       <div class="cardSlots" id="holeCards">
@@ -146,8 +146,13 @@
   </div>
 
   <!-- Calculate -->
-  <div class="btnbar" style="margin-bottom:14px">
+  <div class="btnbar" style="margin-bottom:14px;flex-direction:column;align-items:center;gap:8px">
     <button class="btn primary" id="calcBtn" type="button" style="width:100%;max-width:300px;padding:14px;font-size:16px">🎲 Calculate Odds</button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <label style="margin:0;font-size:11px">Simulations:</label>
+      <button class="btn small" id="sim3k" type="button" style="font-weight:700">3K ⚡</button>
+      <button class="btn small" id="sim10k" type="button">20K 🎯</button>
+    </div>
   </div>
 
   <!-- Results -->
@@ -304,6 +309,19 @@
 
   // Clear all
   document.getElementById("clearAll").addEventListener("click",()=>{holeCards=[null,null];commCards=[null,null,null,null,null];renderAllCards();document.getElementById("resultsPanel").style.display="none";document.getElementById("picker").classList.remove("open")});
+
+  // Load last hand
+  document.getElementById("loadLast").addEventListener("click",()=>{
+    try{
+      const saved=JSON.parse(localStorage.getItem("poker_last_hand"));
+      if(!saved||!saved.hole){toast("No saved hand");return}
+      holeCards=saved.hole||[null,null];
+      commCards=saved.comm||[null,null,null,null,null];
+      if(saved.opp)opponents=saved.opp;
+      document.getElementById("oppNum").textContent=opponents;
+      renderAllCards();toast("Last hand loaded");
+    }catch(e){toast("No saved hand")}
+  });
 
   // ── Poker Hand Evaluation ──
   function handRank(cards){
@@ -498,6 +516,9 @@
 
       panel.scrollIntoView({behavior:"smooth",block:"start"});
       btn.innerHTML="🎲 Calculate Odds";btn.disabled=false;
+
+      // Save last hand
+      try{localStorage.setItem("poker_last_hand",JSON.stringify({hole:[...holeCards],comm:[...commCards],opp:opponents}))}catch(e){}
     },50);
   });
 

@@ -81,6 +81,9 @@
     .disclaimer{text-align:center;padding:20px 14px;margin-top:20px;color:var(--muted);font-size:11px;line-height:1.5;opacity:.6}
     .disclaimer .dEmoji{font-size:20px;margin-bottom:6px}
     .confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999}
+    .offlineBanner{position:fixed;top:0;left:0;right:0;z-index:300;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));background:#dc2626;color:#fff;text-align:center;font-size:13px;font-weight:600;display:none;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+    .offlineBanner.show{display:block}
+    .resultRow .rName{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px}
     .toastBox{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
     .toast{padding:9px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--card-border);color:var(--text);font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(-8px) scale(.96);animation:toastIn .25s ease forwards;pointer-events:auto}
     .toast.out{animation:toastOut .2s ease forwards}
@@ -101,6 +104,7 @@
 </head>
 <body>
 <div class="toastBox" id="toastBox"></div>
+<div class="offlineBanner" id="offlineBanner">⚠️ No internet — submissions won't work</div>
 <div class="pullIndicator" id="pullIndicator"><span class="pullIcon">↓</span><span class="pullText">Pull to refresh</span></div>
 <button class="themeToggle" id="themeToggle" type="button">🌙</button>
 <div class="debugToggle" id="debugToggle">🐛</div>
@@ -179,6 +183,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script>
 (()=>{
   const THEME_KEY="poker_theme",DEVICE_KEY="poker_device_id";
@@ -196,11 +201,13 @@
   function dlog(msg,type="info"){const d=document.createElement("div");d.className="dline "+type;d.textContent=`[${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}] ${msg}`;debugEl.appendChild(d);debugEl.scrollTop=debugEl.scrollHeight;if(type==="err")debugBtn.classList.add("has-error")}
 
   let db;
-  try{firebase.initializeApp({apiKey:"AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",authDomain:"poker-cashout-bde23.firebaseapp.com",databaseURL:"https://poker-cashout-bde23-default-rtdb.firebaseio.com",projectId:"poker-cashout-bde23",storageBucket:"poker-cashout-bde23.firebasestorage.app",messagingSenderId:"1054875878552",appId:"1:1054875878552:web:94d610f9d20a18bed07ced"});db=firebase.database();dlog("Firebase OK","ok")}catch(err){dlog("Firebase FAILED: "+err.message,"err");return}
+  try{firebase.initializeApp({apiKey:"AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",authDomain:"poker-cashout-bde23.firebaseapp.com",databaseURL:"https://poker-cashout-bde23-default-rtdb.firebaseio.com",projectId:"poker-cashout-bde23",storageBucket:"poker-cashout-bde23.firebasestorage.app",messagingSenderId:"1054875878552",appId:"1:1054875878552:web:94d610f9d20a18bed07ced"});db=firebase.database();dlog("Firebase OK","ok");
+    firebase.auth().signInAnonymously().then(c=>{dlog("Auth: "+c.user.uid.slice(0,8),"ok")}).catch(e=>{dlog("Auth err: "+e.message,"err")});
+  }catch(err){dlog("Firebase FAILED: "+err.message,"err");return}
 
   const COLORS=["black","purple","yellow","pink","orange"],SW={black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
   const $=id=>document.getElementById(id),clamp=v=>Number.isFinite(v)?v:0;
-  const fmtUsd=x=>clamp(x).toLocaleString(undefined,{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\$/g,"₥");
+  const fmtUsd=x=>{const v=clamp(x).toLocaleString(undefined,{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});return v.replace(/\$/g,"₥")};
   function toast(msg,dur=2200){const box=$("toastBox"),el=document.createElement("div");el.className="toast";el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},dur)}
   function showError(id,msg){const el=$(id);el.textContent=msg;el.style.display=msg?"block":"none"}
 
@@ -263,12 +270,13 @@
       playerBuyinCount=clamp(ex.buyinCount||1);if(playerBuyinCount<1)playerBuyinCount=1;
     }catch(e){}
     renderChipInputs();showScreen("chipScreen");
+    listenForResults(); // Start listening early so locked session auto-redirects
   });
 
   // ── Chips ──
   function renderChipInputs(){
     const cv=sessionData?.chipValues||{};const dis=isAdminLocked?"disabled":"";
-    $("chipInputs").innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="colorInfo"><span class="sw ${SW[c]}"></span><div><div class="cname">${c[0].toUpperCase()+c.slice(1)}</div><div class="cval">${(cv[c]||0).toLocaleString()} units</div></div></div><div class="stepper"><button class="sbtn" type="button" data-step="-1" data-c="${c}" ${dis}>−</button><input type="number" step="1" inputmode="numeric" data-c="${c}" value="${chipCounts[c]}" placeholder="0" ${dis}/><button class="sbtn" type="button" data-step="1" data-c="${c}" ${dis}>+</button></div></div>`).join("");
+    $("chipInputs").innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="colorInfo"><span class="sw ${SW[c]}"></span><div><div class="cname">${c[0].toUpperCase()+c.slice(1)}</div><div class="cval">${(cv[c]||0).toLocaleString()} units</div></div></div><div class="stepper"><button class="sbtn" type="button" data-step="-1" data-c="${c}" ${dis}>−</button><input type="number" step="1" inputmode="numeric" min="0" max="999" data-c="${c}" value="${chipCounts[c]}" placeholder="0" ${dis}/><button class="sbtn" type="button" data-step="1" data-c="${c}" ${dis}>+</button></div></div>`).join("");
     $("adminLockWarn").style.display=isAdminLocked?"block":"none";
     $("submitChips").disabled=isAdminLocked;$("submitChips").textContent=isAdminLocked?"Locked by host":"Submit Cashout";
     updateResults();
@@ -286,8 +294,8 @@
   function applyCurrSymbol(){
     document.querySelectorAll('.resultsBar .val, .infoBanner, .muted, .resultRow .rVal, .successCard .muted').forEach(el=>{
       if(!el.innerHTML.includes('
-  document.addEventListener("click",e=>{const btn=e.target.closest(".sbtn");if(!btn||isAdminLocked)return;e.preventDefault();const step=Number(btn.dataset.step)||0,c=btn.dataset.c;if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.max(0,(chipCounts[c]||0)+step);btn.parentElement.querySelector("input").value=chipCounts[c];updateResults()});
-  document.addEventListener("input",e=>{const c=e.target?.dataset?.c;if(!c||!COLORS.includes(c)||isAdminLocked)return;chipCounts[c]=Math.max(0,parseInt(e.target.value,10)||0);updateResults()});
+  document.addEventListener("click",e=>{const btn=e.target.closest(".sbtn");if(!btn||isAdminLocked)return;e.preventDefault();const step=Number(btn.dataset.step)||0,c=btn.dataset.c;if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.min(999,Math.max(0,(chipCounts[c]||0)+step));btn.parentElement.querySelector("input").value=chipCounts[c];updateResults()});
+  document.addEventListener("input",e=>{const c=e.target?.dataset?.c;if(!c||!COLORS.includes(c)||isAdminLocked)return;chipCounts[c]=Math.min(999,Math.max(0,parseInt(e.target.value,10)||0));updateResults()});
 
   // ── Submit ──
   $("submitChips").addEventListener("click",async()=>{
