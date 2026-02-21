@@ -368,7 +368,7 @@
 
   function renderPlayersFull(){
     if(mode==="tournament"){$("players").innerHTML=state.players.map((p,pi)=>{const rc=p.buyins.length,tu=p.buyins.reduce((s,b)=>s+ufc(b.counts,state.chipValues),0),cs=COLORS.map(c=>{const v=p.buyins[0].counts[c];return v?`<span style="display:inline-flex;align-items:center;gap:3px;margin-right:6px"><span class="sw ${SW[c]}" style="width:8px;height:8px"></span>${v}</span>`:""}).filter(Boolean).join("");return`<div class="player" data-p="${p.id}" id="player_${p.id}"><div class="phd"><span class="pColorDot" style="background:${playerColor(pi)}"></span><div class="pname"><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" ${state.locked?"disabled":""} style="font-weight:600;background:transparent;border-color:transparent;padding:5px 8px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'"/><div style="font-size:11px;color:var(--muted);margin-top:2px;padding-left:8px">${cs} · ${fmtUsd(u2d(tu))} (${rc} buy-in${rc>1?"s":""})</div></div><div class="pactions"><button class="btn small" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="removeRebuy" data-p="${p.id}" ${state.locked||rc<=1?"disabled":""}>− Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>✕</button></div></div></div>`}).join("");renderTourneyChipPack();[1,2,3].forEach(i=>{const sel=$("place"+i),cur=state["place"+i];sel.innerHTML='<option value="">Select</option>'+state.players.map(p=>`<option value="${p.id}" ${p.id===cur?"selected":""}>${esc(p.name)}</option>`).join("");sel.disabled=!!state.locked});renderTournamentSummary()
-    }else{$("players").innerHTML=state.players.map((p,pi)=>{const isCol=collapsedPlayers.has(p.id),bh=p.buyins.map((b,i)=>{const t=i===0?"Buy-in 1":`Rebuy ${i}`,du=ufc(b.counts,state.chipValues);return`<div class="miniCard"><div class="miniHd"><b>${t}</b><button class="btn small danger" data-act="delBuyin" data-p="${p.id}" data-b="${b.id}" ${(state.locked||p.buyins.length===1)?"disabled":""}>Remove</button></div><div class="miniBd"><div class="chips">${COLORS.map(c=>colorCell(c,state.chipValues[c],b.counts[c],"buyin",p.id,b.id)).join("")}</div><div class="note" id="disp_${p.id}_${b.id}">Dispensed: <b>${du.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(du))}</b>)</div></div></div>`}).join("");const ou=ufc(p.cashout,state.chipValues);return`<div class="player ${isCol?"is-collapsed":""}" data-p="${p.id}" id="player_${p.id}"><div class="phd"><span class="chevron" data-act="togglePlayer" data-p="${p.id}">▼</span><span class="pColorDot" style="background:${playerColor(pi)}"></span><div class="pname"><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" ${state.locked?"disabled":""} style="font-weight:600;background:transparent;border-color:transparent;padding:5px 8px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'"/><div class="pSummaryInline">${shortSummary(p)}</div></div><div class="pactions"><button class="btn small" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>Remove</button></div></div><div class="pbd ${isCol?"collapsed":""}"><div class="outblock"><label>Buy-ins & Rebuys</label></div>${bh}<div class="cashoutSection"><label>Cashout (chips OUT)</label><div class="chips" style="margin-top:6px">${COLORS.map(c=>colorCell(c,state.chipValues[c],p.cashout[c],"cashout",p.id,"")).join("")}</div><div class="note" id="cashnote_${p.id}">Cashout: <b>${ou.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(ou))}</b>)</div></div><div class="outblock"><label>Summary</label><pre id="out_${p.id}">${esc(outputBlockText(p))}</pre></div></div></div>`}).join("")}}
+    }else{$("players").innerHTML=state.players.map((p,pi)=>{const isCol=collapsedPlayers.has(p.id),bh=p.buyins.map((b,i)=>{const t=i===0?"Buy-in 1":`Rebuy ${i}`,du=ufc(b.counts,state.chipValues);return`<div class="miniCard"><div class="miniHd"><b>${t}</b><button class="btn small danger" data-act="delBuyin" data-p="${p.id}" data-b="${b.id}" ${(state.locked||p.buyins.length===1)?"disabled":""}>Remove</button></div><div class="miniBd"><div class="chips">${COLORS.map(c=>colorCell(c,state.chipValues[c],b.counts[c],"buyin",p.id,b.id)).join("")}</div><div class="note" id="disp_${p.id}_${b.id}">Dispensed: <b>${du.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(du))}</b>)</div></div></div>`}).join("");      const ou=ufc(p.cashout,state.chipValues);return`<div class="player ${isCol?"is-collapsed":""}" data-p="${p.id}" id="player_${p.id}"><div class="phd"><span class="chevron" data-act="togglePlayer" data-p="${p.id}">▼</span><span class="pColorDot" style="background:${playerColor(pi)}"></span><div class="pname"><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" ${state.locked?"disabled":""} maxlength="20" style="font-weight:600;background:transparent;border-color:transparent;padding:5px 8px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'"/><div class="pSummaryInline">${shortSummary(p)}</div></div><div class="pactions"><button class="btn small" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>Remove</button></div></div><div class="pbd ${isCol?"collapsed":""}"><div class="outblock"><label>Buy-ins & Rebuys</label></div>${bh}<div class="cashoutSection"><label>Cashout (chips OUT)</label><div class="presetBar" style="margin-top:6px">${state.locked?"":Object.entries(CHIP_PRESETS).map(([k,v])=>`<button class="presetBtn" data-cashpreset="${k}" data-presetp="${p.id}" type="button">${k==="standard"?"🎰 Std":k==="half"?"½":k==="heavy"?"💰":"🪶"}</button>`).join("")+`<button class="presetBtn" data-cashpreset="clear" data-presetp="${p.id}" type="button">✕</button>`}</div><div class="chips" style="margin-top:6px">${COLORS.map(c=>colorCell(c,state.chipValues[c],p.cashout[c],"cashout",p.id,"")).join("")}</div><div class="note" id="cashnote_${p.id}">Cashout: <b>${ou.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(ou))}</b>)</div></div><div class="outblock"><label>Summary</label><pre id="out_${p.id}">${esc(outputBlockText(p))}</pre></div></div></div>`}).join("")}}
 
   function renderTournamentSummary(){const t=calcTournament(),tb=$("tourneySummaryBody"),md=["🥇","🥈","🥉"];tb.innerHTML=t.results.map((r,i)=>{if(!r)return`<tr><td>${md[i]}</td><td class="muted">Not selected</td><td></td><td></td><td></td><td></td><td></td></tr>`;const cls=r.net>0?"good":(r.net<0?"bad":"muted");return`<tr><td>${md[i]}</td><td>${esc(r.name)}</td><td class="num">${r.buyins}</td><td class="num">${fmtUsd(r.prize)}</td><td class="num">${fmtUsd(r.rf)}</td><td class="num">${fmtUsd(r.payout)}</td><td class="num ${cls}">${r.net>=0?"+":""}${fmtUsd(r.net)}</td></tr>`}).join("");state.players.filter(p=>![state.place1,state.place2,state.place3].includes(p.id)).forEach(p=>{const bt=p.buyins.length*state.buyinUsd;tb.innerHTML+=`<tr><td></td><td>${esc(p.name)}</td><td class="num">${p.buyins.length}</td><td class="num">₥0.00</td><td class="num">₥0.00</td><td class="num">₥0.00</td><td class="num bad">-${fmtUsd(bt)}</td></tr>`});$("tourneyInfoText").textContent=`Pool: ${fmtUsd(t.pool)} · Split: ${state.split1}/${state.split2}/${state.split3} · RF: ${Math.round(state.taxRate*100)}%`;const tp=t.results.reduce((s,r)=>s+(r?r.payout:0),0),tr2=t.results.reduce((s,r)=>s+(r?r.rf:0),0);$("t_gross").textContent=fmtUsd(t.pool);$("t_rf").textContent=fmtUsd(tr2);$("t_final").textContent=fmtUsd(tp)}
 
@@ -406,19 +406,29 @@
   [1,2,3].forEach(i=>$("place"+i).addEventListener("change",e=>{state["place"+i]=e.target.value;save();renderAllFull()}));
   $("copyChipPack").addEventListener("click",()=>{if(state.locked)return;const pack=clone(state.tourneyPack);for(const p of state.players)for(const b of p.buyins)for(const c of COLORS)b.counts[c]=pack[c];save();renderAllFull();toast(`Copied to ${state.players.length} ✓`)});
 
-  // Chip presets
+  // Chip presets (buy-in)
   document.addEventListener("click",e=>{
     const pb=e.target.closest("[data-preset]");
-    if(!pb||state.locked)return;
-    const preset=CHIP_PRESETS[pb.dataset.preset];
-    if(!preset)return;
-    for(const p of state.players){
-      p.buyins[0].counts=clone(preset);
-      // Keep rebuys at their current values
+    if(pb&&!state.locked){
+      const preset=CHIP_PRESETS[pb.dataset.preset];
+      if(!preset)return;
+      for(const p of state.players)p.buyins[0].counts=clone(preset);
+      DEFAULTS.defaultPack=clone(preset);
+      renderAllFull();toast("Buy-in preset applied ✓");return;
     }
-    DEFAULTS.defaultPack=clone(preset);
-    renderAllFull();
-    toast("Preset applied to all players ✓");
+    // Cashout presets (per player)
+    const cpb=e.target.closest("[data-cashpreset]");
+    if(cpb&&!state.locked){
+      const pid=cpb.dataset.presetp;
+      const key=cpb.dataset.cashpreset;
+      const p=state.players.find(x=>x.id===pid);
+      if(!p)return;
+      if(key==="clear"){COLORS.forEach(c=>{p.cashout[c]=0})}
+      else{const preset=CHIP_PRESETS[key];if(!preset)return;COLORS.forEach(c=>{p.cashout[c]=preset[c]||0})}
+      save();renderPlayersFull();renderAuditAndSummary();
+      if(onlineSessionCode)setAdminOverride(p.name.trim());
+      toast(key==="clear"?"Cashout cleared":"Preset applied");return;
+    }
   });
 
   let allCollapsed=false;
