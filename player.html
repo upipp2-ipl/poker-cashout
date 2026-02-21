@@ -65,6 +65,11 @@
     .stepper input:focus{box-shadow:none}
     .stepper .sbtn{display:flex;align-items:center;justify-content:center;width:44px;min-width:44px;background:var(--hover);color:var(--muted);cursor:pointer;user-select:none;touch-action:manipulation;font-size:20px;font-weight:700;border:none;transition:all .12s}
     .stepper .sbtn:hover{color:var(--text)}.stepper .sbtn:active{background:rgba(122,167,255,.15)}
+    /* Chip presets */
+    .presetBar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+    .presetBtn{padding:7px 12px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text)}
+    .presetBtn:hover{border-color:var(--accent);background:rgba(122,167,255,.08)}
+    .presetBtn.active{border-color:var(--accent);background:rgba(122,167,255,.12)}
     .resultsBar{padding:14px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);margin:16px 0}
     .resultsBar .row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
     .resultsBar .row.big{font-size:16px;font-weight:800;padding:8px 0 2px}
@@ -140,6 +145,7 @@
       <div id="chipPlayerName" style="font-size:15px;font-weight:700;margin-bottom:4px"></div>
       <div class="note" style="margin-top:0;margin-bottom:14px">Count your chips by color and enter the totals</div>
       <div id="adminLockWarn" class="warnBox" style="display:none;margin-bottom:12px">The host has already entered your cashout. Your submission is disabled.</div>
+      <div class="presetBar" id="playerPresets"></div>
       <div class="chips" id="chipInputs"></div>
       <div class="resultsBar" id="resultsBar">
         <div class="row"><span class="lbl">Cashout value</span><span class="val" id="rCashout">$0.00</span></div>
@@ -202,10 +208,11 @@
 
   let db;
   try{firebase.initializeApp({apiKey:"AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",authDomain:"poker-cashout-bde23.firebaseapp.com",databaseURL:"https://poker-cashout-bde23-default-rtdb.firebaseio.com",projectId:"poker-cashout-bde23",storageBucket:"poker-cashout-bde23.firebasestorage.app",messagingSenderId:"1054875878552",appId:"1:1054875878552:web:94d610f9d20a18bed07ced"});db=firebase.database();dlog("Firebase OK","ok");
-    try{firebase.auth().signInAnonymously().then(c=>{dlog("Auth: "+c.user.uid.slice(0,8),"ok")}).catch(()=>{dlog("Auth skipped","data")})}catch(e){}
+    firebase.auth().signInAnonymously().then(c=>{dlog("Auth: "+c.user.uid.slice(0,8),"ok")}).catch(e=>{dlog("Auth err: "+e.message,"err")});
   }catch(err){dlog("Firebase FAILED: "+err.message,"err");return}
 
   const COLORS=["black","purple","yellow","pink","orange"],SW={black:"b",purple:"p",yellow:"y",pink:"pk",orange:"o"};
+  const CHIP_PRESETS={standard:{label:"🎰 Standard",black:15,purple:3,yellow:12,pink:3,orange:2},half:{label:"½ Half",black:8,purple:2,yellow:6,pink:2,orange:1},heavy:{label:"💰 Heavy",black:20,purple:5,yellow:15,pink:5,orange:3},light:{label:"🪶 Light",black:10,purple:2,yellow:8,pink:2,orange:1},zero:{label:"✕ Clear",black:0,purple:0,yellow:0,pink:0,orange:0}};
   const $=id=>document.getElementById(id),clamp=v=>Number.isFinite(v)?v:0;
   const fmtUsd=x=>{const v=clamp(x).toLocaleString(undefined,{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});return v.replace(/\$/g,"₥")};
   function toast(msg,dur=2200){const box=$("toastBox"),el=document.createElement("div");el.className="toast";el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},dur)}
@@ -279,6 +286,10 @@
     $("chipInputs").innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="colorInfo"><span class="sw ${SW[c]}"></span><div><div class="cname">${c[0].toUpperCase()+c.slice(1)}</div><div class="cval">${(cv[c]||0).toLocaleString()} units</div></div></div><div class="stepper"><button class="sbtn" type="button" data-step="-1" data-c="${c}" ${dis}>−</button><input type="number" step="1" inputmode="numeric" min="0" max="999" data-c="${c}" value="${chipCounts[c]}" placeholder="0" ${dis}/><button class="sbtn" type="button" data-step="1" data-c="${c}" ${dis}>+</button></div></div>`).join("");
     $("adminLockWarn").style.display=isAdminLocked?"block":"none";
     $("submitChips").disabled=isAdminLocked;$("submitChips").textContent=isAdminLocked?"Locked by host":"Submit Cashout";
+    // Presets
+    const presetBar=$("playerPresets");
+    if(isAdminLocked){presetBar.innerHTML=""}
+    else{presetBar.innerHTML=Object.entries(CHIP_PRESETS).map(([k,v])=>`<button class="presetBtn" data-ppreset="${k}" type="button">${v.label}</button>`).join("")}
     updateResults();
   }
   function updateResults(){
@@ -295,6 +306,8 @@
     document.querySelectorAll('.resultsBar .val, .infoBanner, .muted, .resultRow .rVal, .successCard .muted').forEach(el=>{
       if(!el.innerHTML.includes('
   document.addEventListener("click",e=>{const btn=e.target.closest(".sbtn");if(!btn||isAdminLocked)return;e.preventDefault();const step=Number(btn.dataset.step)||0,c=btn.dataset.c;if(!c||!COLORS.includes(c))return;chipCounts[c]=Math.min(999,Math.max(0,(chipCounts[c]||0)+step));btn.parentElement.querySelector("input").value=chipCounts[c];updateResults()});
+  // Preset click
+  document.addEventListener("click",e=>{const pb=e.target.closest("[data-ppreset]");if(!pb||isAdminLocked)return;const key=pb.dataset.ppreset,preset=CHIP_PRESETS[key];if(!preset)return;COLORS.forEach(c=>{chipCounts[c]=preset[c]||0});document.querySelectorAll("#chipInputs input[data-c]").forEach(inp=>{const c=inp.dataset.c;inp.value=chipCounts[c]});document.querySelectorAll(".presetBtn").forEach(b=>b.classList.toggle("active",b.dataset.ppreset===key));updateResults();toast(key==="zero"?"Chips cleared":preset.label+" applied")});
   document.addEventListener("input",e=>{const c=e.target?.dataset?.c;if(!c||!COLORS.includes(c)||isAdminLocked)return;chipCounts[c]=Math.min(999,Math.max(0,parseInt(e.target.value,10)||0));updateResults()});
 
   // ── Submit ──
