@@ -393,6 +393,8 @@
       showScreen("successScreen");toast("Submitted ✓");
       // Ensure results listener is running
       listenForResults();
+      // Also poll every 5 seconds as fallback
+      startResultsPolling();
     }catch(err){showError("submitError","Error: "+err.message)}
     $("submitChips").innerHTML="Submit Cashout";$("submitChips").disabled=false;
   });
@@ -402,6 +404,48 @@
     renderChips();showScreen("chipScreen");
   });
 
+  // ── RESULTS POLLING FALLBACK ──
+  let pollInterval=null;
+  function startResultsPolling(){
+    if(pollInterval||!sessionCode)return;
+    console.log("Starting results polling fallback");
+    pollInterval=setInterval(async()=>{
+      try{
+        const snap=await db.ref("sessions/"+sessionCode+"/results").once("value");
+        const data=snap.val();
+        if(data&&data.locked&&data.players){
+          console.log("Poll found results!");
+          clearInterval(pollInterval);pollInterval=null;
+          showResults(data);
+        }
+      }catch(e){console.log("Poll error:",e.message)}
+    },5000);
+  }
+
+  // ── SHOW RESULTS (shared by listener + poll) ──
+  function showResults(data){
+    $("resultsSessionName").textContent=sessionData?.sessionName||sessionCode;
+    const players=Object.entries(data.players).map(([name,d])=>({name,...d}));
+    if(!players.length)return;
+    players.sort((a,b)=>(b.net||0)-(a.net||0));
+    const medals=["🥇","🥈","🥉"];
+    $("resultsList").innerHTML=players.map(p=>{
+      const isYou=p.name===selectedPlayer;
+      const net=p.net||0;
+      const cls=net>0.01?"good":(net<-0.01?"bad":"muted");
+      const medal=(data.mode==="tournament"&&p.place>=1&&p.place<=3)?medals[p.place-1]+" ":"";
+      const buyinInfo=p.buyins?` · ${p.buyins} buy-in${p.buyins>1?"s":""}`:""
+      const grossInfo=p.gross?` · Gross: ${fmtUsd(p.gross)}`:"";
+      const rfInfo=(p.rfTax||p.rf)?` · RF: ${fmtUsd(p.rfTax||p.rf)}`:"";
+      return`<div class="resultRow ${isYou?"you":""}"><div><span class="rName">${medal}${p.name}</span>${isYou?' <span style="font-size:10px;color:var(--accent)">(you)</span>':""}<br><span style="font-size:10px;color:var(--muted)">${buyinInfo}${grossInfo}${rfInfo}</span></div><div class="rVal ${cls}">${net>=0?"+":""}${fmtUsd(net)}</div></div>`;
+    }).join("");
+    console.log("Results rendered: "+players.length+" players");
+    showScreen("resultsScreen");toast("Results are in! 🎉");
+    // Confetti
+    try{const cv=document.createElement("canvas");cv.className="confettiCanvas";document.body.appendChild(cv);const ctx=cv.getContext("2d");cv.width=window.innerWidth;cv.height=window.innerHeight;const cs=["#2bd576","#f5c542","#ff5c7a","#7aa7ff","#ec4899"];const pcs=[];for(let i=0;i<80;i++)pcs.push({x:Math.random()*cv.width,y:-Math.random()*cv.height*.5-50,r:Math.random()*5+3,dx:(Math.random()-.5)*3,dy:Math.random()*3+2,rot:Math.random()*360,dr:Math.random()*8-4,c:cs[Math.floor(Math.random()*cs.length)]});let f=0;(function draw(){ctx.clearRect(0,0,cv.width,cv.height);let alive=false;pcs.forEach(p=>{p.x+=p.dx;p.y+=p.dy;p.dy+=.04;p.rot+=p.dr;if(p.y<cv.height+20)alive=true;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.c;ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);ctx.restore()});f++;if(alive&&f<150)requestAnimationFrame(draw);else cv.remove()})()}catch(e){}
+    try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type="sine";o.frequency.value=784;g.gain.value=.1;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}catch(e){}
+  }
+
   // ── RESULTS LISTENER ──
   let resultsListener=null;
   function listenForResults(){
@@ -410,30 +454,9 @@
     resultsListener=db.ref("sessions/"+sessionCode+"/results").on("value",snap=>{
       const data=snap.val();
       console.log("Results listener fired:",data?JSON.stringify(data).slice(0,200):"null");
-      if(!data)return;
-      if(!data.locked)return;
-      if(!data.players||typeof data.players!=="object"){console.log("No players in results");return}
-
-      $("resultsSessionName").textContent=sessionData?.sessionName||sessionCode;
-      const players=Object.entries(data.players).map(([name,d])=>({name,...d}));
-      if(!players.length){console.log("Empty players list");return}
-      players.sort((a,b)=>(b.net||0)-(a.net||0));
-      const medals=["🥇","🥈","🥉"];
-      $("resultsList").innerHTML=players.map(p=>{
-        const isYou=p.name===selectedPlayer;
-        const net=p.net||0;
-        const cls=net>0.01?"good":(net<-0.01?"bad":"muted");
-        const medal=(data.mode==="tournament"&&p.place>=1&&p.place<=3)?medals[p.place-1]+" ":"";
-        const buyinInfo=p.buyins?` · ${p.buyins} buy-in${p.buyins>1?"s":""}`:""
-        const grossInfo=p.gross?` · Gross: ${fmtUsd(p.gross)}`:"";
-        const rfInfo=(p.rfTax||p.rf)?` · RF: ${fmtUsd(p.rfTax||p.rf)}`:"";
-        return`<div class="resultRow ${isYou?"you":""}"><div><span class="rName">${medal}${p.name}</span>${isYou?' <span style="font-size:10px;color:var(--accent)">(you)</span>':""}<br><span style="font-size:10px;color:var(--muted)">${buyinInfo}${grossInfo}${rfInfo}</span></div><div class="rVal ${cls}">${net>=0?"+":""}${fmtUsd(net)}</div></div>`;
-      }).join("");
-      console.log("Results screen rendered with "+players.length+" players");
-      showScreen("resultsScreen");toast("Results are in! 🎉");
-      // Confetti
-      try{const cv=document.createElement("canvas");cv.className="confettiCanvas";document.body.appendChild(cv);const ctx=cv.getContext("2d");cv.width=window.innerWidth;cv.height=window.innerHeight;const cs=["#2bd576","#f5c542","#ff5c7a","#7aa7ff","#ec4899"];const pcs=[];for(let i=0;i<80;i++)pcs.push({x:Math.random()*cv.width,y:-Math.random()*cv.height*.5-50,r:Math.random()*5+3,dx:(Math.random()-.5)*3,dy:Math.random()*3+2,rot:Math.random()*360,dr:Math.random()*8-4,c:cs[Math.floor(Math.random()*cs.length)]});let f=0;(function draw(){ctx.clearRect(0,0,cv.width,cv.height);let alive=false;pcs.forEach(p=>{p.x+=p.dx;p.y+=p.dy;p.dy+=.04;p.rot+=p.dr;if(p.y<cv.height+20)alive=true;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.c;ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);ctx.restore()});f++;if(alive&&f<150)requestAnimationFrame(draw);else cv.remove()})()}catch(e){}
-      try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type="sine";o.frequency.value=784;g.gain.value=.1;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}catch(e){}
+      if(!data||!data.locked||!data.players||typeof data.players!=="object")return;
+      if(pollInterval){clearInterval(pollInterval);pollInterval=null}
+      showResults(data);
     },err=>{
       console.error("Results listener error:",err);
     });

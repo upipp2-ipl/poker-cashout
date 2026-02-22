@@ -323,29 +323,45 @@
   function archiveCurrentSession(){const players=state.players.map(p=>{if(mode==="tournament"){const t=calcTournament(),r=t.results.find(x=>x&&x.name===p.name.trim());return{name:p.name.trim(),buyins:p.buyins.length,gross:r?r.prize:0,rfTax:r?r.rf:0,final:r?r.payout:0,net:r?r.net:-(p.buyins.length*state.buyinUsd)}}else{const c=calcPlayer(p);return{name:p.name.trim(),buyins:c.buyinsCount,gross:c.gross,rfTax:c.rfTax,final:c.finalPayout,net:c.netProfit}}});const totalRF=players.reduce((s,p)=>s+p.rfTax,0);const entry={id:uid(),date:new Date().toISOString(),sessionName:(state.sessionName||"").trim()||"Untitled",mode,buyinUsd:state.buyinUsd,playerCount:players.length,totalRF,players};const h=loadHistory();if(h[0]&&Math.abs(new Date(h[0].date)-new Date(entry.date))<30000){toast("Already archived");return false}h.unshift(entry);saveHistory(h);return true}
 
   function syncResultsToFirebase(){
-    if(!onlineSessionCode)return;
-    const r={locked:true,mode:mode,timestamp:Date.now()};
+    if(!onlineSessionCode){console.log("No online session — skipping results sync");return}
     const playersObj={};
     if(mode==="tournament"){
       const t=calcTournament();
-      r.pool=t.pool;
       t.results.forEach((x,i)=>{if(x)playersObj[x.name]={place:i+1,prize:x.prize,rf:x.rf,payout:x.payout,net:x.net,buyins:x.buyins}});
       state.players.forEach(p=>{const n=p.name.trim();if(!playersObj[n])playersObj[n]={place:0,prize:0,rf:0,payout:0,net:-(p.buyins.length*state.buyinUsd),buyins:p.buyins.length}});
     }else{
       state.players.forEach(p=>{
         const c=calcPlayer(p);
-        const n=p.name.trim();
-        playersObj[n]={gross:c.gross,rfTax:c.rfTax,finalPayout:c.finalPayout,net:c.netProfit,buyins:c.buyinsCount};
+        playersObj[p.name.trim()]={gross:c.gross,rfTax:c.rfTax,finalPayout:c.finalPayout,net:c.netProfit,buyins:c.buyinsCount};
       });
     }
-    r.players=playersObj;
-    console.log("Syncing results to Firebase:",JSON.stringify(r).slice(0,200));
-    db.ref("sessions/"+onlineSessionCode+"/results").set(r).then(()=>{
-      console.log("Results synced OK");
+    // Verify we have data
+    const playerKeys=Object.keys(playersObj);
+    if(!playerKeys.length){console.error("No players to sync");toast("Error: no player data");return}
+    
+    const payload={locked:true,mode:mode,timestamp:Date.now(),players:playersObj};
+    console.log("Writing results:",JSON.stringify(payload).slice(0,300));
+    console.log("Path: sessions/"+onlineSessionCode+"/results");
+    console.log("Players:",playerKeys.join(", "));
+    
+    db.ref("sessions/"+onlineSessionCode+"/results").set(payload).then(()=>{
+      console.log("✅ Results written successfully");
       toast("Results published to players ✅");
+      // Verify the write
+      db.ref("sessions/"+onlineSessionCode+"/results/locked").once("value").then(s=>{
+        console.log("Verify locked:",s.val());
+      });
     }).catch(err=>{
-      console.error("Results sync failed:",err);
-      toast("Failed to publish results — check console");
+      console.error("❌ Results write FAILED:",err.message,err.code);
+      toast("Failed to publish: "+err.message);
+      // Retry without validation-sensitive fields
+      console.log("Retrying with simple write...");
+      db.ref("sessions/"+onlineSessionCode+"/results/locked").set(true);
+      db.ref("sessions/"+onlineSessionCode+"/results/mode").set(mode);
+      db.ref("sessions/"+onlineSessionCode+"/results/timestamp").set(Date.now());
+      db.ref("sessions/"+onlineSessionCode+"/results/players").set(playersObj).then(()=>{
+        console.log("✅ Retry succeeded");toast("Results published (retry) ✅");
+      }).catch(err2=>{console.error("❌ Retry also failed:",err2.message)});
     });
   }
 
