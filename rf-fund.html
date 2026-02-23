@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>IPL – RF Fund Manager</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <style>
+    [data-theme="dark"]{
+      --bg:#1a1f2e;--bg2:#242938;--bg3:#2d3348;--text:#e8eefc;--muted:#8b95b0;
+      --line:rgba(255,255,255,.08);--card-border:rgba(255,255,255,.08);
+      --input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);
+      --good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;
+      --sh:0 4px 20px rgba(0,0,0,.25);
+    }
+    [data-theme="light"]{
+      --bg:#f0f2f7;--bg2:#ffffff;--bg3:#e8ebf0;--text:#1a1f2e;--muted:#5a6278;
+      --line:rgba(0,0,0,.08);--card-border:rgba(0,0,0,.08);
+      --input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);
+      --good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;
+      --sh:0 2px 12px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box;margin:0}
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--text);background:var(--bg);transition:background .3s,color .3s;padding-bottom:80px}
+    .iplHeader{text-align:center;padding:18px 14px 6px}
+    .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:26px;font-weight:800;letter-spacing:1px}
+    .suit{font-size:18px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
+    .iplSub{color:var(--muted);font-size:11px;margin-top:2px;letter-spacing:.5px}
+    .wrap{max-width:900px;margin:0 auto;padding:0 14px}
+
+    /* Nav */
+    .nav{display:flex;gap:8px;margin:12px 0 16px;flex-wrap:wrap;align-items:center}
+    .navBtn{padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+    .navBtn:hover{background:var(--bg3);color:var(--text)}
+    .navBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .topRight{margin-left:auto;display:flex;gap:6px;align-items:center}
+    .themeToggle{background:var(--bg2);border:1px solid var(--card-border);border-radius:10px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--text)}
+
+    /* Role badge */
+    .roleBadge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.3px}
+    .roleBadge.admin{background:rgba(43,213,118,.12);color:var(--good);border:1px solid rgba(43,213,118,.2)}
+    .roleBadge.viewer{background:rgba(122,167,255,.12);color:var(--accent);border:1px solid rgba(122,167,255,.2)}
+
+    /* KPI */
+    .kpiRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+    .kpi{border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);padding:16px;box-shadow:var(--sh)}
+    .kpiLabel{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .kpiVal{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+    .kpiNote{font-size:11px;color:var(--muted);margin-top:4px}
+    .kpiVal.good{color:var(--good)}.kpiVal.bad{color:var(--bad)}.kpiVal.warn{color:var(--warn)}
+
+    /* Alert */
+    .alert{border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:13px;font-weight:600;display:none}
+    .alert.warn{display:block;background:rgba(245,197,66,.12);border:1px solid rgba(245,197,66,.25);color:var(--warn)}
+    .alert.bad{display:block;background:rgba(255,92,122,.12);border:1px solid rgba(255,92,122,.25);color:var(--bad)}
+    .alert.info{display:block;background:rgba(122,167,255,.10);border:1px solid rgba(122,167,255,.2);color:var(--accent)}
+
+    /* Card */
+    .card{border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh);margin-bottom:16px;overflow:hidden}
+    .cardHd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+    .cardHd h2{font-size:15px;font-weight:700}
+    .cardBd{padding:16px}
+
+    /* Weekly summary */
+    .weekRow{display:grid;grid-template-columns:1fr repeat(4,auto);gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;align-items:center}
+    .weekRow.hd{font-weight:700;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+    .weekRow:last-child{border-bottom:none}
+    .num{text-align:right;font-variant-numeric:tabular-nums}
+    .chartWrap{position:relative;height:260px;margin:8px 0}
+
+    /* Audit log */
+    .logRow{display:grid;grid-template-columns:130px 1fr auto auto;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px;align-items:center}
+    .logRow.hd{font-weight:700;color:var(--muted);font-size:10px;text-transform:uppercase}
+    .logRow:last-child{border-bottom:none}
+    .logTag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+    .logTag.add{background:rgba(43,213,118,.12);color:var(--good)}
+    .logTag.spend{background:rgba(255,92,122,.12);color:var(--bad)}
+    .logTag.seed{background:rgba(122,167,255,.12);color:var(--accent)}
+    .logTag.del{background:rgba(139,149,176,.12);color:var(--muted);text-decoration:line-through}
+    .logWho{font-size:10px;color:var(--muted);font-style:italic}
+
+    /* Forms */
+    .entryRow{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-top:12px}
+    .fld{display:flex;flex-direction:column;gap:3px}
+    .fld label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .fld input,.fld select{padding:8px 10px;border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:14px;font-weight:600;outline:none;width:140px}
+    .fld input:focus,.fld select:focus{border-color:var(--accent)}
+    .btn{padding:8px 16px;border-radius:10px;border:none;font-weight:700;font-size:13px;cursor:pointer;transition:all .15s}
+    .btn.primary{background:var(--accent);color:#fff}.btn.primary:hover{filter:brightness(1.1)}
+    .btn.danger{background:var(--bad);color:#fff}
+    .btn.small{padding:6px 12px;font-size:12px}
+    .btn.outline{background:transparent;border:1px solid var(--card-border);color:var(--muted)}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .settingsRow{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+    .settingsRow:last-child{border-bottom:none}
+    .settingsRow label{flex:1;color:var(--muted)}
+    .settingsRow input{width:100px;padding:6px 8px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);color:var(--text);font-size:14px;font-weight:600;text-align:right}
+
+    /* Auth modal */
+    .modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);justify-content:center;align-items:center;padding:20px}
+    .modal.open{display:flex}
+    .modalBox{background:var(--bg2);border:1px solid var(--card-border);border-radius:16px;padding:24px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+    .modalBox h3{margin-bottom:12px;font-size:18px}
+    .modalBox p{color:var(--muted);font-size:13px;margin-bottom:16px}
+    .pinInput{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+    .pinInput input{width:48px;height:56px;text-align:center;font-size:22px;font-weight:800;border:2px solid var(--input-border);border-radius:10px;background:var(--input-bg);color:var(--text);outline:none}
+    .pinInput input:focus{border-color:var(--accent)}
+    .pinErr{color:var(--bad);font-size:12px;margin-bottom:10px;min-height:16px}
+    .nameInput{width:100%;padding:10px;border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:14px;text-align:center;margin-bottom:12px}
+
+    .liveIndicator{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--good);font-weight:600}
+    .liveIndicator .dot{width:7px;height:7px;border-radius:50%;background:var(--good);animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+    .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);padding:10px 18px;border-radius:10px;background:#242938;border:1px solid var(--card-border);color:var(--text);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s}
+    .toast.show{opacity:1}
+
+    .adminOnly{display:none}
+    body.is-admin .adminOnly{display:block}
+    body.is-admin .adminOnlyFlex{display:flex}
+    body.is-admin .adminOnlyInline{display:inline-flex}
+
+    @media(max-width:600px){
+      .kpiRow{grid-template-columns:1fr 1fr}
+      .weekRow{grid-template-columns:1fr repeat(2,auto);font-size:12px}
+      .weekRow .hide-m{display:none}
+      .logRow{grid-template-columns:100px 1fr auto}
+      .logRow .hide-m{display:none}
+    }
+  </style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- Admin Auth Modal -->
+<div class="modal" id="authModal">
+  <div class="modalBox">
+    <h3 id="authTitle">Admin Login</h3>
+    <p id="authDesc">Enter your 4-digit admin PIN</p>
+    <input class="nameInput" id="authName" placeholder="Your name (e.g. Vidya)" style="display:none"/>
+    <div class="pinInput">
+      <input type="tel" maxlength="1" data-pin="0" inputmode="numeric" autocomplete="off"/>
+      <input type="tel" maxlength="1" data-pin="1" inputmode="numeric" autocomplete="off"/>
+      <input type="tel" maxlength="1" data-pin="2" inputmode="numeric" autocomplete="off"/>
+      <input type="tel" maxlength="1" data-pin="3" inputmode="numeric" autocomplete="off"/>
+    </div>
+    <div class="pinErr" id="pinErr"></div>
+    <button class="btn primary" id="authSubmit" style="width:100%;margin-bottom:8px">Unlock</button>
+    <button class="btn outline" id="authSkip" style="width:100%">Continue as Viewer</button>
+  </div>
+</div>
+
+<div class="iplHeader">
+  <div class="iplLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div>
+  <div class="iplSub">Innovation Poker League</div>
+</div>
+
+<div class="wrap">
+  <div class="nav">
+    <a class="navBtn" href="index.html">♠ Admin</a>
+    <a class="navBtn active" href="rf-fund.html">💰 RF Fund</a>
+    <a class="navBtn" href="analytics.html">📊 Analytics</a>
+    <div class="topRight">
+      <span class="liveIndicator"><span class="dot"></span> LIVE</span>
+      <span class="roleBadge viewer" id="roleBadge">👁 VIEWER</span>
+      <button class="btn small outline" id="loginBtn">🔐 Admin</button>
+      <button class="themeToggle" id="themeToggle">🌙</button>
+    </div>
+  </div>
+
+  <div class="alert info" id="viewerBanner">👁 You're viewing as a guest. Admin access required to add transactions or change settings.</div>
+  <div class="alert" id="alertBanner"></div>
+
+  <!-- KPIs -->
+  <div class="kpiRow">
+    <div class="kpi"><div class="kpiLabel">Total RF Balance</div><div class="kpiVal good" id="kpiBalance">$0.00</div><div class="kpiNote" id="kpiBalNote">Across all sessions</div></div>
+    <div class="kpi"><div class="kpiLabel">This Week Collected</div><div class="kpiVal" id="kpiWeekIn">$0.00</div><div class="kpiNote" id="kpiWeekInNote">0 sessions</div></div>
+    <div class="kpi"><div class="kpiLabel">This Week Spent</div><div class="kpiVal" id="kpiWeekOut">$0.00</div><div class="kpiNote" id="kpiWeekOutNote">0 txns</div></div>
+    <div class="kpi"><div class="kpiLabel">Avg RF / Session</div><div class="kpiVal" id="kpiAvgRF">$0.00</div><div class="kpiNote" id="kpiAvgNote">—</div></div>
+  </div>
+
+  <!-- Fund Settings (admin only) -->
+  <div class="card adminOnly">
+    <div class="cardHd"><h2>⚙️ Fund Settings</h2></div>
+    <div class="cardBd">
+      <div class="settingsRow"><label>Low Balance Alert Threshold</label><input type="number" id="threshold" value="50" min="0" step="5" inputmode="numeric"/></div>
+      <div style="padding-top:8px;display:flex;gap:8px">
+        <button class="btn primary small" id="saveSettings">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Transaction (admin only) -->
+  <div class="card adminOnly">
+    <div class="cardHd"><h2>➕ Manual Transaction</h2></div>
+    <div class="cardBd">
+      <div class="entryRow">
+        <div class="fld"><label>Type</label><select id="txType"><option value="add">➕ Add Funds</option><option value="spend">💸 Spend</option></select></div>
+        <div class="fld"><label>Amount ($)</label><input type="number" id="txAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal"/></div>
+        <div class="fld"><label>Note</label><input type="text" id="txNote" placeholder="e.g. Pizza, Cards" style="width:180px"/></div>
+        <button class="btn primary" id="txSubmit">Add</button>
+      </div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">SEED FUND</div>
+        <div class="entryRow" style="margin-top:0">
+          <div class="fld"><label>Amount ($)</label><input type="number" id="seedAmount" value="0" min="0" step="10" inputmode="numeric" style="width:120px"/></div>
+          <button class="btn outline small" id="applySeed">Apply Seed</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trend Chart -->
+  <div class="card">
+    <div class="cardHd"><h2>📈 Fund Movement (Weekly)</h2></div>
+    <div class="cardBd"><div class="chartWrap"><canvas id="trendChart"></canvas></div></div>
+  </div>
+
+  <!-- Weekly Summary -->
+  <div class="card">
+    <div class="cardHd"><h2>📅 Weekly Summary</h2><button class="btn small outline" id="exportWeekly">Export CSV</button></div>
+    <div class="cardBd">
+      <div class="weekRow hd"><div>Week</div><div class="num">Opening</div><div class="num hide-m">Added</div><div class="num hide-m">Spent</div><div class="num">Closing</div></div>
+      <div id="weeklyBody"></div>
+    </div>
+  </div>
+
+  <!-- Audit Log -->
+  <div class="card">
+    <div class="cardHd">
+      <h2>📋 Audit Log</h2>
+      <div style="display:flex;gap:6px">
+        <button class="btn small outline" id="exportLog">Export CSV</button>
+      </div>
+    </div>
+    <div class="cardBd">
+      <div class="logRow hd"><div>Date</div><div>Description</div><div class="num hide-m">By</div><div class="num">Amount</div></div>
+      <div id="logBody"></div>
+      <div id="logEmpty" style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No transactions yet</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmtUsd=v=>"$"+Math.abs(v).toFixed(2);
+  let trendChartInstance=null;
+  let isAdmin=false;
+  let adminName="";
+  let allTransactions=[];
+  let settings={threshold:50};
+
+  // ══════════════════════════════════════════
+  //  FIREBASE CONFIG — replace with yours
+  // ══════════════════════════════════════════
+  const firebaseConfig={
+    apiKey:"YOUR_API_KEY",
+    authDomain:"YOUR_PROJECT.firebaseapp.com",
+    databaseURL:"https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+    projectId:"YOUR_PROJECT",
+    storageBucket:"YOUR_PROJECT.appspot.com",
+    messagingSenderId:"000000000000",
+    appId:"YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  // Silent anonymous auth — required for write access
+  firebase.auth().signInAnonymously().catch(err=>console.warn("Auth:",err));
+  const db=firebase.database();
+  const rfRef=db.ref("rf_fund");
+  const txRef=db.ref("rf_fund/transactions");
+  const settRef=db.ref("rf_fund/settings");
+  const pinRef=db.ref("rf_fund/admin_pin");
+  const archiveRef=db.ref("session_archive");
+
+  // ── Toast ──
+  function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+
+  // ── Theme ──
+  const savedTheme=localStorage.getItem("ipl_theme")||"dark";
+  document.documentElement.setAttribute("data-theme",savedTheme);
+  $("themeToggle").textContent=savedTheme==="dark"?"🌙":"☀️";
+  $("themeToggle").addEventListener("click",()=>{
+    const t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",t);
+    localStorage.setItem("ipl_theme",t);
+    $("themeToggle").textContent=t==="dark"?"🌙":"☀️";
+    renderChart();
+  });
+
+  // ══════════════════════════════════════════
+  //  AUTH — PIN-based admin access
+  // ══════════════════════════════════════════
+  async function hashPin(pin){
+    const enc=new TextEncoder().encode(pin);
+    const buf=await crypto.subtle.digest("SHA-256",enc);
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+
+  function setAdminMode(name){
+    isAdmin=true;adminName=name;
+    document.body.classList.add("is-admin");
+    $("roleBadge").className="roleBadge admin";
+    $("roleBadge").textContent="🔑 ADMIN: "+name;
+    $("loginBtn").textContent="🔓 Logout";
+    $("viewerBanner").style.display="none";
+    $("authModal").classList.remove("open");
+    localStorage.setItem("ipl_rf_admin",name);
+    toast("Welcome, "+name+" 🔑");
+  }
+
+  function setViewerMode(){
+    isAdmin=false;adminName="";
+    document.body.classList.remove("is-admin");
+    $("roleBadge").className="roleBadge viewer";
+    $("roleBadge").textContent="👁 VIEWER";
+    $("loginBtn").textContent="🔐 Admin";
+    $("viewerBanner").style.display="block";
+    $("authModal").classList.remove("open");
+    localStorage.removeItem("ipl_rf_admin");
+  }
+
+  // PIN inputs auto-advance
+  document.querySelectorAll(".pinInput input").forEach((inp,i,all)=>{
+    inp.addEventListener("input",()=>{
+      inp.value=inp.value.replace(/\D/g,"").slice(0,1);
+      if(inp.value&&i<3)all[i+1].focus();
+    });
+    inp.addEventListener("keydown",e=>{
+      if(e.key==="Backspace"&&!inp.value&&i>0)all[i-1].focus();
+      if(e.key==="Enter")$("authSubmit").click();
+    });
+  });
+
+  function getPin(){return[...document.querySelectorAll(".pinInput input")].map(i=>i.value).join("")}
+  function clearPin(){document.querySelectorAll(".pinInput input").forEach(i=>{i.value=""});$("pinErr").textContent=""}
+
+  $("authSubmit").addEventListener("click",async()=>{
+    const pin=getPin();
+    if(pin.length!==4){$("pinErr").textContent="Enter all 4 digits";return}
+    const name=($("authName").value||"").trim();
+
+    const snap=await pinRef.once("value");
+    const stored=snap.val();
+
+    if(!stored){
+      // First-time setup
+      if(!name){
+        $("authName").style.display="block";
+        $("authDesc").textContent="No admin PIN exists yet. Enter your name and choose a 4-digit PIN to set up admin access.";
+        $("authTitle").textContent="Setup Admin PIN";
+        if(!name){$("pinErr").textContent="Enter your name above";return}
+      }
+      const hash=await hashPin(pin);
+      await pinRef.set({hash,createdBy:name,createdAt:Date.now()});
+      setAdminMode(name);
+      toast("Admin PIN created ✓");
+      return;
+    }
+
+    // Verify
+    const hash=await hashPin(pin);
+    if(hash===stored.hash){
+      if(!name&&!localStorage.getItem("ipl_rf_admin")){
+        $("authName").style.display="block";
+        if(!($("authName").value||"").trim()){$("pinErr").textContent="Enter your name";return}
+      }
+      setAdminMode(name||localStorage.getItem("ipl_rf_admin")||"Admin");
+    }else{
+      $("pinErr").textContent="Incorrect PIN";
+      clearPin();
+    }
+  });
+
+  $("authSkip").addEventListener("click",setViewerMode);
+
+  $("loginBtn").addEventListener("click",()=>{
+    if(isAdmin){setViewerMode();toast("Logged out");return}
+    clearPin();
+    $("authName").style.display="block";$("authName").value="";
+    // Check if PIN exists to set correct messaging
+    pinRef.once("value").then(snap=>{
+      if(snap.val()){
+        $("authTitle").textContent="Admin Login";
+        $("authDesc").textContent="Enter your 4-digit admin PIN";
+      }else{
+        $("authTitle").textContent="Setup Admin PIN";
+        $("authDesc").textContent="No admin PIN exists yet. Enter your name and choose a 4-digit PIN.";
+      }
+    });
+    $("authModal").classList.add("open");
+  });
+
+  // Auto-login if previously authenticated
+  const savedAdmin=localStorage.getItem("ipl_rf_admin");
+  if(savedAdmin){
+    setAdminMode(savedAdmin);
+  }else{
+    setViewerMode();
+  }
+
+  // ══════════════════════════════════════════
+  //  REAL-TIME DATA LISTENERS
+  // ══════════════════════════════════════════
+  let sessionRFEntries=[];
+
+  // Listen for transactions
+  txRef.on("value",snap=>{
+    const data=snap.val()||{};
+    allTransactions=Object.entries(data).map(([k,v])=>({id:k,...v})).filter(t=>!t.deleted);
+    render();
+  });
+
+  // Listen for settings
+  settRef.on("value",snap=>{
+    settings=snap.val()||{threshold:50};
+    $("threshold").value=settings.threshold||50;
+    render();
+  });
+
+  // Listen for session archives (RF amounts)
+  archiveRef.on("value",snap=>{
+    const data=snap.val()||{};
+    sessionRFEntries=Object.entries(data).map(([k,s])=>({
+      id:k,date:s.date,amount:s.totalRF||0,
+      note:`Session: ${s.sessionName||"Untitled"} (${s.playerCount||0}p)`,
+      type:"add",source:"auto"
+    })).filter(e=>e.amount>0);
+    render();
+  });
+
+  // Also read from localStorage history as fallback
+  function getLocalHistory(){
+    try{return JSON.parse(localStorage.getItem("ipl_session_history"))||[]}catch(e){return[]}
+  }
+
+  // ── Combined ledger ──
+  function getLedger(){
+    const all=[];
+    // Session RF entries (from Firebase archive OR localStorage fallback)
+    const rfEntries=sessionRFEntries.length?sessionRFEntries:getLocalHistory().map(s=>({
+      date:s.date,amount:s.totalRF||0,note:`Session: ${s.sessionName||"Untitled"} (${s.playerCount||0}p)`,type:"add",source:"auto"
+    })).filter(e=>e.amount>0);
+
+    rfEntries.forEach(e=>all.push(e));
+    allTransactions.forEach(e=>all.push(e));
+    all.sort((a,b)=>new Date(a.date||a.timestamp)-new Date(b.date||b.timestamp));
+    return all;
+  }
+
+  // ── Week helpers ──
+  function getWeekStart(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()-dt.getDay());return dt}
+  function fmtWeek(d){const m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return m[d.getMonth()]+" "+d.getDate()}
+  function isThisWeek(d){return getWeekStart(d).getTime()===getWeekStart(new Date()).getTime()}
+
+  function computeWeeklySummaries(){
+    const ledger=getLedger();
+    if(!ledger.length)return[];
+    const weeks=new Map();
+    ledger.forEach(tx=>{
+      const date=tx.date||tx.timestamp;
+      if(!date)return;
+      const ws=getWeekStart(new Date(date)).toISOString();
+      if(!weeks.has(ws))weeks.set(ws,{added:0,spent:0,sessions:0,txCount:0});
+      const w=weeks.get(ws);
+      if(tx.type==="add"||tx.type==="seed"){w.added+=tx.amount;if(tx.source==="auto")w.sessions++}
+      else if(tx.type==="spend"){w.spent+=tx.amount;w.txCount++}
+    });
+    const sorted=[...weeks.entries()].sort((a,b)=>new Date(a[0])-new Date(b[0]));
+    let running=0;
+    return sorted.map(([ws,w])=>{
+      const opening=running;running+=w.added-w.spent;
+      return{week:new Date(ws),opening,added:w.added,spent:w.spent,closing:running,sessions:w.sessions,txCount:w.txCount};
+    });
+  }
+
+  // ── Render ──
+  function render(){
+    const ledger=getLedger();
+    const weeks=computeWeeklySummaries();
+    const balance=ledger.reduce((s,tx)=>s+(tx.type==="spend"?-tx.amount:tx.amount),0);
+
+    $("kpiBalance").textContent=fmtUsd(balance);
+    $("kpiBalance").className="kpiVal "+(balance>(settings.threshold||50)?"good":(balance>0?"warn":"bad"));
+
+    const thisWeek=weeks.find(w=>isThisWeek(w.week));
+    $("kpiWeekIn").textContent=fmtUsd(thisWeek?thisWeek.added:0);
+    $("kpiWeekInNote").textContent=(thisWeek?thisWeek.sessions:0)+" sessions";
+    $("kpiWeekOut").textContent=fmtUsd(thisWeek?thisWeek.spent:0);
+    $("kpiWeekOutNote").textContent=(thisWeek?thisWeek.txCount:0)+" txns";
+
+    const rfOnly=ledger.filter(t=>t.source==="auto");
+    const sessionCount=rfOnly.length;
+    const totalRF=rfOnly.reduce((s,t)=>s+t.amount,0);
+    $("kpiAvgRF").textContent=sessionCount?fmtUsd(totalRF/sessionCount):"$0.00";
+    $("kpiAvgNote").textContent=sessionCount+" sessions";
+
+    // Alert
+    const al=$("alertBanner");
+    if(balance<=0){al.className="alert bad";al.textContent="⚠️ RF Fund is empty! Add funds to continue.";al.style.display="block"}
+    else if(balance<(settings.threshold||50)){al.className="alert warn";al.textContent=`⚠️ Balance (${fmtUsd(balance)}) is below ${fmtUsd(settings.threshold||50)} threshold.`;al.style.display="block"}
+    else{al.style.display="none"}
+
+    // Weekly
+    const wb=$("weeklyBody");
+    if(!weeks.length){wb.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No data yet</div>'}
+    else{wb.innerHTML=weeks.slice().reverse().map(w=>{
+      const hl=isThisWeek(w.week)?' style="background:rgba(122,167,255,.06);border-radius:8px;padding:10px 4px;margin:0 -4px"':'';
+      return`<div class="weekRow"${hl}>
+        <div>${fmtWeek(w.week)}${isThisWeek(w.week)?' <span style="font-size:10px;color:var(--accent);font-weight:700">NOW</span>':''}</div>
+        <div class="num">${fmtUsd(w.opening)}</div>
+        <div class="num hide-m" style="color:var(--good)">+${fmtUsd(w.added)}</div>
+        <div class="num hide-m" style="color:var(--bad)">-${fmtUsd(w.spent)}</div>
+        <div class="num" style="font-weight:700">${fmtUsd(w.closing)}</div>
+      </div>`}).join("")}
+
+    // Audit log
+    const lb=$("logBody");
+    if(!ledger.length){$("logEmpty").style.display="block";lb.innerHTML=""}
+    else{
+      $("logEmpty").style.display="none";
+      lb.innerHTML=ledger.slice().reverse().map(tx=>{
+        const d=new Date(tx.date||tx.timestamp);
+        const dateStr=d.toLocaleDateString("en-US",{month:"short",day:"numeric"})+" "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+        const tag=tx.type==="spend"?"spend":(tx.type==="seed"?"seed":"add");
+        const tagLabel=tx.type==="spend"?"SPENT":(tx.type==="seed"?"SEED":"ADDED");
+        const sign=tx.type==="spend"?"-":"+";
+        const color=tx.type==="spend"?"var(--bad)":"var(--good)";
+        const who=tx.who||tx.source==="auto"?"auto":"—";
+        const delBtn=isAdmin&&tx.id&&tx.source!=="auto"?` <button class="btn small danger" style="padding:2px 6px;font-size:10px" data-del="${tx.id}">✕</button>`:"";
+        return`<div class="logRow">
+          <div style="color:var(--muted)">${dateStr}</div>
+          <div><span class="logTag ${tag}">${tagLabel}</span> ${tx.note||""}${delBtn}</div>
+          <div class="num hide-m logWho">${who}</div>
+          <div class="num" style="color:${color};font-weight:700">${sign}${fmtUsd(tx.amount)}</div>
+        </div>`}).join("");
+    }
+    renderChart();
+  }
+
+  // ── Chart ──
+  function renderChart(){
+    const weeks=computeWeeklySummaries();
+    const isDark=document.documentElement.getAttribute("data-theme")==="dark";
+    const grid=isDark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)";
+    const txt=isDark?"#8b95b0":"#5a6278";
+    if(trendChartInstance){trendChartInstance.destroy();trendChartInstance=null}
+    const ctx=$("trendChart").getContext("2d");
+    if(!weeks.length){ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);ctx.fillStyle=txt;ctx.font="13px Inter,system-ui";ctx.textAlign="center";ctx.fillText("No data yet",ctx.canvas.width/2,ctx.canvas.height/2);return}
+    trendChartInstance=new Chart(ctx,{type:"line",
+      data:{labels:weeks.map(w=>fmtWeek(w.week)),datasets:[
+        {label:"Balance",data:weeks.map(w=>w.closing),borderColor:"#7aa7ff",backgroundColor:"rgba(122,167,255,.1)",fill:true,tension:.3,pointRadius:4,pointBackgroundColor:"#7aa7ff"},
+        {label:"Added",data:weeks.map(w=>w.added),borderColor:"#2bd576",backgroundColor:"transparent",borderDash:[4,4],tension:.3,pointRadius:3},
+        {label:"Spent",data:weeks.map(w=>w.spent),borderColor:"#ff5c7a",backgroundColor:"transparent",borderDash:[4,4],tension:.3,pointRadius:3}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:txt,font:{size:11}}}},
+        scales:{x:{ticks:{color:txt,font:{size:10}},grid:{color:grid}},y:{ticks:{color:txt,font:{size:10},callback:v=>"$"+v},grid:{color:grid},beginAtZero:true}}
+      }
+    });
+  }
+
+  // ══════════════════════════════════════════
+  //  ADMIN ACTIONS
+  // ══════════════════════════════════════════
+  $("txSubmit").addEventListener("click",()=>{
+    if(!isAdmin){toast("Admin access required");return}
+    const type=$("txType").value;
+    const amount=parseFloat($("txAmount").value)||0;
+    const note=$("txNote").value.trim();
+    if(amount<=0){toast("Enter a valid amount");return}
+    txRef.push({type,amount,note:note||("Manual "+type),who:adminName,date:new Date().toISOString(),timestamp:Date.now()});
+    $("txAmount").value="";$("txNote").value="";
+    toast(type==="add"?"Funds added ✓":"Expense recorded ✓");
+  });
+
+  $("applySeed").addEventListener("click",()=>{
+    if(!isAdmin){toast("Admin access required");return}
+    const amt=parseFloat($("seedAmount").value)||0;
+    if(amt<=0){toast("Enter a seed amount");return}
+    if(!confirm("Add "+fmtUsd(amt)+" as fund seed?"))return;
+    txRef.push({type:"seed",amount:amt,note:"Fund seed",who:adminName,date:new Date().toISOString(),timestamp:Date.now()});
+    $("seedAmount").value="0";toast("Seed applied ✓");
+  });
+
+  $("saveSettings").addEventListener("click",()=>{
+    if(!isAdmin)return;
+    const s={threshold:parseFloat($("threshold").value)||50};
+    settRef.set(s);toast("Settings saved ✓");
+  });
+
+  // Delete transaction (soft delete)
+  document.addEventListener("click",e=>{
+    const btn=e.target.closest("[data-del]");
+    if(!btn||!isAdmin)return;
+    if(!confirm("Delete this transaction?"))return;
+    txRef.child(btn.dataset.del).update({deleted:true,deletedBy:adminName,deletedAt:Date.now()});
+    toast("Deleted ✓");
+  });
+
+  // CSV exports
+  function downloadCSV(fn,rows){
+    const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=fn;a.click();
+  }
+  $("exportWeekly").addEventListener("click",()=>{
+    const weeks=computeWeeklySummaries();
+    const rows=[["Week","Opening","Added","Spent","Closing"]];
+    weeks.forEach(w=>rows.push([fmtWeek(w.week),w.opening.toFixed(2),w.added.toFixed(2),w.spent.toFixed(2),w.closing.toFixed(2)]));
+    downloadCSV("ipl_rf_weekly.csv",rows);toast("Exported ✓");
+  });
+  $("exportLog").addEventListener("click",()=>{
+    const ledger=getLedger();
+    const rows=[["Date","Type","Amount","Note","By"]];
+    ledger.forEach(tx=>rows.push([new Date(tx.date||tx.timestamp).toLocaleString(),tx.type,tx.amount.toFixed(2),tx.note||"",tx.who||"auto"]));
+    downloadCSV("ipl_rf_audit.csv",rows);toast("Exported ✓");
+  });
+
+  // Initial render
+  render();
+})();
+</script>
+</body>
+</html>
