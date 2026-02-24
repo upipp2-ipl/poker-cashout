@@ -6,7 +6,6 @@
   <title>IPL – Player Analytics</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
   <style>
     [data-theme="dark"]{--bg:#1a1f2e;--bg2:#242938;--bg3:#2d3348;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);--card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;--sh:0 4px 20px rgba(0,0,0,.25)}
@@ -151,7 +150,6 @@
     messagingSenderId:"1054875878552",
     appId:"1:1054875878552:web:94d610f9d20a18bed07ced"
   });
-  firebase.auth().signInAnonymously().catch(err=>console.warn("Auth:",err));
   const db=firebase.database();
 
   // Theme
