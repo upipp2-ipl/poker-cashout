@@ -188,7 +188,7 @@
     messagingSenderId:"1054875878552",
     appId:"1:1054875878552:web:94d610f9d20a18bed07ced"
   });
-  firebase.auth().signInAnonymously().then(()=>{firebaseReady=true;console.log("Auth OK")}).catch(err=>console.warn("Auth:",err));
+  const authPromise=firebase.auth().signInAnonymously().then(()=>{firebaseReady=true;console.log("Auth OK")}).catch(err=>console.warn("Auth:",err));
   const db=firebase.database();
   const txRef=db.ref("rf_fund/transactions");
   const settRef=db.ref("rf_fund/settings");
@@ -239,6 +239,13 @@
     if(pin.length!==4){$("pinErr").textContent="Enter all 4 digits";return}
     const name=($("authName").value||"").trim();
     if(!name){$("pinErr").textContent="Enter your name first";return}
+
+    // Wait for auth to be ready
+    try{await authPromise}catch(e){}
+    if(!firebase.auth().currentUser){
+      $("pinErr").textContent="Connecting... try again in a moment";
+      try{await firebase.auth().signInAnonymously()}catch(e){$("pinErr").textContent="Auth failed: "+e.message;return}
+    }
 
     try{
       const snap=await pinRef.once("value");
