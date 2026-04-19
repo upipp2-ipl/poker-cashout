@@ -230,6 +230,40 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .rfExpRow .rfAmt{font-weight:700;color:var(--bad)}
 .rfExpRow .rfMeta{font-size:10px;color:var(--muted);margin-top:2px}
 .rfExpRow .rfDel{padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid rgba(255,92,122,.20);background:rgba(255,92,122,.06);color:var(--bad);touch-action:manipulation}
+/* ===== Wizard ===== */
+.stepBar{display:flex;gap:6px;margin:0 0 14px;padding:10px 12px;border-radius:14px;border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--sh);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.stepBar::-webkit-scrollbar{display:none}
+.stepBar .step{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;user-select:none;touch-action:manipulation;transition:all .15s;white-space:nowrap}
+.stepBar .step:hover{background:var(--hover);color:var(--text)}
+.stepBar .step.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.stepBar .step.visited{color:var(--text)}
+.stepBar .step .stepNum{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--input-bg);color:var(--muted);font-size:11px;font-weight:800;flex-shrink:0}
+.stepBar .step.active .stepNum{background:rgba(255,255,255,.25);color:#fff}
+.stepBar .step.visited .stepNum{background:rgba(43,213,118,.15);color:var(--good)}
+.stepPanel{display:none;animation:fadeIn .25s ease}
+.stepPanel.active{display:block}
+.stepNav{display:flex;gap:8px;justify-content:space-between;margin:18px 0 8px}
+.stepNav .btn{min-width:100px;padding:11px 16px;font-size:13px;font-weight:600}
+.stepNav .spacer{flex:1}
+/* ===== Admin Modal ===== */
+.adminBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;touch-action:manipulation}
+.adminBtn:hover{background:var(--hover)}
+.adminOverlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.adminOverlay.open{display:flex}
+.adminDialog{max-width:720px;width:100%;background:var(--bg);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);padding:16px;margin:auto;max-height:calc(100vh - 40px);display:flex;flex-direction:column;overflow:hidden}
+.adminDialog .adminHd{display:flex;justify-content:space-between;align-items:center;padding:4px 4px 12px;border-bottom:1px solid var(--line);margin-bottom:10px;flex-shrink:0}
+.adminDialog .adminHd h2{margin:0;font-size:16px;font-weight:700}
+.adminDialog .adminClose{width:32px;height:32px;border-radius:8px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.adminDialog .adminTabs{display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:8px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.adminDialog .adminTabs::-webkit-scrollbar{display:none}
+.adminDialog .adminTab{flex:0 0 auto;padding:7px 12px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+.adminDialog .adminTab.active{background:var(--accent);color:#fff}
+.adminDialog .adminBody{flex:1;overflow-y:auto;padding:2px 2px 10px}
+.adminDialog .adminPane{display:none}
+.adminDialog .adminPane.active{display:block}
+@media(max-width:560px){.adminDialog{padding:12px;border-radius:12px;max-height:calc(100vh - 20px)}.adminOverlay{padding:10px}}
+/* ===== Players card collapse ===== */
+#playersBody.collapsed{display:none}
 </style>
 </head>
 <body>
@@ -257,15 +291,21 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 <a href="index.html" style="padding:8px 14px;border-radius:10px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;text-decoration:none">♠ Admin</a>
 <a href="rf-fund.html" data-admin-only style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">💰 RF Fund</a>
 <a href="analytics.html" data-admin-only style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">📊 Analytics</a>
+<button class="adminBtn" id="openAdminModal" type="button" data-admin-only style="margin-left:auto">⚙️ Admin</button>
 </div>
 <div class="sessionBanner hidden" id="activeSessionBanner"><span class="bDot"></span><div class="bContent"><span class="bTitle" id="bannerTitle">Session in progress</span><span class="bSub" id="bannerSub"></span></div><button class="btn small primary" id="bannerCashoutBtn" type="button" style="display:none">💰 Cashout</button><button class="btn small" id="bannerResumeBtn" type="button" style="display:none">Resume</button><button class="btn small gold" id="bannerTakeoverBtn" type="button" style="display:none">Take over</button></div>
 <div class="modeToggle" id="modeToggle"><button class="modeBtn active" data-mode="cash" type="button">♠ Cash Game</button><button class="modeBtn" data-mode="tournament" type="button">🏆 Tournament</button></div>
 <div class="top"><div><h1 id="topTitle">Poker Cashout</h1><div class="sub" id="topSub"></div></div><div class="topPills"><div id="liveBadge" class="pill live" style="display:none"><span class="dot"></span><span id="liveText">LIVE</span></div><div id="lockBadge" class="pill secondary" style="display:none"><span class="dot" style="background:var(--accent)"></span><span>LOCKED</span></div><div id="pill" class="pill warn"><span class="dot"></span><span id="pillText">Audit: pending</span></div><button class="themeToggle" id="themeToggle" type="button">🌙</button></div></div>
+<div class="stepBar" id="stepBar">
+  <button class="step active" data-step="1" type="button"><span class="stepNum">1</span><span>Setup</span></button>
+  <button class="step" data-step="2" type="button"><span class="stepNum">2</span><span>Players</span></button>
+  <button class="step" data-step="3" type="button"><span class="stepNum">3</span><span>Game</span></button>
+  <button class="step" data-step="4" type="button"><span class="stepNum">4</span><span>Results</span></button>
+  <button class="step" data-step="5" type="button"><span class="stepNum">5</span><span>Settlement</span></button>
+</div>
+<!-- ===== STEP 1: SETUP ===== -->
+<div class="stepPanel active" data-step="1">
 <div class="card timerCard hidden" id="timerCard" style="margin-bottom:14px"><div class="hd"><h2>⏱ Blinds Timer</h2><div class="btnbar"><button class="btn small" id="timerStart" type="button">Start</button><button class="btn small danger" id="timerReset" type="button">Reset</button></div></div><div class="bd"><div class="timerDisplay" id="timerDisplay">10:00</div><div class="row" style="max-width:300px;margin:0 auto"><div><label>Minutes</label><input id="timerMin" type="number" value="10" min="1" max="120" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:700"/></div></div></div></div>
-<div class="card" id="onlineCard"><div class="hd"><h2>Online Session</h2><div class="btnbar"><button class="btn small live" id="startOnline" type="button">Start Online</button><button class="btn small danger" id="stopOnline" type="button" style="display:none">End Online</button></div></div>
-<div class="bd"><div id="onlineOff"><div class="note" style="margin:0;text-align:center;padding:6px 0">Let players submit cashouts from their phones.<br><b style="color:var(--warn)">1) Add & name players below 2) Click "Start Online"</b></div><div class="sep" data-admin-only></div><div class="note" style="margin:0;text-align:center" data-admin-only>Admin-only: resume a previous session</div><div class="resumeBox" data-admin-only><input id="resumeCode" type="text" placeholder="Session code" maxlength="12"/><button class="btn small" id="resumeBtn" type="button">Resume</button></div></div>
-<div id="onlineOn" style="display:none"><div class="note" style="margin:0;text-align:center">Share this code:</div><div class="codeDisplay" id="sessionCodeDisplay"></div><div class="qrWrap" id="qrWrap"></div><div class="playerLink" id="playerLinkDisplay"></div><div class="btnbar" style="justify-content:center;margin-top:8px"><button class="btn small" id="copyCode" type="button">Copy code</button><button class="btn small" id="copyLink" type="button">Copy link</button></div><div class="sep"></div><div style="font-size:11px;color:var(--muted)"><b id="submitCount">0</b> / <span id="submitTotal">0</span> submitted</div><div class="statusGrid" id="statusGrid"></div></div></div></div>
-<div class="grid" style="margin-top:14px">
 <div class="card"><div class="hd"><h2>Session & Rules</h2><div class="btnbar"><button class="btn small gold" id="archiveSession" type="button" data-admin-only>Archive</button><button class="btn small danger" id="resetAll" type="button">Reset</button><button class="btn small" id="lockSession" type="button">Lock session</button><button class="btn small" id="toggleRules" type="button">Expand</button></div></div>
 <div class="bd" id="rulesBody" style="display:none">
 <div class="row"><div><label>Session name</label><input id="sessionName" type="text" placeholder="Friday poker"/></div><div><label>Buy-in (₥) <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><input id="buyinUsd" type="number" step="0.01" inputmode="decimal" data-league-setting/></div><div><label>RF Rate (%) <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><input id="taxRate" type="number" step="1" min="0" max="100" inputmode="numeric" placeholder="10" data-league-setting/></div></div>
@@ -275,31 +315,88 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 <div class="presetBar"><button class="presetBtn" data-preset="standard" type="button">🎰 Standard (15/3/12/3/2)</button><button class="presetBtn" data-preset="half" type="button">½ Half (8/2/6/2/1)</button><button class="presetBtn" data-preset="heavy" type="button">💰 Heavy (20/5/15/5/3)</button><button class="presetBtn" data-preset="light" type="button">🪶 Light (10/2/8/2/1)</button></div>
 </div>
 <div id="prizeSplitSection" class="hidden"><div class="sep"></div><label>Prize split (%)</label><div class="row"><div><label>🥇 1st</label><input id="split1" type="number" value="50" inputmode="numeric"/></div><div><label>🥈 2nd</label><input id="split2" type="number" value="30" inputmode="numeric"/></div><div><label>🥉 3rd</label><input id="split3" type="number" value="20" inputmode="numeric"/></div></div><div class="sep"></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><label style="margin:0;font-weight:700;color:var(--warn)">🎰 Tournament Chip Pack</label><button class="btn small gold" id="copyChipPack" type="button">Copy to all</button></div><div class="note" style="margin-top:4px;margin-bottom:8px">Set starting chips, then copy to all.</div><div class="chips" id="tourneyChipPack"></div><div class="note" id="tourneyPackValue"></div></div>
-<div class="sep"></div><div class="btnbar"><button class="btn" id="copyAll" type="button">Copy outputs</button><button class="btn small" id="pinSetBtn" type="button" data-admin-only>🔑 Change admin PIN</button></div>
+<div class="sep"></div><div class="btnbar"><button class="btn" id="copyAll" type="button">Copy outputs</button></div>
 <div id="auditHint" class="auditHint" style="display:none"></div>
 </div></div>
-<div class="card"><div class="hd"><h2>Players (<span id="playerCount">0</span>)</h2><div class="btnbar"><button class="btn small" id="collapseAll" type="button">Collapse all</button><button class="btn" id="addPlayer" type="button">+ Add player</button></div></div>
-<div class="bd">
+</div><!-- /step 1 -->
+
+<!-- ===== STEP 2: PLAYERS ===== -->
+<div class="stepPanel" data-step="2">
+<div class="card"><div class="hd"><h2>Players (<span id="playerCount">0</span>)</h2><div class="btnbar"><button class="btn small" id="togglePlayersBody" type="button">Expand</button><button class="btn small" id="collapseAll" type="button">Collapse all</button><button class="btn" id="addPlayer" type="button">+ Add player</button></div></div>
+<div class="bd collapsed" id="playersBody">
 <div class="rosterWrap"><div class="rosterHd" id="rosterToggle"><b>📋 Regular Players</b><span class="rChev" id="rosterChev">▼</span></div><div class="rosterBd" id="rosterBody"><div class="note" style="margin:0 0 8px">Tap a name to add to this game.</div><div class="rosterChips" id="rosterChips"></div><div class="rosterAdd" data-admin-only><input id="rosterNewName" type="text" placeholder="New regular player" autocapitalize="words"/><button class="btn small" id="rosterAddBtn" type="button">+ Save</button></div><div class="sep"></div><div class="btnbar"><button class="btn small" id="rosterAddAll" type="button">Add all to game</button><button class="btn small danger" id="rosterClearAll" type="button" data-admin-only>Clear roster</button></div></div></div>
 <div id="jumpNav" class="jumpNav"></div><div id="players" class="players"></div>
+</div></div>
+</div><!-- /step 2 -->
+
+<!-- ===== STEP 3: GAME ===== -->
+<div class="stepPanel" data-step="3">
+<div class="card" id="onlineCard"><div class="hd"><h2>Online Session</h2><div class="btnbar"><button class="btn small live" id="startOnline" type="button">Start Online</button><button class="btn small danger" id="stopOnline" type="button" style="display:none">End Online</button></div></div>
+<div class="bd"><div id="onlineOff"><div class="note" style="margin:0;text-align:center;padding:6px 0">Let players submit cashouts from their phones.<br><b style="color:var(--warn)">1) Add & name players on Step 2  2) Click "Start Online"</b></div><div class="sep" data-admin-only></div><div class="note" style="margin:0;text-align:center" data-admin-only>Admin-only: resume a previous session</div><div class="resumeBox" data-admin-only><input id="resumeCode" type="text" placeholder="Session code" maxlength="12"/><button class="btn small" id="resumeBtn" type="button">Resume</button></div></div>
+<div id="onlineOn" style="display:none"><div class="note" style="margin:0;text-align:center">Share this code:</div><div class="codeDisplay" id="sessionCodeDisplay"></div><div class="qrWrap" id="qrWrap"></div><div class="playerLink" id="playerLinkDisplay"></div><div class="btnbar" style="justify-content:center;margin-top:8px"><button class="btn small" id="copyCode" type="button">Copy code</button><button class="btn small" id="copyLink" type="button">Copy link</button></div><div class="sep"></div><div style="font-size:11px;color:var(--muted)"><b id="submitCount">0</b> / <span id="submitTotal">0</span> submitted</div><div class="statusGrid" id="statusGrid"></div></div></div></div>
 <div id="placementSection" class="hidden" style="margin-top:14px"><label style="font-weight:700;color:var(--warn);font-size:13px">🏆 Placements</label><div class="placeSelect"><div class="placeItem gold"><div class="placeLabel">🥇 1st (50%)</div><select id="place1"><option value="">Select</option></select></div><div class="placeItem silver"><div class="placeLabel">🥈 2nd (30%)</div><select id="place2"><option value="">Select</option></select></div><div class="placeItem bronze"><div class="placeLabel">🥉 3rd (20%)</div><select id="place3"><option value="">Select</option></select></div></div></div>
-</div></div></div>
+</div><!-- /step 3 -->
+
+<!-- ===== STEP 4: RESULTS ===== -->
+<div class="stepPanel" data-step="4">
 <div class="grid" id="cashAuditGrid"><div class="card"><div class="hd"><h2>Audit: IN vs OUT</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Color</th><th class="num">IN</th><th class="num">OUT</th><th class="num">Diff</th></tr></thead><tbody id="auditBody"></tbody></table></div></div></div><div class="card"><div class="hd"><h2>Summary</h2><button class="btn small" id="exportImage" type="button">📸 Share</button></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Buy-ins</th><th class="num">Gross</th><th class="num">RF</th><th class="num">Final</th><th class="num">Net</th></tr></thead><tbody id="summaryBody"></tbody></table></div><div class="rakeBar" id="rakeBar"></div><div class="payPreview" id="payPreview" style="display:none"><div class="ppTitle">💸 Payout Preview (who owes who)</div><div id="payPreviewLines"></div></div></div></div></div>
 <div class="card hidden" id="tournamentSummary" style="margin-top:14px"><div class="hd"><h2>🏆 Tournament Summary</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Player</th><th class="num">Buy-ins</th><th class="num">Prize</th><th class="num">RF</th><th class="num">Payout</th><th class="num">Net</th></tr></thead><tbody id="tourneySummaryBody"></tbody></table></div><div class="outblock" style="margin-top:10px"><pre id="tourneyInfoText"></pre></div></div></div>
-<div class="card" id="payoutCard" style="margin-top:14px;display:none"><div class="hd"><h2>Payouts</h2><div class="btnbar"><button class="btn small" id="copyPayouts" type="button">Copy payouts</button></div></div><div class="bd"><div class="note" style="margin:0 0 8px">Swipe right → paid. Swipe left → undo.</div><div id="payoutLines"></div></div></div>
-<div class="card" id="memberMgmtCard" data-admin-only style="margin-top:14px"><div class="hd"><h2>👥 Members</h2><div class="btnbar"><button class="btn small" id="addInviteBtn" type="button">+ Generate Invite</button></div></div><div class="bd"><div class="note" style="margin:0 0 10px">Active members (<span id="memberCount">0</span>)</div><div id="membersList"></div><div class="sep"></div><div class="note" style="margin:0 0 10px">Invite codes</div><div id="invitesList"></div></div></div>
-<div class="card" id="rfExpenseCard" data-admin-only style="margin-top:14px"><div class="hd"><h2>💰 RF Fund Expenses</h2><a href="rf-fund.html" style="font-size:11px;color:var(--accent);text-decoration:none">Full manager →</a></div><div class="bd">
-<div class="rakeBar" id="rfStats"></div>
-<div class="sep"></div>
-<label>Log an expense (food, supplies, etc.)</label>
-<div class="row" style="margin-top:6px"><div style="flex:2"><label>Description</label><input id="rfExpDesc" type="text" placeholder="e.g. Pizza for the table" maxlength="80"/></div><div style="flex:1"><label>Amount (₥)</label><input id="rfExpAmt" type="number" step="0.01" inputmode="decimal" placeholder="0.00"/></div></div>
-<div class="btnbar" style="margin-top:8px"><button class="btn primary" id="rfExpAdd" type="button">+ Add Expense</button></div>
-<div class="sep"></div>
-<div class="note" style="margin:0 0 8px">Recent expenses</div>
-<div id="rfExpList"></div>
-</div></div>
-<div class="card" style="margin-top:14px" data-admin-only id="playerStatsCard"><div class="hd histHd"><h2>Player Stats</h2><span class="muted" id="statsSessionCount" style="font-size:11px"></span></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Games</th><th class="num">Wins</th><th class="num">Win%</th><th class="num">Net</th><th class="num">Avg</th></tr></thead><tbody id="statsBody"></tbody></table></div><div id="statsEmpty" class="emptyState" style="display:none">No sessions yet.</div></div></div>
-<div class="card" style="margin-top:14px" data-admin-only id="historyCard"><div class="hd histHd"><h2>History</h2><div class="btnbar"><button class="btn small" id="exportHistory" type="button">Export CSV</button><button class="btn small danger" id="clearHistory" type="button">Clear</button></div></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Session</th><th class="num">Mode</th><th class="num">#</th><th></th></tr></thead><tbody id="historyBody"></tbody></table></div><div id="historyEmpty" class="emptyState" style="display:none">No sessions yet.</div></div></div>
+</div><!-- /step 4 -->
+
+<!-- ===== STEP 5: SETTLEMENT ===== -->
+<div class="stepPanel" data-step="5">
+<div class="card" id="payoutCard"><div class="hd"><h2>Payouts</h2><div class="btnbar"><button class="btn small" id="copyPayouts" type="button">Copy payouts</button></div></div><div class="bd"><div class="note" style="margin:0 0 8px">Swipe right → paid. Swipe left → undo.</div><div id="payoutLines"></div></div></div>
+</div><!-- /step 5 -->
+
+<!-- ===== STEP NAV (Back / Next) ===== -->
+<div class="stepNav">
+  <button class="btn" id="stepPrev" type="button" style="visibility:hidden">← Back</button>
+  <div class="spacer"></div>
+  <button class="btn primary" id="stepNext" type="button">Next →</button>
+</div>
+
+<!-- ===== ADMIN MODAL ===== -->
+<div class="adminOverlay" id="adminOverlay">
+  <div class="adminDialog" id="adminDialog">
+    <div class="adminHd"><h2>⚙️ Admin</h2><button class="adminClose" id="adminClose" type="button">×</button></div>
+    <div class="adminTabs">
+      <button class="adminTab active" data-pane="members" type="button">👥 Members</button>
+      <button class="adminTab" data-pane="rf" type="button">💰 RF Expenses</button>
+      <button class="adminTab" data-pane="stats" type="button">📊 Stats</button>
+      <button class="adminTab" data-pane="history" type="button">📜 History</button>
+      <button class="adminTab" data-pane="settings" type="button">🔑 Settings</button>
+    </div>
+    <div class="adminBody">
+      <div class="adminPane active" data-pane="members">
+        <div class="card" id="memberMgmtCard"><div class="hd"><h2>👥 Members</h2><div class="btnbar"><button class="btn small" id="addInviteBtn" type="button">+ Generate Invite</button></div></div><div class="bd"><div class="note" style="margin:0 0 10px">Active members (<span id="memberCount">0</span>)</div><div id="membersList"></div><div class="sep"></div><div class="note" style="margin:0 0 10px">Invite codes</div><div id="invitesList"></div></div></div>
+      </div>
+      <div class="adminPane" data-pane="rf">
+        <div class="card" id="rfExpenseCard"><div class="hd"><h2>💰 RF Fund Expenses</h2><a href="rf-fund.html" style="font-size:11px;color:var(--accent);text-decoration:none">Full manager →</a></div><div class="bd">
+        <div class="rakeBar" id="rfStats"></div>
+        <div class="sep"></div>
+        <label>Log an expense (food, supplies, etc.)</label>
+        <div class="row" style="margin-top:6px"><div style="flex:2"><label>Description</label><input id="rfExpDesc" type="text" placeholder="e.g. Pizza for the table" maxlength="80"/></div><div style="flex:1"><label>Amount (₥)</label><input id="rfExpAmt" type="number" step="0.01" inputmode="decimal" placeholder="0.00"/></div></div>
+        <div class="btnbar" style="margin-top:8px"><button class="btn primary" id="rfExpAdd" type="button">+ Add Expense</button></div>
+        <div class="sep"></div>
+        <div class="note" style="margin:0 0 8px">Recent expenses</div>
+        <div id="rfExpList"></div>
+        </div></div>
+      </div>
+      <div class="adminPane" data-pane="stats">
+        <div class="card" id="playerStatsCard"><div class="hd histHd"><h2>Player Stats</h2><span class="muted" id="statsSessionCount" style="font-size:11px"></span></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Games</th><th class="num">Wins</th><th class="num">Win%</th><th class="num">Net</th><th class="num">Avg</th></tr></thead><tbody id="statsBody"></tbody></table></div><div id="statsEmpty" class="emptyState" style="display:none">No sessions yet.</div></div></div>
+      </div>
+      <div class="adminPane" data-pane="history">
+        <div class="card" id="historyCard"><div class="hd histHd"><h2>History</h2><div class="btnbar"><button class="btn small" id="exportHistory" type="button">Export CSV</button><button class="btn small danger" id="clearHistory" type="button">Clear</button></div></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Session</th><th class="num">Mode</th><th class="num">#</th><th></th></tr></thead><tbody id="historyBody"></tbody></table></div><div id="historyEmpty" class="emptyState" style="display:none">No sessions yet.</div></div></div>
+      </div>
+      <div class="adminPane" data-pane="settings">
+        <div class="card"><div class="hd"><h2>🔑 Admin Settings</h2></div><div class="bd">
+          <div class="note" style="margin:0 0 10px">Change your 5-digit admin PIN.</div>
+          <button class="btn" id="pinSetBtn" type="button">🔑 Change admin PIN</button>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="disclaimer"><div class="dEmoji">🃏</div><b>Innovation Poker League</b> — where bluffs are bold and the math is real.<br>Data accuracy depends on honest submissions (yes, we're looking at you).<br>Not affiliated with any casino. Just friends, chips & vibes. ♠♥♦♣<br><br><a href="odds.html" style="color:var(--accent);text-decoration:none;font-weight:600">🎲 Poker Odds Calculator →</a></div>
 </div>
 <div class="footer"><div class="inner"><div class="totwrap"><div class="tot"><div class="k" id="footK1">Total Gross</div><div class="v" id="t_gross">₥0.00</div></div><div class="tot"><div class="k">RF fund</div><div class="v" id="t_rf">₥0.00</div></div><div class="tot"><div class="k" id="footK3">Total Final</div><div class="v" id="t_final">₥0.00</div></div></div><button class="btn" id="toTop" type="button">↑</button></div></div>
@@ -887,9 +984,9 @@ $("rosterAddBtn").addEventListener("click",async()=>{if(currentMember.role!=='ad
 $("rosterNewName").addEventListener("keydown",e=>{if(e.key==="Enter")$("rosterAddBtn").click()});
 $("rosterAddAll").addEventListener("click",()=>{if(state.locked)return;const cur=state.players.map(p=>p.name.trim().toLowerCase());let n=0;leagueRoster.forEach(nm=>{if(!cur.includes(nm.trim().toLowerCase())){const p=makePlayer(nm);if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);state.players.push(p);cur.push(nm.trim().toLowerCase());n++}});if(n){renderAllFull();toast(`${n} added`)}else toast("All in game already")});
 $("rosterClearAll").addEventListener("click",async()=>{if(currentMember.role!=='admin')return;if(!confirm("Clear entire roster?"))return;try{await db.ref('league/roster').remove();toast("Cleared")}catch(err){toast("Failed: "+err.message)}});
-// Collapsible state persistence: null → collapsed by default; "open"/"closed" remembers user choice
+// ===== Collapsible persistence (per-box) =====
 const COLLAPSE_PREFIX="ipl_collapse_";
-function getCollapseState(id){const v=localStorage.getItem(COLLAPSE_PREFIX+id);return v==="open"}
+function getCollapseState(id){return localStorage.getItem(COLLAPSE_PREFIX+id)==="open"}
 function setCollapseState(id,isOpen){localStorage.setItem(COLLAPSE_PREFIX+id,isOpen?"open":"closed")}
 let rosterOpen=getCollapseState("rosterBody");
 $("rosterBody").classList.toggle("open",rosterOpen);
@@ -901,9 +998,50 @@ document.addEventListener("click",async e=>{
 },true);
 document.addEventListener("click",e=>{const sb=e.target.closest("[data-savecashout]");if(!sb||state.locked)return;const pid=sb.dataset.savecashout;const p=state.players.find(x=>x.id===pid);if(!p)return;if(tcc(p.cashout)===0){toast("Enter chip counts first");return}savedCashouts.add(pid);if(onlineSessionCode)setAdminOverride(p.name.trim());save();renderPlayersFull();renderAuditAndSummary();toast(`${p.name} cashout saved ✅`)});
 let rulesCol=!getCollapseState("rulesBody");
-// HTML starts with display:none so first paint is collapsed; open it here only if user previously had it open
 if(!rulesCol){$("rulesBody").style.display="block";$("toggleRules").textContent="Collapse"}
 $("toggleRules").addEventListener("click",()=>{rulesCol=!rulesCol;$("rulesBody").style.display=rulesCol?"none":"block";$("toggleRules").textContent=rulesCol?"Expand":"Collapse";setCollapseState("rulesBody",!rulesCol)});
+// ===== Players card body collapse (always starts collapsed, user expands manually, persists) =====
+let playersOpen=getCollapseState("playersBody");
+$("playersBody").classList.toggle("collapsed",!playersOpen);
+$("togglePlayersBody").textContent=playersOpen?"Collapse":"Expand";
+$("togglePlayersBody").addEventListener("click",()=>{playersOpen=!playersOpen;$("playersBody").classList.toggle("collapsed",!playersOpen);$("togglePlayersBody").textContent=playersOpen?"Collapse":"Expand";setCollapseState("playersBody",playersOpen)});
+// ===== Wizard step controller =====
+let currentStep=1;const visitedSteps=new Set([1]);
+function goToStep(n){
+  n=Math.max(1,Math.min(5,Number(n)||1));
+  currentStep=n;visitedSteps.add(n);
+  document.querySelectorAll(".stepPanel").forEach(p=>p.classList.toggle("active",Number(p.dataset.step)===n));
+  document.querySelectorAll("#stepBar .step").forEach(b=>{
+    const s=Number(b.dataset.step);
+    b.classList.toggle("active",s===n);
+    b.classList.toggle("visited",visitedSteps.has(s)&&s!==n);
+  });
+  $("stepPrev").style.visibility=n===1?"hidden":"visible";
+  $("stepNext").textContent=n===5?"🏁 Finish":"Next →";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("#stepBar .step").forEach(b=>b.addEventListener("click",()=>goToStep(b.dataset.step)));
+$("stepPrev").addEventListener("click",()=>goToStep(currentStep-1));
+$("stepNext").addEventListener("click",()=>{
+  if(currentStep===5){
+    // On Step 5, Finish button triggers lock (which archives). Reuse existing lockSession click.
+    $("lockSession").click();
+    return;
+  }
+  goToStep(currentStep+1);
+});
+// ===== Admin modal controller =====
+function openAdminModal(){$("adminOverlay").classList.add("open")}
+function closeAdminModal(){$("adminOverlay").classList.remove("open")}
+$("openAdminModal").addEventListener("click",openAdminModal);
+$("adminClose").addEventListener("click",closeAdminModal);
+$("adminOverlay").addEventListener("click",e=>{if(e.target===$("adminOverlay"))closeAdminModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("adminOverlay").classList.contains("open"))closeAdminModal()});
+document.querySelectorAll(".adminTab").forEach(t=>t.addEventListener("click",()=>{
+  const pane=t.dataset.pane;
+  document.querySelectorAll(".adminTab").forEach(x=>x.classList.toggle("active",x===t));
+  document.querySelectorAll(".adminPane").forEach(p=>p.classList.toggle("active",p.dataset.pane===pane));
+}));
 $("toTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 $("copyAll").addEventListener("click",()=>{const l=[state.sessionName.trim()];if(mode==="tournament"){const t=calcTournament();t.results.forEach((r,i)=>{if(r)l.push(`${i+1}. ${r.name}: ${fmtUsd(r.payout)} (net ${r.net>=0?"+":""}${fmtUsd(r.net)})`)})}else state.players.forEach(p=>{l.push(p.name,outputBlockText(p),"")});navigator.clipboard?.writeText(l.join("\n")).then(()=>toast("Copied"))});
 $("copyPayouts").addEventListener("click",()=>{navigator.clipboard?.writeText(buildPayoutLines().map(l=>`${l.label}: ${fmtUsd(l.amount)}${paidMap[l.key]?" ✓":""}`).join("\n")).then(()=>toast("Copied"))});
