@@ -11,9 +11,10 @@
     [data-theme="dark"]{--bg:#1a1f2e;--bg2:#242938;--bg3:#2d3348;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);--card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;--sh:0 4px 20px rgba(0,0,0,.25)}
     [data-theme="light"]{--bg:#f0f2f7;--bg2:#ffffff;--bg3:#e8ebf0;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);--card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;--sh:0 2px 12px rgba(0,0,0,.06)}
     *{box-sizing:border-box;margin:0}
-    html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
-    body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--text);background:var(--bg);transition:background .3s,color .3s;padding-bottom:80px;min-height:100vh;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
-    .iplHeader{text-align:center;padding:18px 14px 6px}
+    html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--text);background:var(--bg);transition:background .3s,color .3s;padding-bottom:80px;min-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    button,.btn,.tab,.navBtn,.themeToggle,.drillClose{touch-action:manipulation}
+    .iplHeader{text-align:center;padding:calc(18px + env(safe-area-inset-top)) 14px 6px}
     .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:26px;font-weight:800;letter-spacing:1px}
     .suit{font-size:18px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
     .iplSub{color:var(--muted);font-size:11px;margin-top:2px;letter-spacing:.5px}
@@ -67,6 +68,14 @@
     .empty{text-align:center;padding:30px;color:var(--muted);font-size:13px}
     .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);padding:10px 18px;border-radius:10px;background:#242938;border:1px solid var(--card-border);color:var(--text);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s}
     .toast.show{opacity:1}
+    .migBanner{display:none;background:linear-gradient(135deg,rgba(122,167,255,.12),rgba(43,213,118,.08));border:1px solid var(--accent);border-radius:14px;padding:14px 16px;margin-bottom:16px;box-shadow:var(--sh)}
+    .migBanner.show{display:block}
+    .migBanner .migTitle{font-weight:800;font-size:14px;margin-bottom:4px;color:var(--accent)}
+    .migBanner .migMsg{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4}
+    .migBanner .migBtns{display:flex;gap:8px;flex-wrap:wrap}
+    .migBanner .migProgress{font-size:11px;color:var(--muted);margin-top:8px;display:none}
+    .migBanner.working .migProgress{display:block}
+    .migBanner.working .migBtns{opacity:.5;pointer-events:none}
     @media(max-width:700px){.chartGrid{grid-template-columns:1fr}}
     @media(max-width:600px){.kpiRow{grid-template-columns:1fr 1fr}.tbl{font-size:11px}.tbl th,.tbl td{padding:6px 4px}}
   </style>
@@ -86,6 +95,15 @@
       <span class="liveIndicator"><span class="dot"></span> LIVE</span>
       <button class="themeToggle" id="themeToggle">🌙</button>
     </div>
+  </div>
+  <div class="migBanner" id="migBanner">
+    <div class="migTitle">📦 Migrate local session history?</div>
+    <div class="migMsg">Found <span id="migCount">0</span> session(s) in this device's local storage that aren't in Firebase yet. Migrating will push them to Firebase so all your devices (and the RF Fund page) can see the full history. A safety backup is kept in this browser even after migration.</div>
+    <div class="migBtns">
+      <button class="btn small primary" id="migrateBtn" type="button">Migrate to Firebase</button>
+      <button class="btn small outline" id="migrateSkipBtn" type="button">Skip (keep local only)</button>
+    </div>
+    <div class="migProgress" id="migProgress">Uploading...</div>
   </div>
   <div class="kpiRow" id="kpiRow"></div>
   <div class="filterBar">
@@ -158,7 +176,11 @@
       if(tries>40){toast("Firebase unavailable — showing local data only");renderFromLocalOnly();return}
       setTimeout(()=>bootFirebase(tries+1),150);return;
     }
-    try{firebase.initializeApp(fbConfig);db=firebase.database();attachFirebaseListener()}
+    try{
+      if(!firebase.apps.length)firebase.initializeApp(fbConfig);
+      db=firebase.database();
+      attachFirebaseListener();
+    }
     catch(err){toast("Firebase init failed: "+err.message);renderFromLocalOnly()}
   }
   function renderFromLocalOnly(){
@@ -188,8 +210,64 @@
       const fbDates=new Set(fbSessions.map(s=>s.date));
       allSessions=[...fbSessions,...localSessions.filter(s=>!fbDates.has(s.date))].sort((a,b)=>new Date(b.date)-new Date(a.date));
       render();
+      checkMigration(fbDates);
     },err=>{toast("Read error: "+err.message);renderFromLocalOnly()});
   }
+
+  // One-time migration: push local-only sessions up to Firebase
+  const MIG_DISMISSED_KEY="ipl_migration_dismissed";
+  const MIG_DONE_KEY="ipl_migration_done";
+  const MIG_BACKUP_KEY="ipl_migration_backup";
+  function checkMigration(fbDates){
+    if(localStorage.getItem(MIG_DISMISSED_KEY)||localStorage.getItem(MIG_DONE_KEY))return;
+    const local=getLocalHistory();
+    const missing=local.filter(s=>s&&s.date&&!fbDates.has(s.date));
+    if(!missing.length)return;
+    $("migCount").textContent=missing.length;
+    $("migBanner").classList.add("show");
+  }
+  $("migrateSkipBtn").addEventListener("click",()=>{
+    localStorage.setItem(MIG_DISMISSED_KEY,new Date().toISOString());
+    $("migBanner").classList.remove("show");
+    toast("Skipped — local data kept as-is");
+  });
+  $("migrateBtn").addEventListener("click",async()=>{
+    if(!db){toast("Not connected to Firebase yet");return}
+    const banner=$("migBanner");
+    banner.classList.add("working");
+    $("migProgress").textContent="Checking current Firebase state...";
+    try{
+      // Re-read Firebase right now to avoid racing duplicates
+      const snap=await db.ref("session_archive").once("value");
+      const fbData=snap.val()||{};
+      const fbDates=new Set(Object.values(fbData).map(v=>v&&v.date).filter(Boolean));
+      const local=getLocalHistory();
+      const missing=local.filter(s=>s&&s.date&&!fbDates.has(s.date));
+      if(!missing.length){
+        localStorage.setItem(MIG_DONE_KEY,new Date().toISOString());
+        banner.classList.remove("show","working");
+        toast("Already up to date ✓");
+        return;
+      }
+      // Backup before any destructive action
+      localStorage.setItem(MIG_BACKUP_KEY,JSON.stringify({backedUpAt:new Date().toISOString(),sessions:local}));
+      let done=0;
+      for(const s of missing){
+        $("migProgress").textContent=`Uploading ${done+1} of ${missing.length}...`;
+        const payload={...s,migratedFromLocal:true,migratedAt:new Date().toISOString()};
+        delete payload.source;delete payload.id;
+        await db.ref("session_archive").push(payload);
+        done++;
+      }
+      localStorage.setItem(MIG_DONE_KEY,new Date().toISOString());
+      banner.classList.remove("show","working");
+      toast(`Migrated ${done} session${done===1?"":"s"} ✓`);
+    }catch(err){
+      $("migProgress").textContent="Error: "+err.message;
+      banner.classList.remove("working");
+      toast("Migration failed — local data untouched");
+    }
+  });
   // safety net: if Firebase takes too long to respond with data, render local while waiting
   setTimeout(()=>{if(!allSessions.length)renderFromLocalOnly()},2000);
 
