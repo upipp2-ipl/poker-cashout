@@ -214,13 +214,16 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .memberRow .mMeta{font-size:10px;color:var(--muted);margin-top:2px}
 .memberRow select{width:auto;padding:4px 8px;font-size:11px;min-width:80px}
 .memberRow .mYou{font-size:9px;padding:2px 5px;border-radius:4px;background:rgba(122,167,255,.12);color:var(--accent);font-weight:600;margin-left:6px}
-.inviteRow{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);margin-bottom:6px}
+.inviteRow{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);margin-bottom:6px;flex-wrap:wrap}
 .inviteRow .iCode{flex:1;font-weight:700;letter-spacing:1px;font-family:ui-monospace,monospace;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .inviteRow .iStatus{font-size:10px;padding:3px 6px;border-radius:4px;font-weight:600;text-transform:uppercase}
 .inviteRow .iStatus.unused{background:rgba(43,213,118,.15);color:var(--good)}
+.inviteRow .iStatus.warn{background:rgba(245,158,11,.15);color:var(--warn)}
 .inviteRow .iStatus.used{background:var(--input-bg);color:var(--muted)}
 .inviteRow .iBtn{padding:5px 10px;font-size:11px;border-radius:6px;cursor:pointer;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);touch-action:manipulation}
 .inviteRow .iBtn.copy{color:var(--accent);border-color:rgba(122,167,255,.25)}
+.inviteRow .iMeta{flex-basis:100%;font-size:11px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+.inviteRow .iMeta span{white-space:nowrap}
 .emptyMembers{padding:20px;text-align:center;color:var(--muted);font-size:12px}
 .rfExpRow{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);margin-bottom:6px;font-size:12px}
 .rfExpRow .rfDesc{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -265,7 +268,7 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 <div class="grid" style="margin-top:14px">
 <div class="card"><div class="hd"><h2>Session & Rules</h2><div class="btnbar"><button class="btn small gold" id="archiveSession" type="button" data-admin-only>Archive</button><button class="btn small danger" id="resetAll" type="button">Reset</button><button class="btn small" id="lockSession" type="button">Lock session</button><button class="btn small" id="toggleRules" type="button">Collapse</button></div></div>
 <div class="bd" id="rulesBody">
-<div class="row"><div><label>Session name</label><input id="sessionName" type="text" placeholder="Friday poker"/></div><div><label>Buy-in (₥) <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><input id="buyinUsd" type="number" step="0.01" inputmode="decimal" data-league-setting/></div><div><label>RF tax rate <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><input id="taxRate" type="number" step="0.01" inputmode="decimal" data-league-setting/></div></div>
+<div class="row"><div><label>Session name</label><input id="sessionName" type="text" placeholder="Friday poker"/></div><div><label>Buy-in (₥) <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><input id="buyinUsd" type="number" step="0.01" inputmode="decimal" data-league-setting/></div><div><label>RF Rate (%) <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><input id="taxRate" type="number" step="1" min="0" max="100" inputmode="numeric" placeholder="10" data-league-setting/></div></div>
 <div class="row" style="margin-top:8px"><div><label>Bank / Admin</label><select id="bankSelect"></select></div></div>
 <div id="chipValuesSection"><div class="sep"></div><label>Chip values (units per chip) <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><div class="row"><div><label>Black</label><input id="v_black" type="number" step="1" inputmode="numeric" data-league-setting/></div><div><label>Purple</label><input id="v_purple" type="number" step="1" inputmode="numeric" data-league-setting/></div><div><label>Yellow</label><input id="v_yellow" type="number" step="1" inputmode="numeric" data-league-setting/></div><div><label>Pink</label><input id="v_pink" type="number" step="1" inputmode="numeric" data-league-setting/></div><div><label>Orange</label><input id="v_orange" type="number" step="1" inputmode="numeric" data-league-setting/></div></div>
 <div class="sep"></div><label>Buy-in chip presets</label><div class="note" style="margin-top:0;margin-bottom:6px">Quick-fill buy-in chips for all players</div>
@@ -499,8 +502,15 @@ function setupInviteEntry(){
     try{
       const snap=await db.ref('league/invite_codes/'+raw).once('value');
       const entry=snap.val();
-      if(!entry){setAuthMsg('inviteMsg',"Code not found")}
-      else if(entry.used){setAuthMsg('inviteMsg',"Code already used")}
+      if(!entry){setAuthMsg('inviteMsg',"Code not found");$("inviteVerifyBtn").disabled=false;return}
+      // Backward compat with old {used:true} codes
+      const isLegacy=typeof entry.used==='boolean'&&entry.maxUses===undefined;
+      const maxUses=entry.maxUses||(isLegacy?1:5);
+      const uses=isLegacy?(entry.used?1:0):(entry.uses||0);
+      const expiresAt=entry.expiresAt||0;
+      if(expiresAt>0&&expiresAt<=Date.now()){setAuthMsg('inviteMsg',"Code expired")}
+      else if(uses>=maxUses){setAuthMsg('inviteMsg',`Code fully used (${uses}/${maxUses})`)}
+      else if(entry.redeemedBy&&Object.values(entry.redeemedBy).some(r=>r.deviceId===deviceId)){setAuthMsg('inviteMsg',"This device already registered with this code")}
       else{setupInviteComplete(raw)}
     }catch(err){setAuthMsg('inviteMsg',"Error: "+err.message)}
     $("inviteVerifyBtn").disabled=false;
@@ -518,12 +528,28 @@ function setupInviteComplete(code){
     try{
       const hash=await sha256Hex(pin);
       const memberId='user_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-      const updates={};
-      updates['league/members/'+memberId]={name,role:'user',pinHash:hash,createdAt:Date.now(),deviceId,inviteCode:code,pinLength:4};
-      updates['league/invite_codes/'+code+'/used']=true;
-      updates['league/invite_codes/'+code+'/usedBy']=memberId;
-      updates['league/invite_codes/'+code+'/usedAt']=Date.now();
-      await db.ref().update(updates);
+      // Atomic: bump uses and add to redeemedBy in a transaction (prevents race past the cap)
+      const inviteRef=db.ref('league/invite_codes/'+code);
+      const txResult=await inviteRef.transaction(cur=>{
+        if(!cur)return;
+        const isLegacy=typeof cur.used==='boolean'&&cur.maxUses===undefined;
+        const maxUses=cur.maxUses||(isLegacy?1:5);
+        const uses=isLegacy?(cur.used?1:0):(cur.uses||0);
+        const expiresAt=cur.expiresAt||0;
+        if(expiresAt>0&&expiresAt<=Date.now())return;
+        if(uses>=maxUses)return;
+        if(cur.redeemedBy&&Object.values(cur.redeemedBy).some(r=>r.deviceId===deviceId))return;
+        // Migrate legacy shape if needed
+        if(isLegacy){cur.maxUses=maxUses;cur.uses=uses;delete cur.used;}
+        cur.uses=(cur.uses||0)+1;
+        cur.redeemedBy=cur.redeemedBy||{};
+        cur.redeemedBy[memberId]={name,deviceId,at:Date.now()};
+        return cur;
+      });
+      if(!txResult.committed){
+        setAuthMsg('setupMsg',"Code no longer available — ask admin for a new one");fail();return;
+      }
+      await db.ref('league/members/'+memberId).set({name,role:'user',pinHash:hash,createdAt:Date.now(),deviceId,inviteCode:code,pinLength:4});
       currentMember={id:memberId,name,role:'user',pinHash:hash};
       saveCachedMember(currentMember);onAuthSuccess();
     }catch(err){setAuthMsg('setupMsg',"Failed: "+err.message);fail()}
@@ -571,6 +597,8 @@ function startLeagueListeners(){
     db.ref('league/invite_codes').on('value',snap=>{leagueInvites=snap.val()||{};renderInvites()});
     db.ref('session_archive').on('value',snap=>{const arc=snap.val()||{};sessionArchive=Object.entries(arc).map(([id,s])=>({id,...s})).sort((a,b)=>new Date(b.date)-new Date(a.date));renderHistory();renderStats();renderRfExpenses()});
     db.ref('rf_fund/expenses').on('value',snap=>{const e=snap.val()||{};rfExpenses=Object.entries(e).map(([id,x])=>({id,...x})).sort((a,b)=>new Date(b.date)-new Date(a.date));renderRfExpenses()});
+    // Re-render invites every 60s so the expiry countdown stays accurate
+    setInterval(()=>{if(Object.keys(leagueInvites).length)renderInvites()},60000);
   }
 }
 
@@ -671,18 +699,41 @@ function renderInvites(){
   const entries=Object.entries(leagueInvites);
   if(!entries.length){list.innerHTML='<div class="emptyMembers">No invite codes yet. Generate one above.</div>';return}
   entries.sort((a,b)=>(b[1].createdAt||0)-(a[1].createdAt||0));
+  const now=Date.now();
   list.innerHTML=entries.map(([code,inv])=>{
-    const used=!!inv.used;
-    const usedBy=used&&inv.usedBy?(leagueMembers[inv.usedBy]?.name||inv.usedBy.slice(0,8)):'';
-    return`<div class="inviteRow"><div class="iCode">${esc(code)}</div>${used?`<span class="iStatus used">Used${usedBy?' by '+esc(usedBy):''}</span>`:'<span class="iStatus unused">Open</span>'}${!used?`<button class="iBtn copy" data-copy-code="${esc(code)}" type="button">Copy</button>`:''}<button class="iBtn" data-del-invite="${esc(code)}" type="button">✕</button></div>`;
+    // Backward compat: old codes had {used:true/false, usedBy}
+    const isLegacy=typeof inv.used==='boolean'&&inv.maxUses===undefined;
+    const maxUses=inv.maxUses||(isLegacy?1:5);
+    const uses=isLegacy?(inv.used?1:0):(inv.uses||0);
+    const expiresAt=inv.expiresAt||0;
+    const isExpired=expiresAt>0&&expiresAt<=now;
+    const isFull=uses>=maxUses;
+    const isOpen=!isFull&&!isExpired;
+    // Status pill
+    let statusHtml;
+    if(isFull)statusHtml=`<span class="iStatus used">Full ${uses}/${maxUses}</span>`;
+    else if(isExpired)statusHtml=`<span class="iStatus used">Expired</span>`;
+    else statusHtml=`<span class="iStatus unused">Open ${uses}/${maxUses}</span>`;
+    // Meta row: expiry countdown + redeemers
+    const metaParts=[];
+    if(expiresAt>0){
+      if(isExpired){const ago=now-expiresAt;const d=Math.floor(ago/86400000);metaParts.push(`<span>⏰ expired ${d>0?d+'d ':''}${Math.floor((ago%86400000)/3600000)}h ago</span>`);}
+      else{const rem=expiresAt-now;const h=Math.floor(rem/3600000);const m=Math.floor((rem%3600000)/60000);metaParts.push(`<span>⏰ ${h>0?h+'h '+m+'m':m+'m'} left</span>`);}
+    }
+    const redeemers=inv.redeemedBy?Object.values(inv.redeemedBy).map(r=>r.name).filter(Boolean):[];
+    if(isLegacy&&inv.used&&inv.usedBy){const n=leagueMembers[inv.usedBy]?.name;if(n)redeemers.push(n);}
+    if(redeemers.length)metaParts.push(`<span>👥 ${redeemers.map(esc).join(', ')}</span>`);
+    const metaHtml=metaParts.length?`<div class="iMeta">${metaParts.join('')}</div>`:'';
+    return`<div class="inviteRow"><div class="iCode">${esc(code)}</div>${statusHtml}${isOpen?`<button class="iBtn copy" data-copy-code="${esc(code)}" type="button">Copy</button>`:''}<button class="iBtn" data-del-invite="${esc(code)}" type="button">✕</button>${metaHtml}</div>`;
   }).join("");
 }
 $("addInviteBtn").addEventListener("click",async()=>{
   const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='IPL-';for(let i=0;i<4;i++)code+=chars[Math.floor(Math.random()*chars.length)];
   try{
-    await db.ref('league/invite_codes/'+code).set({createdBy:currentMember.id,createdAt:Date.now(),used:false});
+    const now=Date.now();
+    await db.ref('league/invite_codes/'+code).set({createdBy:currentMember.id,createdAt:now,maxUses:5,uses:0,expiresAt:now+(2*24*60*60*1000)});
     try{await navigator.clipboard?.writeText(code)}catch{}
-    toast(`Invite code: ${code} (copied)`);
+    toast(`Invite ${code} (5 uses · 2 days · copied)`);
   }catch(err){toast("Failed: "+err.message)}
 });
 document.addEventListener("change",async e=>{
@@ -788,7 +839,7 @@ async function resumeSession(code){
 // ==== RENDER FUNCTIONS ====
 function colorCell(col,vu,ct,kind,pid,bid){const d=state.locked?"disabled":"";return`<div class="cell" data-color="${col}"><div class="ctop"><span class="sw ${SW[col]}"></span><span class="cname">${col[0].toUpperCase()+col.slice(1)}</span><span class="cval">${vu.toLocaleString()}</span></div><div class="stepper"><button class="sbtn" data-step="-1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" ${d}>−</button><input type="number" step="1" inputmode="numeric" min="0" max="999" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" value="${ct??0}" ${d}/><button class="sbtn" data-step="1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" ${d}>+</button></div></div>`}
 function renderJumpNav(){$("jumpNav").innerHTML=state.players.length<=2?"":state.players.map((p,i)=>`<span class="jbtn" data-jump="${p.id}"><span class="pColorDot" style="background:${playerColor(i)};width:8px;height:8px;margin-right:4px"></span>${esc(p.name)}</span>`).join("")}
-function renderStatic(){$("playerCount").textContent=state.players.length;$("sessionName").value=state.sessionName;$("buyinUsd").value=state.buyinUsd;$("taxRate").value=state.taxRate;$("split1").value=state.split1;$("split2").value=state.split2;$("split3").value=state.split3;for(const c of COLORS)$("v_"+c).value=state.chipValues[c];$("lockSession").textContent=state.locked?"Unlock":"Lock";$("lockSession").classList.toggle("danger",state.locked);$("lockBadge").style.display=state.locked?"inline-flex":"none";$("lockedOverlay").style.display=state.locked?"block":"none";["sessionName","split1","split2","split3"].forEach(id=>{const el=$(id);if(el)el.disabled=!!state.locked});const isAdmin=currentMember&&currentMember.role==='admin';["buyinUsd","taxRate","v_black","v_purple","v_yellow","v_pink","v_orange"].forEach(id=>{const el=$(id);if(el)el.disabled=state.locked||!isAdmin});const bs=$("bankSelect");bs.innerHTML=state.players.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");bs.value=state.bankId||(state.players[0]?.id||"");bs.disabled=!!state.locked;$("addPlayer").disabled=!!state.locked;$("resetAll").disabled=!!state.locked}
+function renderStatic(){$("playerCount").textContent=state.players.length;$("sessionName").value=state.sessionName;$("buyinUsd").value=state.buyinUsd;$("taxRate").value=Math.round(state.taxRate*100);$("split1").value=state.split1;$("split2").value=state.split2;$("split3").value=state.split3;for(const c of COLORS)$("v_"+c).value=state.chipValues[c];$("lockSession").textContent=state.locked?"Unlock":"Lock";$("lockSession").classList.toggle("danger",state.locked);$("lockBadge").style.display=state.locked?"inline-flex":"none";$("lockedOverlay").style.display=state.locked?"block":"none";["sessionName","split1","split2","split3"].forEach(id=>{const el=$(id);if(el)el.disabled=!!state.locked});const isAdmin=currentMember&&currentMember.role==='admin';["buyinUsd","taxRate","v_black","v_purple","v_yellow","v_pink","v_orange"].forEach(id=>{const el=$(id);if(el)el.disabled=state.locked||!isAdmin});const bs=$("bankSelect");bs.innerHTML=state.players.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");bs.value=state.bankId||(state.players[0]?.id||"");bs.disabled=!!state.locked;$("addPlayer").disabled=!!state.locked;$("resetAll").disabled=!!state.locked}
 function renderTourneyChipPack(){const w=$("tourneyChipPack");if(!w)return;const cv=state.chipValues;w.innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="ctop"><span class="sw ${SW[c]}"></span><span class="cname">${c[0].toUpperCase()+c.slice(1)}</span><span class="cval">${cv[c].toLocaleString()}</span></div><div class="stepper"><button class="sbtn" data-step="-1" data-kind="tpack" data-c="${c}" ${state.locked?"disabled":""}>−</button><input type="number" step="1" inputmode="numeric" data-kind="tpack" data-c="${c}" value="${state.tourneyPack[c]}" ${state.locked?"disabled":""}/><button class="sbtn" data-step="1" data-kind="tpack" data-c="${c}" ${state.locked?"disabled":""}>+</button></div></div>`).join("");const u=ufc(state.tourneyPack,cv);$("tourneyPackValue").innerHTML=`Pack: <b>${u.toLocaleString()}</b> units (~ <b>${fmtUsd(u2d(u))}</b>)`}
 function renderPlayersFull(){if(mode==="tournament"){$("players").innerHTML=state.players.map((p,pi)=>{const rc=p.buyins.length,tu=p.buyins.reduce((s,b)=>s+ufc(b.counts,state.chipValues),0),cs=COLORS.map(c=>{const v=p.buyins[0].counts[c];return v?`<span style="display:inline-flex;align-items:center;gap:3px;margin-right:6px"><span class="sw ${SW[c]}" style="width:8px;height:8px"></span>${v}</span>`:""}).filter(Boolean).join("");return`<div class="player" data-p="${p.id}" id="player_${p.id}"><div class="phd"><span class="pColorDot" style="background:${playerColor(pi)}"></span><div class="pname"><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" ${state.locked?"disabled":""} style="font-weight:600;background:transparent;border-color:transparent;padding:5px 8px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'"/><div style="font-size:11px;color:var(--muted);margin-top:2px;padding-left:8px">${cs} · ${fmtUsd(u2d(tu))} (${rc} buy-in${rc>1?"s":""})</div></div><div class="pactions"><button class="btn small" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="removeRebuy" data-p="${p.id}" ${state.locked||rc<=1?"disabled":""}>− Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>✕</button></div></div></div>`}).join("");renderTourneyChipPack();[1,2,3].forEach(i=>{const sel=$("place"+i),cur=state["place"+i];sel.innerHTML='<option value="">Select</option>'+state.players.map(p=>`<option value="${p.id}" ${p.id===cur?"selected":""}>${esc(p.name)}</option>`).join("");sel.disabled=!!state.locked});renderTournamentSummary()}else{$("players").innerHTML=state.players.map((p,pi)=>{const isCol=collapsedPlayers.has(p.id),bh=p.buyins.map((b,i)=>{const t=i===0?"Buy-in 1":`Rebuy ${i}`,du=ufc(b.counts,state.chipValues);return`<div class="miniCard"><div class="miniHd"><b>${t}</b><button class="btn small danger" data-act="delBuyin" data-p="${p.id}" data-b="${b.id}" ${(state.locked||p.buyins.length===1)?"disabled":""}>Remove</button></div><div class="miniBd"><div class="chips">${COLORS.map(c=>colorCell(c,state.chipValues[c],b.counts[c],"buyin",p.id,b.id)).join("")}</div><div class="note">Dispensed: <b>${du.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(du))}</b>)</div></div></div>`}).join("");const ou=ufc(p.cashout,state.chipValues);const hasChips=tcc(p.cashout)>0;const isSaved=savedCashouts.has(p.id);const statusHtml=isSaved?'<span class="cashoutStatus saved">🟢 Saved</span>':hasChips?'<span class="cashoutStatus pending">🟡 Unsaved</span>':'<span class="cashoutStatus pending">⚪ Pending</span>';const saveBtnHtml=state.locked?'':`<button class="saveBtn ${isSaved?"done":""}" data-savecashout="${p.id}" type="button">${isSaved?"✅ Saved":"💾 Save cashout"}</button>`;return`<div class="player ${isCol?"is-collapsed":""}" data-p="${p.id}" id="player_${p.id}"><div class="phd"><span class="chevron" data-act="togglePlayer" data-p="${p.id}">▼</span><span class="pColorDot" style="background:${playerColor(pi)}"></span><div class="pname"><span class="pNameDisplay" data-p="${p.id}" style="font-weight:600;padding:5px 8px;display:inline-block;font-size:16px">${esc(p.name)}</span><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" ${state.locked?"disabled":""} maxlength="20" class="pNameEdit" style="font-weight:600;background:transparent;border-color:var(--accent);padding:5px 8px;display:none" onblur="this.style.display='none';this.previousElementSibling.style.display='inline-block';this.previousElementSibling.textContent=this.value"/>${state.locked?"":'<button type="button" class="pNamePencil" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px 6px;margin-left:2px;touch-action:manipulation" onclick="const inp=this.previousElementSibling;const spn=inp.previousElementSibling;spn.style.display=\'none\';inp.style.display=\'inline-block\';inp.focus()">✏️</button>'}<div class="pSummaryInline">${shortSummary(p)} ${statusHtml}</div></div><div class="pactions"><button class="btn small" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>Remove</button></div></div><div class="pbd ${isCol?"collapsed":""}"><div class="outblock"><label>Buy-ins & Rebuys</label></div>${bh}<div class="cashoutSection"><label>Cashout (chips OUT) ${statusHtml}</label><div class="presetBar" style="margin-top:6px">${state.locked?"":Object.entries(CHIP_PRESETS).map(([k,v])=>`<button class="presetBtn" data-cashpreset="${k}" data-presetp="${p.id}" type="button">${k==="standard"?"🎰 Std":k==="half"?"½":k==="heavy"?"💰":"🪶"}</button>`).join("")+`<button class="presetBtn" data-cashpreset="clear" data-presetp="${p.id}" type="button">✕</button>`}</div><div class="chips" style="margin-top:6px">${COLORS.map(c=>colorCell(c,state.chipValues[c],p.cashout[c],"cashout",p.id,"")).join("")}</div><div class="note">Cashout: <b>${ou.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(ou))}</b>)</div>${saveBtnHtml}</div><div class="outblock"><label>Summary</label><pre>${esc(outputBlockText(p))}</pre></div></div></div>`}).join("")}}
 function renderTournamentSummary(){const t=calcTournament(),tb=$("tourneySummaryBody"),md=["🥇","🥈","🥉"];tb.innerHTML=t.results.map((r,i)=>{if(!r)return`<tr><td>${md[i]}</td><td class="muted">Not selected</td><td></td><td></td><td></td><td></td><td></td></tr>`;const cls=r.net>0?"good":(r.net<0?"bad":"muted");return`<tr><td>${md[i]}</td><td>${esc(r.name)}</td><td class="num">${r.buyins}</td><td class="num">${fmtUsd(r.prize)}</td><td class="num">${fmtUsd(r.rf)}</td><td class="num">${fmtUsd(r.payout)}</td><td class="num ${cls}">${r.net>=0?"+":""}${fmtUsd(r.net)}</td></tr>`}).join("");state.players.filter(p=>![state.place1,state.place2,state.place3].includes(p.id)).forEach(p=>{const bt=p.buyins.length*state.buyinUsd;tb.innerHTML+=`<tr><td></td><td>${esc(p.name)}</td><td class="num">${p.buyins.length}</td><td class="num">₥0.00</td><td class="num">₥0.00</td><td class="num">₥0.00</td><td class="num bad">-${fmtUsd(bt)}</td></tr>`});$("tourneyInfoText").textContent=`Pool: ${fmtUsd(t.pool)} · Split: ${state.split1}/${state.split2}/${state.split3} · RF: ${Math.round(state.taxRate*100)}%`;const tp=t.results.reduce((s,r)=>s+(r?r.payout:0),0),tr2=t.results.reduce((s,r)=>s+(r?r.rf:0),0);$("t_gross").textContent=fmtUsd(t.pool);$("t_rf").textContent=fmtUsd(tr2);$("t_final").textContent=fmtUsd(tp)}
@@ -810,7 +861,7 @@ $("timerReset").addEventListener("click",()=>{clearInterval(timerInterval);timer
 $("timerMin").addEventListener("input",()=>{if(!timerRunning){timerSeconds=(Number($("timerMin").value)||10)*60;renderTimer()}});renderTimer();
 $("sessionName").addEventListener("input",e=>{if(!state.locked){state.sessionName=e.target.value;save()}});
 $("buyinUsd").addEventListener("input",async e=>{if(state.locked||currentMember.role!=='admin')return;state.buyinUsd=Math.min(10000,Math.max(1,Number(e.target.value)||DEFAULTS.buyinUsd));renderAllFull();try{await db.ref('league/settings/buyinUsd').set(state.buyinUsd)}catch{}});
-$("taxRate").addEventListener("input",async e=>{if(state.locked||currentMember.role!=='admin')return;state.taxRate=Math.min(1,Math.max(0,Number(e.target.value)||0));renderAllFull();try{await db.ref('league/settings/taxRate').set(state.taxRate)}catch{}});
+$("taxRate").addEventListener("input",async e=>{if(state.locked||currentMember.role!=='admin')return;const pct=Math.min(100,Math.max(0,Number(e.target.value)||0));state.taxRate=pct/100;renderAllFull();try{await db.ref('league/settings/taxRate').set(state.taxRate)}catch{}});
 $("bankSelect").addEventListener("change",e=>{if(!state.locked){state.bankId=e.target.value;save();renderAllFull()}});
 for(const c of COLORS)$("v_"+c).addEventListener("input",async e=>{if(state.locked||currentMember.role!=='admin')return;state.chipValues[c]=Number(e.target.value)||DEFAULTS.chipValues[c];renderAllFull();try{await db.ref('league/settings/chipValues/'+c).set(state.chipValues[c])}catch{}});
 ["split1","split2","split3"].forEach(id=>$(id).addEventListener("input",e=>{if(!state.locked){state[id]=Number(e.target.value)||0;renderAllFull()}}));
