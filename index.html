@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.2-invite-diagnostic-2026-04-19"/>
+<meta name="ipl-build" content="v2.3-invite-prefetch-fix-2026-04-19"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -628,12 +628,17 @@ function setupInviteComplete(code){
       const memberId='user_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
       let failReason=null;let txCalls=0;
       const inviteRef=db.ref('league/invite_codes/'+code);
-      let txErr=null,txSnap=null,txCommitted=null;
+      // Pre-load the node so Firebase's transaction sees real data on the first call,
+      // not null-from-cache. Without this, some SDK versions abort before retrying.
+      const prefetch=await inviteRef.once('value');
+      if(!prefetch.exists()){setAuthMsg('setupMsg',"Code not found — ask admin for a new one");fail();return;}
+      let txErr=null,txCommitted=null;
       try{
         const result=await inviteRef.transaction(cur=>{
           txCalls++;
-          if(cur===null){failReason=null;return;}
-          if(cur===undefined){failReason=null;return;}
+          // If cur is null here (rare after prefetch), treat it as "create with the prefetched data".
+          // Transaction will then verify server-side and re-run with real data if there's a mismatch.
+          if(cur===null||cur===undefined){cur=prefetch.val();}
           const isLegacy=typeof cur.used==='boolean'&&cur.maxUses===undefined;
           const maxUses=cur.maxUses||(isLegacy?1:5);
           const uses=isLegacy?(cur.used?1:0):(cur.uses||0);
@@ -648,10 +653,9 @@ function setupInviteComplete(code){
           failReason=null;
           return cur;
         });
-        txCommitted=result.committed;txSnap=result.snapshot;
+        txCommitted=result.committed;
       }catch(e){txErr=e;}
       if(txErr||!txCommitted){
-        // Diagnostic: gather everything and display on screen (for testing; can be simplified once fixed)
         let msg;
         try{
           const fresh=await inviteRef.once('value');
@@ -665,7 +669,6 @@ function setupInviteComplete(code){
             else if(f.redeemedBy&&Object.values(f.redeemedBy).some(r=>r.deviceId===deviceId)){msg="This device already registered — sign in with existing PIN";}
             else if(failReason==='same_device'){msg="This device already registered — sign in with existing PIN";}
             else{
-              // No legitimate reason — show diagnostic so we can see what's happening
               const parts=[];
               parts.push(`tx-calls:${txCalls}`);
               parts.push(`fail-reason:${failReason||'none'}`);
