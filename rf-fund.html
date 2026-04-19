@@ -74,11 +74,17 @@
     .modalBox{background:var(--bg2);border:1px solid var(--card-border);border-radius:16px;padding:24px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
     .modalBox h3{margin-bottom:12px;font-size:18px}
     .modalBox p{color:var(--muted);font-size:13px;margin-bottom:16px}
-    .pinInput{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
-    .pinInput input{width:48px;height:56px;text-align:center;font-size:22px;font-weight:800;border:2px solid var(--input-border);border-radius:10px;background:var(--input-bg);color:var(--text);outline:none}
-    .pinInput input:focus{border-color:var(--accent)}
-    .pinErr{color:var(--bad);font-size:12px;margin-bottom:10px;min-height:16px}
-    .nameInput{width:100%;padding:10px;border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:14px;text-align:center;margin-bottom:12px}
+    /* ===== Unified sign-in gate ===== */
+    .signInGate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+    .signInGate.open{display:flex}
+    .signInGate .gateLogo{font-size:32px;font-weight:800;letter-spacing:1px;margin-bottom:6px}
+    .signInGate .gateSub{color:var(--muted);font-size:12px;margin-bottom:28px}
+    .signInGate h2{font-size:22px;font-weight:700;margin-bottom:10px}
+    .signInGate p{color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:22px;max-width:360px}
+    .signInGate .gateLink{display:inline-block;padding:13px 24px;background:var(--accent);color:#fff;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px}
+    .signInGate .gateLink:hover{filter:brightness(1.1)}
+    body.gated{overflow:hidden}
+    body.gated>*:not(.signInGate):not(#toast){visibility:hidden}
     .liveIndicator{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--good);font-weight:600}
     .liveIndicator .dot{width:7px;height:7px;border-radius:50%;background:var(--good);animation:pulse 1.5s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -97,21 +103,13 @@
 </head>
 <body>
 <div id="toast" class="toast"></div>
-<div class="modal" id="authModal">
-  <div class="modalBox">
-    <h3 id="authTitle">Admin Login</h3>
-    <p id="authDesc">Enter your 4-digit admin PIN</p>
-    <input class="nameInput" id="authName" placeholder="Your name (e.g. John)" style="display:block"/>
-    <div class="pinInput">
-      <input type="tel" maxlength="1" data-pin="0" inputmode="numeric" autocomplete="off"/>
-      <input type="tel" maxlength="1" data-pin="1" inputmode="numeric" autocomplete="off"/>
-      <input type="tel" maxlength="1" data-pin="2" inputmode="numeric" autocomplete="off"/>
-      <input type="tel" maxlength="1" data-pin="3" inputmode="numeric" autocomplete="off"/>
-    </div>
-    <div class="pinErr" id="pinErr"></div>
-    <button class="btn primary" id="authSubmit" style="width:100%;margin-bottom:8px">Unlock</button>
-    <button class="btn outline" id="authSkip" style="width:100%">Continue as Viewer</button>
-  </div>
+<!-- Sign-in gate: shown when no valid session in localStorage. Starts hidden; JS shows if unauthenticated. -->
+<div class="signInGate" id="signInGate">
+  <div class="gateLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div>
+  <div class="gateSub">Innovation Poker League</div>
+  <h2>Sign in required</h2>
+  <p>Please sign in on the Admin page first to view the RF Fund. Your session will be shared across all IPL pages.</p>
+  <a class="gateLink" href="index.html">♠ Sign in on Admin page →</a>
 </div>
 <div class="iplHeader">
   <div class="iplLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div>
@@ -125,7 +123,8 @@
     <div class="topRight">
       <span class="liveIndicator"><span class="dot"></span> LIVE</span>
       <span class="roleBadge viewer" id="roleBadge">👁 VIEWER</span>
-      <button class="btn small outline" id="loginBtn">🔐 Admin</button>
+      <span id="signedInAs" style="font-size:11px;color:var(--muted)"></span>
+      <button class="btn small outline" id="signOutBtn" style="display:none">Sign out</button>
       <button class="themeToggle" id="themeToggle">🌙</button>
     </div>
   </div>
@@ -174,6 +173,7 @@
   let trendChartInstance=null;
   let isAdmin=false;
   let adminName="";
+  let currentMember=null;
   let allTransactions=[];
   let settings={threshold:50};
   let firebaseReady=false;
@@ -193,7 +193,6 @@
   const db=firebase.database();
   const txRef=db.ref("rf_fund/transactions");
   const settRef=db.ref("rf_fund/settings");
-  const pinRef=db.ref("rf_fund/admin_pin");
   const archiveRef=db.ref("session_archive");
 
   function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
@@ -208,80 +207,54 @@
     $("themeToggle").textContent=t==="dark"?"🌙":"☀️";renderChart();
   });
 
-  // Auth
-  async function hashPin(pin){const enc=new TextEncoder().encode(pin);const buf=await crypto.subtle.digest("SHA-256",enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("")}
+  // ===== Unified auth: read session from localStorage (same key as index.html) =====
+  const MEMBER_KEY="poker_current_member_v1";
+  function loadCachedMember(){try{return JSON.parse(localStorage.getItem(MEMBER_KEY))}catch{return null}}
+  function clearCachedMember(){localStorage.removeItem(MEMBER_KEY)}
 
-  function setAdminMode(name){
-    isAdmin=true;adminName=name;
-    document.body.classList.add("is-admin");
-    $("roleBadge").className="roleBadge admin";$("roleBadge").textContent="🔑 ADMIN: "+name;
-    $("loginBtn").textContent="🔓 Logout";$("viewerBanner").style.display="none";
-    $("authModal").classList.remove("open");
-    localStorage.setItem("ipl_rf_admin",name);toast("Welcome, "+name+" 🔑");
-  }
-  function setViewerMode(){
-    isAdmin=false;adminName="";
-    document.body.classList.remove("is-admin");
-    $("roleBadge").className="roleBadge viewer";$("roleBadge").textContent="👁 VIEWER";
-    $("loginBtn").textContent="🔐 Admin";$("viewerBanner").style.display="block";
-    $("authModal").classList.remove("open");localStorage.removeItem("ipl_rf_admin");
-  }
-
-  // PIN auto-advance
-  document.querySelectorAll(".pinInput input").forEach((inp,i,all)=>{
-    inp.addEventListener("input",()=>{inp.value=inp.value.replace(/\D/g,"").slice(0,1);if(inp.value&&i<3)all[i+1].focus()});
-    inp.addEventListener("keydown",e=>{if(e.key==="Backspace"&&!inp.value&&i>0)all[i-1].focus();if(e.key==="Enter")$("authSubmit").click()});
-  });
-  function getPin(){return[...document.querySelectorAll(".pinInput input")].map(i=>i.value).join("")}
-  function clearPin(){document.querySelectorAll(".pinInput input").forEach(i=>{i.value=""});$("pinErr").textContent=""}
-
-  $("authSubmit").addEventListener("click",async()=>{
-    const pin=getPin();
-    if(pin.length!==4){$("pinErr").textContent="Enter all 4 digits";return}
-    const name=($("authName").value||"").trim();
-    if(!name){$("pinErr").textContent="Enter your name first";return}
-
-    // Wait for auth to be ready
-    try{
-      const snap=await pinRef.once("value");
-      const stored=snap.val();
-
-      if(!stored){
-        // First time — create PIN
-        const hash=await hashPin(pin);
-        await pinRef.set({hash,createdBy:name,createdAt:Date.now()});
-        setAdminMode(name);toast("Admin PIN created ✓");
-        return;
-      }
-
-      // Verify existing PIN
-      const hash=await hashPin(pin);
-      if(hash===stored.hash){
-        setAdminMode(name);
-      }else{
-        $("pinErr").textContent="Incorrect PIN";clearPin();
-      }
-    }catch(err){
-      console.error("PIN error:",err);
-      $("pinErr").textContent="Error: "+err.message;
+  function applyAuthState(){
+    const m=loadCachedMember();
+    if(!m||!m.id||!m.name){
+      // Not signed in anywhere → show full-page gate
+      currentMember=null;isAdmin=false;adminName="";
+      document.body.classList.add("gated");
+      $("signInGate").classList.add("open");
+      return false;
     }
+    // Signed in — apply role
+    currentMember=m;adminName=m.name;
+    isAdmin=(m.role==="admin");
+    document.body.classList.remove("gated");
+    $("signInGate").classList.remove("open");
+    if(isAdmin){
+      document.body.classList.add("is-admin");
+      $("roleBadge").className="roleBadge admin";$("roleBadge").textContent="🔑 ADMIN";
+      $("viewerBanner").style.display="none";
+      // Clean up orphaned rf_fund/admin_pin node (best-effort, silent on failure)
+      db.ref("rf_fund/admin_pin").remove().catch(()=>{});
+    }else{
+      document.body.classList.remove("is-admin");
+      $("roleBadge").className="roleBadge viewer";$("roleBadge").textContent="👁 READ-ONLY";
+      $("viewerBanner").style.display="block";
+      $("viewerBanner").textContent="👁 Signed in as "+m.name+" · read-only. RF editing is admin-only.";
+    }
+    $("signedInAs").textContent="👤 "+m.name;
+    $("signOutBtn").style.display="";
+    return true;
+  }
+
+  // Sign out: clear the shared member and redirect to index so user re-auths there
+  $("signOutBtn").addEventListener("click",()=>{
+    if(!confirm("Sign out?"))return;
+    clearCachedMember();
+    location.href="index.html";
   });
 
-  $("authSkip").addEventListener("click",setViewerMode);
+  // Watch for sign-in changes from other tabs / pages
+  window.addEventListener("storage",e=>{if(e.key===MEMBER_KEY)location.reload()});
 
-  $("loginBtn").addEventListener("click",()=>{
-    if(isAdmin){setViewerMode();toast("Logged out");return}
-    clearPin();$("authName").value="";$("pinErr").textContent="";
-    pinRef.once("value").then(snap=>{
-      if(snap.val()){$("authTitle").textContent="Admin Login";$("authDesc").textContent="Enter your 4-digit admin PIN"}
-      else{$("authTitle").textContent="Setup Admin PIN";$("authDesc").textContent="No admin PIN exists yet. Enter your name and choose a 4-digit PIN."}
-    }).catch(()=>{$("authTitle").textContent="Admin Login";$("authDesc").textContent="Enter your 4-digit admin PIN"});
-    $("authModal").classList.add("open");
-  });
-
-  // Auto-login
-  const savedAdmin=localStorage.getItem("ipl_rf_admin");
-  if(savedAdmin){setAdminMode(savedAdmin)}else{setViewerMode()}
+  // Initial check
+  applyAuthState();
 
   // Data listeners
   let sessionRFEntries=[];
