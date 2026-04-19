@@ -173,6 +173,12 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .authMsg.err{color:var(--bad);font-weight:500}.authMsg.ok{color:var(--good);font-weight:500}
 .authScreen .btn{margin-top:10px;width:100%;padding:13px}
 .textBtn{background:transparent;border:1px solid transparent;color:var(--muted);font-size:12px;padding:10px;margin-top:6px;cursor:pointer}.textBtn:hover{color:var(--text)}
+.memberSelectList{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px;max-height:42vh;overflow-y:auto}
+.memberSelectRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border:1px solid var(--card-border);border-radius:10px;background:var(--hover);color:var(--text);cursor:pointer;text-align:left;width:100%;font-size:15px;font-weight:600;touch-action:manipulation}
+.memberSelectRow:hover,.memberSelectRow:active{background:var(--bg2);border-color:var(--accent)}
+.memberSelectRow .msBadge{flex-shrink:0;font-size:10px;padding:3px 8px;border-radius:6px;background:var(--accent);color:#fff;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.memberSelectRow .msBadge.user{background:var(--bg3);color:var(--muted)}
+.memberSelectEmpty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
 .authScreen input{font-size:18px;padding:13px}
 .authScreen input.codeInput{text-align:center;letter-spacing:3px;text-transform:uppercase;font-weight:700}
 .authScreen input.nameInput{text-align:left}
@@ -232,7 +238,8 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
     <div class="authTagline">Innovation Poker League</div>
     <div class="authScreen" id="auth-loading"><div class="authSpinner"></div><div class="authMsg">Connecting to league…</div></div>
     <div class="authScreen hidden" id="auth-firstrun"><h2>Welcome!</h2><p>You're the founding admin, <b>Umakanth</b>. Set a 5-digit PIN to secure your league.</p><div class="pinDots" id="firstrunDots"></div><div class="pinPad" id="firstrunPad"></div><div class="authMsg" id="firstrunMsg"></div></div>
-    <div class="authScreen hidden" id="auth-welcome"><h2>Sign in</h2><p>Choose how you enter.</p><button class="btn primary" id="wAdminBtn" type="button">♠ I'm Umakanth (Admin)</button><button class="btn" id="wInviteBtn" type="button">🎟️ I have an invite code</button></div>
+    <div class="authScreen hidden" id="auth-welcome"><h2>Sign in</h2><p>Choose how to enter.</p><button class="btn primary" id="wSignInBtn" type="button">👤 Sign in with your name + PIN</button><button class="btn" id="wInviteBtn" type="button">🎟️ I have an invite code</button><button class="textBtn" id="wAdminBtn" type="button" style="margin-top:14px;font-size:11px;opacity:.65">Admin recovery (master PIN)</button></div>
+    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Tap your name to sign in.</p><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
     <div class="authScreen hidden" id="auth-quick"><h2 id="quickTitle">Welcome back</h2><p id="quickSub"></p><div class="pinDots" id="quickDots"></div><div class="pinPad" id="quickPad"></div><div class="authMsg" id="quickMsg"></div><button class="textBtn" id="quickSwitch" type="button">Not you? Sign in as someone else</button></div>
     <div class="authScreen hidden" id="auth-adminpin"><h2>Admin PIN</h2><p>Enter your 5-digit admin PIN.</p><div class="pinDots" id="adminDots"></div><div class="pinPad" id="adminPad"></div><div class="authMsg" id="adminMsg"></div><button class="textBtn" id="adminBack" type="button">← Back</button></div>
     <div class="authScreen hidden" id="auth-invite"><h2>Invite Code</h2><p>Enter the code from your admin.</p><input id="inviteCodeInput" class="codeInput" type="text" placeholder="IPL-XXXX" maxlength="12"/><button class="btn primary" id="inviteVerifyBtn" type="button">Continue</button><div class="authMsg" id="inviteMsg"></div><button class="textBtn" id="inviteBack" type="button">← Back</button></div>
@@ -248,7 +255,7 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 <a href="rf-fund.html" data-admin-only style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">💰 RF Fund</a>
 <a href="analytics.html" data-admin-only style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">📊 Analytics</a>
 </div>
-<div class="sessionBanner hidden" id="activeSessionBanner"><span class="bDot"></span><div class="bContent"><span class="bTitle" id="bannerTitle">Session in progress</span><span class="bSub" id="bannerSub"></span></div><button class="btn small" id="bannerResumeBtn" type="button" style="display:none">Resume</button><button class="btn small gold" id="bannerTakeoverBtn" type="button" style="display:none">Take over</button></div>
+<div class="sessionBanner hidden" id="activeSessionBanner"><span class="bDot"></span><div class="bContent"><span class="bTitle" id="bannerTitle">Session in progress</span><span class="bSub" id="bannerSub"></span></div><button class="btn small primary" id="bannerCashoutBtn" type="button" style="display:none">💰 Cashout</button><button class="btn small" id="bannerResumeBtn" type="button" style="display:none">Resume</button><button class="btn small gold" id="bannerTakeoverBtn" type="button" style="display:none">Take over</button></div>
 <div class="modeToggle" id="modeToggle"><button class="modeBtn active" data-mode="cash" type="button">♠ Cash Game</button><button class="modeBtn" data-mode="tournament" type="button">🏆 Tournament</button></div>
 <div class="top"><div><h1 id="topTitle">Poker Cashout</h1><div class="sub" id="topSub"></div></div><div class="topPills"><div id="liveBadge" class="pill live" style="display:none"><span class="dot"></span><span id="liveText">LIVE</span></div><div id="lockBadge" class="pill secondary" style="display:none"><span class="dot" style="background:var(--accent)"></span><span>LOCKED</span></div><div id="pill" class="pill warn"><span class="dot"></span><span id="pillText">Audit: pending</span></div><button class="themeToggle" id="themeToggle" type="button">🌙</button></div></div>
 <div class="card timerCard hidden" id="timerCard" style="margin-bottom:14px"><div class="hd"><h2>⏱ Blinds Timer</h2><div class="btnbar"><button class="btn small" id="timerStart" type="button">Start</button><button class="btn small danger" id="timerReset" type="button">Reset</button></div></div><div class="bd"><div class="timerDisplay" id="timerDisplay">10:00</div><div class="row" style="max-width:300px;margin:0 auto"><div><label>Minutes</label><input id="timerMin" type="number" value="10" min="1" max="120" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:700"/></div></div></div></div>
@@ -322,7 +329,7 @@ function applyTheme(){document.documentElement.setAttribute("data-theme",theme);
 applyTheme();
 function toast(msg,d=2200){const box=$("toastBox"),el=document.createElement("div");el.className="toast";el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},d)}
 let currentMember=null,masterPinHash=null,adminName="Umakanth";
-let leagueRoster=[],leagueMembers={},leagueInvites={},sessionArchive=[],activeSession=null,rfExpenses=[];
+let leagueRoster=[],leagueMembers={},leagueInvites={},sessionArchive=[],activeSession=null,rfExpenses=[],activeSessionData=null,activeSessionDetailRef=null,activeSessionDetailCb=null;
 let mode="cash";const collapsedPlayers=new Set();let onlineSessionCode=null,firebaseListener=null;
 let timerInterval=null,timerSeconds=600,timerRunning=false;
 let paidMap={};try{paidMap=JSON.parse(localStorage.getItem(PAY_KEY)||"{}")}catch{}
@@ -381,35 +388,67 @@ function setupFirstRun(){
 }
 function setupWelcome(){
   showAuthScreen('auth-welcome');
-  $("wAdminBtn").onclick=setupAdminLogin;
+  $("wSignInBtn").onclick=setupSignIn;
   $("wInviteBtn").onclick=setupInviteEntry;
+  $("wAdminBtn").onclick=setupAdminLogin;
 }
-async function setupQuickLogin(cached){
+async function setupSignIn(){
+  showAuthScreen('auth-signin');
+  const list=$("memberSelectList");
+  setAuthMsg('signInMsg','');
+  list.innerHTML='<div class="memberSelectEmpty">Loading members…</div>';
+  $("signInBack").onclick=setupWelcome;
+  try{
+    const snap=await db.ref('league/members').once('value');
+    const members=snap.val()||{};
+    const entries=Object.entries(members).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
+    if(!entries.length){
+      list.innerHTML='<div class="memberSelectEmpty">No members yet. Use an invite code to join the league.</div>';
+      return;
+    }
+    list.innerHTML=entries.map(([id,m])=>{
+      const admin=m.role==='admin';
+      return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span><span class="msBadge${admin?'':' user'}">${admin?'Admin':'Member'}</span></button>`;
+    }).join('');
+    list.querySelectorAll('[data-msid]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'← Pick a different name'});
+      });
+    });
+  }catch(err){
+    list.innerHTML=`<div class="memberSelectEmpty">Error loading members: ${esc(err.message)}</div>`;
+  }
+}
+async function setupQuickLogin(cached,opts){
+  opts=opts||{};
   // Fetch current member data to detect promotions / pinLength
   let m=null;
   try{const snap=await db.ref('league/members/'+cached.id).once('value');m=snap.val()}catch(err){}
-  if(!m){setupWelcome();return}
+  if(!m){setAuthMsg('signInMsg','Member no longer exists');setupWelcome();return}
   // PROMOTION CASE: promoted to admin, old PIN is 4-digit, needs to set 5-digit admin PIN
-  if(m.role==='admin'&&m.needsAdminPinUpgrade){setupAdminPromotion(cached,m);return}
+  if(m.role==='admin'&&m.needsAdminPinUpgrade){setupAdminPromotion(cached,m,opts);return}
   // Normal quick login: use pinLength from DB (source of truth), fall back to role-based guess for old records
   const len=m.pinLength||(m.role==='admin'?5:4);
   showAuthScreen('auth-quick');
   $("quickTitle").textContent=`Welcome back, ${m.name}`;
   $("quickSub").textContent=`Enter your ${len}-digit ${m.role==='admin'?'admin ':''}PIN`;
+  $("quickSwitch").textContent=opts.switchLabel||'Not you? Sign in as someone else';
   bindPinPad($("quickPad"),$("quickDots"),len,async(pin,fail)=>{
     const hash=await sha256Hex(pin);
     if(hash!==m.pinHash){setAuthMsg('quickMsg',"Wrong PIN");fail();return}
     currentMember={id:cached.id,name:m.name,role:m.role,pinHash:m.pinHash};
     saveCachedMember(currentMember);onAuthSuccess();
   });
-  $("quickSwitch").onclick=()=>{clearCachedMember();currentMember=null;setupWelcome()};
+  $("quickSwitch").onclick=opts.onSwitch||(()=>{clearCachedMember();currentMember=null;setupWelcome()});
 }
 
 // Admin promotion flow: verify old 4-digit PIN, then collect new 5-digit admin PIN
-function setupAdminPromotion(cached,m){
+function setupAdminPromotion(cached,m,opts){
+  opts=opts||{};
   showAuthScreen('auth-quick');
   $("quickTitle").textContent=`🎉 You're now an admin!`;
   $("quickSub").textContent=`${m.name}, first enter your current 4-digit PIN to confirm`;
+  $("quickSwitch").textContent=opts.switchLabel||'Not you? Sign in as someone else';
   const oldLen=m.pinLength||4;
   bindPinPad($("quickPad"),$("quickDots"),oldLen,async(oldPin,fail)=>{
     const oldHash=await sha256Hex(oldPin);
@@ -430,7 +469,7 @@ function setupAdminPromotion(cached,m){
       }catch(err){setAuthMsg('quickMsg',"Failed: "+err.message);fail2()}
     });
   });
-  $("quickSwitch").onclick=()=>{clearCachedMember();currentMember=null;setupWelcome()};
+  $("quickSwitch").onclick=opts.onSwitch||(()=>{clearCachedMember();currentMember=null;setupWelcome()});
 }
 function setupAdminLogin(){
   showAuthScreen('auth-adminpin');
@@ -526,7 +565,7 @@ function startLeagueListeners(){
     const r=snap.val()||{};leagueRoster=Object.values(r).map(e=>e.name).filter(Boolean);
     renderRosterChips();
   });
-  db.ref('league/active_session').on('value',snap=>{activeSession=snap.val();renderActiveBanner()});
+  db.ref('league/active_session').on('value',snap=>{activeSession=snap.val();watchActiveSessionDetails();renderActiveBanner()});
   if(currentMember.role==='admin'){
     db.ref('league/members').on('value',snap=>{leagueMembers=snap.val()||{};renderMembers()});
     db.ref('league/invite_codes').on('value',snap=>{leagueInvites=snap.val()||{};renderInvites()});
@@ -535,31 +574,85 @@ function startLeagueListeners(){
   }
 }
 
+// Attach/detach a listener to the active session's data (config + cashouts + results)
+// so the banner can detect whether the current member is a player who needs to cashout.
+function watchActiveSessionDetails(){
+  // Cleanup previous listener
+  if(activeSessionDetailRef&&activeSessionDetailCb){
+    activeSessionDetailRef.off('value',activeSessionDetailCb);
+    activeSessionDetailRef=null;activeSessionDetailCb=null;
+  }
+  activeSessionData=null;
+  if(!activeSession||!activeSession.code)return;
+  activeSessionDetailRef=db.ref('sessions/'+activeSession.code);
+  activeSessionDetailCb=activeSessionDetailRef.on('value',snap=>{
+    activeSessionData=snap.val();renderActiveBanner();
+  });
+}
+
 // ==== ACTIVE SESSION BANNER ====
 function renderActiveBanner(){
-  const banner=$("activeSessionBanner"),resumeBtn=$("bannerResumeBtn"),takeoverBtn=$("bannerTakeoverBtn"),startBtn=$("startOnline");
-  if(!activeSession){banner.classList.add("hidden");resumeBtn.style.display='none';takeoverBtn.style.display='none';if(startBtn&&!onlineSessionCode)startBtn.disabled=false;return}
+  const banner=$("activeSessionBanner"),resumeBtn=$("bannerResumeBtn"),takeoverBtn=$("bannerTakeoverBtn"),cashoutBtn=$("bannerCashoutBtn"),startBtn=$("startOnline");
+  if(!activeSession){banner.classList.add("hidden");resumeBtn.style.display='none';takeoverBtn.style.display='none';cashoutBtn.style.display='none';if(startBtn&&!onlineSessionCode)startBtn.disabled=false;return}
   banner.classList.remove("hidden");
   const isMine=activeSession.startedBy===currentMember.id;
   const isMyActiveCode=onlineSessionCode===activeSession.code;
   banner.classList.toggle("mine",isMine);
   const when=new Date(activeSession.startedAt||Date.now()).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
   const who=activeSession.startedByName||leagueMembers[activeSession.startedBy]?.name||'someone';
+  // Detect if current member is a player in this session
+  const myName=(currentMember?.name||'').toLowerCase().trim();
+  const playerNames=(activeSessionData?.config?.playerNames||[]).map(n=>(n||'').toLowerCase().trim());
+  const sessionPlayerNameExact=(activeSessionData?.config?.playerNames||[]).find(n=>(n||'').toLowerCase().trim()===myName);
+  const amPlayer=!!myName&&playerNames.includes(myName);
+  const cashouts=activeSessionData?.cashouts||{};
+  const myCashoutKey=sessionPlayerNameExact?Object.keys(cashouts).find(k=>k.toLowerCase().trim()===myName):null;
+  const myCashout=myCashoutKey?cashouts[myCashoutKey]:null;
+  const iCashedOut=!!(myCashout&&(myCashout.submitted||myCashout.adminOverride));
+  const sessionLocked=!!activeSessionData?.results?.locked;
   if(isMine){
     $("bannerTitle").textContent=`🎯 Your session ${activeSession.code} is live`;
     $("bannerSub").textContent=`Started at ${when}`;
     if(!isMyActiveCode){resumeBtn.style.display='inline-flex';resumeBtn.dataset.code=activeSession.code}else{resumeBtn.style.display='none'}
-    takeoverBtn.style.display='none';if(startBtn)startBtn.disabled=true;
-  }else{
-    $("bannerTitle").textContent=`🎯 Session ${activeSession.code} in progress`;
-    $("bannerSub").textContent=`Started by ${who} at ${when}`;
+    takeoverBtn.style.display='none';cashoutBtn.style.display='none';
+    if(startBtn)startBtn.disabled=true;
+  }else if(amPlayer&&!iCashedOut&&!sessionLocked){
+    // Current member IS a player in this session and hasn't cashed out yet
+    $("bannerTitle").textContent=`🎰 You're in "${activeSessionData.config.sessionName||activeSession.code}"`;
+    $("bannerSub").textContent=`Started by ${who} at ${when} — tap Cashout when ready`;
     resumeBtn.style.display='none';
     takeoverBtn.style.display=currentMember.role==='admin'?'inline-flex':'none';
-    takeoverBtn.dataset.code=activeSession.code;if(startBtn)startBtn.disabled=true;
+    takeoverBtn.dataset.code=activeSession.code;
+    cashoutBtn.style.display='inline-flex';
+    cashoutBtn.dataset.code=activeSession.code;
+    cashoutBtn.dataset.pname=sessionPlayerNameExact||currentMember.name;
+    if(startBtn)startBtn.disabled=true;
+  }else if(amPlayer&&iCashedOut){
+    // They're a player but already submitted their cashout
+    $("bannerTitle").textContent=`✓ Cashout submitted — ${activeSession.code}`;
+    $("bannerSub").textContent=`Started by ${who} at ${when}`;
+    resumeBtn.style.display='none';cashoutBtn.style.display='none';
+    takeoverBtn.style.display=currentMember.role==='admin'?'inline-flex':'none';
+    takeoverBtn.dataset.code=activeSession.code;
+    if(startBtn)startBtn.disabled=true;
+  }else{
+    // Not a player in this session
+    $("bannerTitle").textContent=`🎯 Session ${activeSession.code} in progress`;
+    $("bannerSub").textContent=`Started by ${who} at ${when}`;
+    resumeBtn.style.display='none';cashoutBtn.style.display='none';
+    takeoverBtn.style.display=currentMember.role==='admin'?'inline-flex':'none';
+    takeoverBtn.dataset.code=activeSession.code;
+    if(startBtn)startBtn.disabled=true;
   }
 }
 $("bannerResumeBtn").addEventListener("click",async()=>{const code=$("bannerResumeBtn").dataset.code;if(code)await resumeSession(code)});
 $("bannerTakeoverBtn").addEventListener("click",async()=>{const code=$("bannerTakeoverBtn").dataset.code;if(!code)return;if(!confirm(`Take over session ${code}?`))return;await resumeSession(code)});
+$("bannerCashoutBtn").addEventListener("click",()=>{
+  const code=$("bannerCashoutBtn").dataset.code,pname=$("bannerCashoutBtn").dataset.pname;
+  if(!code||!pname)return;
+  const url=`player.html?session=${encodeURIComponent(code)}&name=${encodeURIComponent(pname)}`;
+  window.location.href=url;
+});
 
 // ==== MEMBER MGMT ====
 function renderMembers(){
