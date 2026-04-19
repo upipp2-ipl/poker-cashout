@@ -256,6 +256,22 @@ $("joinBtn").addEventListener("click",async()=>{
       sel.appendChild(opt);
     });
     showScreen("nameScreen");toast("Session found ✓");
+    // Deep-link: if a ?name= param was supplied and matches an enabled option, auto-select & confirm
+    try{
+      const wantName=(new URLSearchParams(window.location.search).get("name")||"").trim();
+      if(wantName){
+        const sel=$("nameSelect");
+        const match=Array.from(sel.options).find(o=>o.value&&!o.disabled&&o.value.toLowerCase().trim()===wantName.toLowerCase().trim());
+        if(match){
+          sel.value=match.value;
+          $("confirmName").disabled=false;
+          setTimeout(()=>$("confirmName").click(),250);
+        }else{
+          const disabledMatch=Array.from(sel.options).find(o=>o.value&&o.value.toLowerCase().trim()===wantName.toLowerCase().trim());
+          if(disabledMatch)toast("Your cashout is already submitted or locked");
+        }
+      }
+    }catch(e){}
   }catch(err){showError("joinError","Connection error: "+err.message)}
   $("joinBtn").innerHTML="Join Session";$("joinBtn").disabled=false;
 });
