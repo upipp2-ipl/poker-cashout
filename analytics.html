@@ -76,12 +76,31 @@
     .migBanner .migProgress{font-size:11px;color:var(--muted);margin-top:8px;display:none}
     .migBanner.working .migProgress{display:block}
     .migBanner.working .migBtns{opacity:.5;pointer-events:none}
+    /* ===== Unified sign-in gate ===== */
+    .signInGate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+    .signInGate.open{display:flex}
+    .signInGate .gateLogo{font-size:32px;font-weight:800;letter-spacing:1px;margin-bottom:6px}
+    .signInGate .gateSub{color:var(--muted);font-size:12px;margin-bottom:28px}
+    .signInGate h2{font-size:22px;font-weight:700;margin-bottom:10px}
+    .signInGate p{color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:22px;max-width:360px}
+    .signInGate .gateLink{display:inline-block;padding:13px 24px;background:var(--accent);color:#fff;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px}
+    .signInGate .gateLink:hover{filter:brightness(1.1)}
+    body.gated{overflow:hidden}
+    body.gated>*:not(.signInGate):not(#toast){visibility:hidden}
     @media(max-width:700px){.chartGrid{grid-template-columns:1fr}}
     @media(max-width:600px){.kpiRow{grid-template-columns:1fr 1fr}.tbl{font-size:11px}.tbl th,.tbl td{padding:6px 4px}}
   </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
+<!-- Sign-in gate: shown when no valid session in localStorage. Starts hidden; JS shows if unauthenticated. -->
+<div class="signInGate" id="signInGate">
+  <div class="gateLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div>
+  <div class="gateSub">Innovation Poker League</div>
+  <h2>Sign in required</h2>
+  <p>Please sign in on the Admin page first to view Analytics. Your session will be shared across all IPL pages.</p>
+  <a class="gateLink" href="index.html">♠ Sign in on Admin page →</a>
+</div>
 <div class="iplHeader">
   <div class="iplLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div>
   <div class="iplSub">Innovation Poker League</div>
@@ -93,6 +112,8 @@
     <a class="navBtn active" href="analytics.html">📊 Analytics</a>
     <div class="topRight">
       <span class="liveIndicator"><span class="dot"></span> LIVE</span>
+      <span id="signedInAs" style="font-size:11px;color:var(--muted)"></span>
+      <button class="btn small outline" id="signOutBtn" style="display:none">Sign out</button>
       <button class="themeToggle" id="themeToggle">🌙</button>
     </div>
   </div>
@@ -158,6 +179,28 @@
   const charts={};let currentSort={col:"net",dir:-1};let filteredData=null;let allSessions=[];
 
   function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+
+  // ===== Unified sign-in gate: reads same localStorage key as index.html =====
+  const MEMBER_KEY="poker_current_member_v1";
+  function loadCachedMember(){try{return JSON.parse(localStorage.getItem(MEMBER_KEY))}catch{return null}}
+  function clearCachedMember(){localStorage.removeItem(MEMBER_KEY)}
+  const _cachedMember=loadCachedMember();
+  const _isSignedIn=!!(_cachedMember&&_cachedMember.id&&_cachedMember.name);
+  if(!_isSignedIn){
+    document.body.classList.add("gated");
+    $("signInGate").classList.add("open");
+    return; // Stop the IIFE here — no Firebase, no listeners, no renders
+  }
+  // Signed in — show name + sign-out, continue normal boot
+  $("signedInAs").textContent="👤 "+_cachedMember.name;
+  $("signOutBtn").style.display="";
+  $("signOutBtn").addEventListener("click",()=>{
+    if(!confirm("Sign out?"))return;
+    clearCachedMember();
+    location.href="index.html";
+  });
+  // Cross-tab sync: if user signs out elsewhere, reload here
+  window.addEventListener("storage",e=>{if(e.key===MEMBER_KEY)location.reload()});
 
   // Firebase — bootstrap guard waits for SDK (handles slow/blocked CDN gracefully)
   const fbConfig={
