@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-session-roles-step3-2026-04-19"/>
+<meta name="ipl-build" content="v2.5-session-roles-step4c-2026-04-19"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -32,6 +32,14 @@ h1{margin:0;font-size:15px}.sub{color:var(--muted);font-size:11px;margin-top:2px
 .pill.good .dot{background:var(--good)}.pill.warn .dot{background:var(--warn)}.pill.bad .dot{background:var(--bad)}
 .pill.secondary{background:var(--input-bg)}.pill.live{background:rgba(43,213,118,.10);border-color:rgba(43,213,118,.25);color:var(--good)}
 .pill.live .dot{background:var(--good);animation:pulse 2s infinite}
+/* Step 4b: Role indicator pill in the header */
+.pill.role{cursor:pointer;font-weight:700}
+.pill.role.banker{background:rgba(43,213,118,.10);border-color:rgba(43,213,118,.28);color:var(--good)}
+.pill.role.banker .dot{background:var(--good);animation:pulse 2s infinite}
+.pill.role.playing{background:rgba(122,167,255,.10);border-color:rgba(122,167,255,.28);color:var(--accent)}
+.pill.role.playing .dot{background:var(--accent)}
+.pill.role.spectator{background:var(--input-bg);border-color:var(--card-border);color:var(--muted)}
+.pill.role.spectator .dot{background:var(--muted)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .themeToggle{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;touch-action:manipulation}
 .lockedOverlay{position:fixed;bottom:70px;left:12px;right:12px;z-index:40;display:none;padding:10px 12px;border-radius:14px;border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--sh);max-width:1050px;opacity:.95;cursor:pointer}
@@ -281,6 +289,21 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 .pHomeTool .pTLabel{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
 .pHomeTool .pTSub{font-size:11px;color:var(--muted);text-align:center}
 .pHomeNote{font-size:12px;color:var(--muted);text-align:center;margin:16px 0 4px;padding:10px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--card-border)}
+/* Step 4c: Waiting-state enrichments */
+.pWaitCard{margin:14px auto 0;max-width:360px;text-align:left;border-radius:12px;border:1px solid var(--card-border);background:rgba(255,255,255,.02);padding:12px 14px;font-size:12px;color:var(--muted)}
+.pWaitCard .pwTitle{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;opacity:.8}
+.pWaitCard .pwRow{display:flex;justify-content:space-between;align-items:center;padding:3px 0;gap:10px}
+.pWaitCard .pwRow b{color:var(--text);font-weight:600}
+.pWaitCard .pwNet{font-weight:700;font-variant-numeric:tabular-nums}
+.pWaitCard .pwNet.good{color:var(--good)} .pWaitCard .pwNet.bad{color:var(--bad)} .pWaitCard .pwNet.neutral{color:var(--muted)}
+.pPresence{margin:12px auto 0;max-width:360px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;font-size:11px;color:var(--muted)}
+.pPresenceCount{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(43,213,118,.08);border:1px solid rgba(43,213,118,.20);color:var(--good);font-weight:600}
+.pPresenceCount .pDotOnline{width:6px;height:6px;border-radius:50%;background:var(--good);animation:pulse 2s infinite}
+.pPresenceChip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:var(--bg2);border:1px solid var(--card-border);font-size:11px}
+.pPresenceChip.admin{border-color:rgba(245,197,66,.30);color:var(--warn)}
+.pPresenceChip .pDotOnline{width:5px;height:5px;border-radius:50%;background:var(--good)}
+.pCheckConn{display:inline-flex;align-items:center;gap:6px;margin:12px auto 0;padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.pCheckConn:hover{border-color:var(--accent);color:var(--text)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 /* ===== Admin Modal ===== */
 .adminBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;touch-action:manipulation}
@@ -380,6 +403,10 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
     <p class="pHomeSub" id="pHeroSub">—</p>
     <div class="pHomeMeta" id="pHeroMeta" style="display:none"></div>
     <a class="pHomeCTA" id="pHeroCTA" style="display:none" href="#">💰 Submit your cashout</a>
+    <!-- Step 4c: waiting-state enrichments — only populated when no active session -->
+    <div class="pWaitCard" id="pLastSessionCard" style="display:none"></div>
+    <div class="pPresence" id="pPresenceStrip" style="display:none"></div>
+    <button class="pCheckConn" id="pCheckConnBtn" type="button" style="display:none">📡 Check connection</button>
   </div>
   <div class="pHomeTools">
     <a class="pHomeTool" href="rf-fund.html"><span class="pTIcon">💰</span><span class="pTLabel">RF Fund</span><span class="pTSub">View balance &amp; history</span></a>
@@ -389,7 +416,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
   <div class="pHomeNote" id="pHomeNote" style="display:none"></div>
 </div>
 <div class="modeToggle" id="modeToggle"><button class="modeBtn active" data-mode="cash" type="button">♠ Cash Game</button><button class="modeBtn" data-mode="tournament" type="button">🏆 Tournament</button></div>
-<div class="top"><div><h1 id="topTitle">Poker Cashout</h1><div class="sub" id="topSub"></div></div><div class="topPills"><div id="liveBadge" class="pill live" style="display:none"><span class="dot"></span><span id="liveText">LIVE</span></div><div id="lockBadge" class="pill secondary" style="display:none"><span class="dot" style="background:var(--accent)"></span><span>LOCKED</span></div><div id="pill" class="pill warn"><span class="dot"></span><span id="pillText">Audit: pending</span></div><button class="themeToggle" id="themeToggle" type="button">🌙</button></div></div>
+<div class="top"><div><h1 id="topTitle">Poker Cashout</h1><div class="sub" id="topSub"></div></div><div class="topPills"><div id="rolePill" class="pill role" style="display:none" role="button" tabindex="0"><span class="dot"></span><span id="rolePillText">—</span></div><div id="liveBadge" class="pill live" style="display:none"><span class="dot"></span><span id="liveText">LIVE</span></div><div id="lockBadge" class="pill secondary" style="display:none"><span class="dot" style="background:var(--accent)"></span><span>LOCKED</span></div><div id="pill" class="pill warn"><span class="dot"></span><span id="pillText">Audit: pending</span></div><button class="themeToggle" id="themeToggle" type="button">🌙</button></div></div>
 <div class="stepBar" id="stepBar">
   <button class="step active" data-step="1" type="button"><span class="stepNum">1</span><span>Setup</span></button>
   <button class="step" data-step="2" type="button"><span class="stepNum">2</span><span>Players</span></button>
@@ -546,6 +573,13 @@ applyTheme();
 function toast(msg,d=2200){const box=$("toastBox"),el=document.createElement("div");el.className="toast";el.textContent=msg;box.appendChild(el);setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),220)},d)}
 let currentMember=null,masterPinHash=null,adminName="Umakanth";
 let leagueRoster=[],leagueMembers={},leagueInvites={},sessionArchive=[],activeSession=null,rfExpenses=[],activeSessionData=null,activeSessionDetailRef=null,activeSessionDetailCb=null;
+// Step 4a: Track last-seen role + session code so we can fire a welcome toast
+// when the role changes mid-session (vs. on first page load, which should stay silent).
+// lastKnownRole=null means we haven't rendered yet — first render primes the cache, no toast.
+let lastKnownRole=null,lastKnownSessionCode=null;
+// Step 4c: Presence + last-session data for the waiting hero
+let presenceMap={},presenceRef=null,presenceStarted=false,presenceMembersRef=null;
+let lastSessionSummary=null; // {date, sessionName, bankerName, myNet} or null
 let mode="cash";const collapsedPlayers=new Set();let onlineSessionCode=null,firebaseListener=null;
 let timerInterval=null,timerSeconds=600,timerRunning=false;
 let paidMap={};try{paidMap=JSON.parse(localStorage.getItem(PAY_KEY)||"{}")}catch{}
@@ -866,14 +900,23 @@ function startLeagueListeners(){
     renderRosterChips();
   });
   db.ref('league/active_session').on('value',snap=>{activeSession=snap.val();watchActiveSessionDetails();renderActiveBanner();applySessionRole();renderSessionAdminPane()});
+  // Step 4c: members listener runs for everyone now (not just admins) so the
+  // presence strip and session-role lookups work for participants too.
+  db.ref('league/members').on('value',snap=>{
+    leagueMembers=snap.val()||{};
+    if(currentMember.role==='admin'){renderMembers();renderRosterChips()}
+    // Re-render presence strip in case a newly-loaded member is online
+    if(!activeSession)renderPresenceStrip();
+  });
   if(currentMember.role==='admin'){
-    db.ref('league/members').on('value',snap=>{leagueMembers=snap.val()||{};renderMembers();renderRosterChips()});
     db.ref('league/invite_codes').on('value',snap=>{leagueInvites=snap.val()||{};renderInvites()});
     db.ref('session_archive').on('value',snap=>{const arc=snap.val()||{};sessionArchive=Object.entries(arc).map(([id,s])=>({id,...s})).sort((a,b)=>new Date(b.date)-new Date(a.date));renderHistory();renderStats();renderRfExpenses()});
     db.ref('rf_fund/expenses').on('value',snap=>{const e=snap.val()||{};rfExpenses=Object.entries(e).map(([id,x])=>({id,...x})).sort((a,b)=>new Date(b.date)-new Date(a.date));renderRfExpenses()});
     // Re-render invites every 60s so the expiry countdown stays accurate
     setInterval(()=>{if(Object.keys(leagueInvites).length)renderInvites()},60000);
   }
+  // Step 4c: bring us online in the presence system
+  startPresence();
 }
 
 // Attach/detach a listener to the active session's data (config + cashouts + results)
@@ -978,6 +1021,10 @@ function renderParticipantHome(){
   metaEl.style.display="none";metaEl.innerHTML="";
   ctaEl.style.display="none";ctaEl.className="pHomeCTA";ctaEl.textContent="";ctaEl.removeAttribute("href");ctaEl.onclick=null;
   noteEl.style.display="none";noteEl.textContent="";
+  // Step 4c: reset waiting widgets — they'll re-show only in the waiting branch
+  const lastCard=$("pLastSessionCard");if(lastCard){lastCard.style.display='none';lastCard.innerHTML=''}
+  const presStrip=$("pPresenceStrip");if(presStrip){presStrip.style.display='none';presStrip.innerHTML=''}
+  const connBtn=$("pCheckConnBtn");if(connBtn)connBtn.style.display='none';
 
   if(!activeSession){
     // No active session at all — waiting state
@@ -987,6 +1034,14 @@ function renderParticipantHome(){
     subEl.textContent="Your admin hasn't started a session yet. Check back in a bit.";
     noteEl.style.display="block";
     noteEl.textContent="You can still check your stats or use the odds calculator below.";
+    // Step 4c: fetch last-session summary (one-time) and render widgets
+    if(!lastSessionSummary && !lastSessionFetchInFlight){
+      fetchLastSessionSummary().then(()=>{ if(!activeSession) renderLastSessionCard() });
+    }else{
+      renderLastSessionCard();
+    }
+    renderPresenceStrip();
+    if(connBtn)connBtn.style.display='inline-flex';
     return;
   }
 
@@ -1036,11 +1091,266 @@ function renderParticipantHome(){
   }
 }
 
+// ==== Step 4c: Firebase Presence system ====
+// Each signed-in member writes to /presence/{memberId} with their online state.
+// Uses Firebase's .info/connected + onDisconnect() so the server auto-flips us
+// to online:false when we disconnect (tab close, network drop, etc.).
+// Subscribes to /presence so every participant can see who's around.
+function startPresence(){
+  if(presenceStarted||!currentMember||!db)return;
+  presenceStarted=true;
+  const myRef=db.ref('presence/'+currentMember.id);
+  const connRef=db.ref('.info/connected');
+  connRef.on('value',snap=>{
+    if(snap.val()!==true)return;
+    // When we disconnect, flip online false + stamp lastSeen via server
+    myRef.onDisconnect().update({
+      online:false,
+      lastSeen:firebase.database.ServerValue.TIMESTAMP
+    }).then(()=>{
+      // Now declare we're online
+      myRef.set({
+        memberId:currentMember.id,
+        name:currentMember.name,
+        role:currentMember.role,
+        online:true,
+        lastSeen:firebase.database.ServerValue.TIMESTAMP
+      }).catch(()=>{});
+    });
+  });
+  // Subscribe so we can render who else is online
+  presenceRef=db.ref('presence');
+  presenceRef.on('value',snap=>{
+    presenceMap=snap.val()||{};
+    // If we're currently showing the waiting hero, refresh the presence strip
+    if(!activeSession)renderPresenceStrip();
+  });
+}
+
+// One-time fetch of the most recent archived session + the current user's net
+// from it. Used only by the waiting hero. No ongoing listener — refresh happens
+// next time applySessionRole() hits the waiting branch.
+let lastSessionFetchInFlight=false;
+async function fetchLastSessionSummary(){
+  if(!currentMember||!db||lastSessionFetchInFlight)return;
+  lastSessionFetchInFlight=true;
+  try{
+    const snap=await db.ref('session_archive').orderByChild('date').limitToLast(1).once('value');
+    const v=snap.val();
+    if(!v){lastSessionSummary=null;return}
+    const [id,s]=Object.entries(v)[0];
+    const myLc=(currentMember.name||'').toLowerCase().trim();
+    const mine=(s.players||[]).find(p=>(p.name||'').toLowerCase().trim()===myLc);
+    lastSessionSummary={
+      id,
+      date:s.date,
+      sessionName:s.sessionName||'Session',
+      bankerName:s.bankerName||s.archivedByName||'',
+      myNet:mine?Number(mine.net)||0:null
+    };
+  }catch{
+    lastSessionSummary=null;
+  }finally{
+    lastSessionFetchInFlight=false;
+  }
+}
+
+// Render the last-session card in the waiting hero
+function renderLastSessionCard(){
+  const card=$("pLastSessionCard");if(!card)return;
+  if(!lastSessionSummary){card.style.display='none';card.innerHTML='';return}
+  const s=lastSessionSummary;
+  const when=new Date(s.date);
+  const daysAgo=Math.max(0,Math.round((Date.now()-when.getTime())/86400000));
+  const ds=when.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  const agoText=daysAgo===0?'today':(daysAgo===1?'yesterday':`${daysAgo} days ago`);
+  const banker=s.bankerName?`banked by <b>${esc(s.bankerName)}</b>`:'';
+  let netRow='';
+  if(s.myNet!==null){
+    const cls=s.myNet>0.005?'good':(s.myNet<-0.005?'bad':'neutral');
+    const sign=s.myNet>=0?'+':'';
+    netRow=`<div class="pwRow"><span>Your net</span><span class="pwNet ${cls}">${sign}${fmtUsd(s.myNet)}</span></div>`;
+  }else{
+    netRow=`<div class="pwRow"><span>Your net</span><span class="pwNet neutral">—</span></div>`;
+  }
+  card.innerHTML=`
+    <div class="pwTitle">Last session</div>
+    <div class="pwRow"><span><b>${esc(s.sessionName)}</b></span><span>${ds} · ${agoText}</span></div>
+    ${banker?`<div class="pwRow"><span>Banker</span><span><b>${esc(s.bankerName)}</b></span></div>`:''}
+    ${netRow}
+  `;
+  card.style.display='block';
+}
+
+// Render the presence strip in the waiting hero — who else is online right now
+function renderPresenceStrip(){
+  const strip=$("pPresenceStrip");if(!strip)return;
+  const entries=Object.entries(presenceMap).filter(([id,p])=>p&&p.online===true);
+  if(!entries.length){strip.style.display='none';strip.innerHTML='';return}
+  // Sort: admins first, then by name
+  entries.sort(([,a],[,b])=>{
+    if((a.role==='admin')!==(b.role==='admin'))return a.role==='admin'?-1:1;
+    return (a.name||'').localeCompare(b.name||'');
+  });
+  const myId=currentMember?.id;
+  const chips=entries.slice(0,6).map(([id,p])=>{
+    const isMe=id===myId;
+    const label=isMe?`${esc(p.name)} (you)`:esc(p.name);
+    return `<span class="pPresenceChip ${p.role==='admin'?'admin':''}"><span class="pDotOnline"></span>${label}</span>`;
+  }).join('');
+  const more=entries.length>6?`<span class="pPresenceChip">+${entries.length-6}</span>`:'';
+  const count=entries.length;
+  strip.innerHTML=`
+    <span class="pPresenceCount"><span class="pDotOnline"></span>${count} online</span>
+    ${chips}${more}
+  `;
+  strip.style.display='flex';
+}
+
+
+// Step 4b: Render the header role pill so users can see at a glance whether
+// they're banking, playing, or watching tonight's session. Called from
+// applySessionRole() so it stays in sync with every relevant Firebase snapshot.
+function renderRolePill(){
+  const pill=$("rolePill"), txt=$("rolePillText");
+  if(!pill||!txt)return;
+  // Hide when not signed in or no active session — no role context to show
+  if(!currentMember||!activeSession){
+    pill.style.display='none';
+    pill.classList.remove('banker','playing','spectator');
+    return;
+  }
+  const code=activeSession.code||'';
+  const role=checkSessionRole(); // 'banker' | 'participant' | null
+  // Figure out if participant is a player or spectator in this session
+  const myName=(currentMember.name||'').toLowerCase().trim();
+  const playerNamesLc=(activeSessionData?.config?.playerNames||[]).map(n=>(n||'').toLowerCase().trim());
+  const amPlayer=!!myName&&playerNamesLc.includes(myName);
+
+  pill.classList.remove('banker','playing','spectator');
+  if(role==='banker'){
+    pill.classList.add('banker');
+    txt.textContent=`🎰 Banking · ${code}`;
+  }else if(role==='participant' && amPlayer){
+    pill.classList.add('playing');
+    txt.textContent=`🎲 Playing · ${code}`;
+  }else{
+    pill.classList.add('spectator');
+    txt.textContent=`👀 Watching · ${code}`;
+  }
+  pill.style.display='inline-flex';
+}
+
+// Clicking the role pill takes you to the most useful spot for your role.
+// Banker -> session admin pane (reassign/end controls). Player/spectator -> participant hero.
+(function wireRolePillClick(){
+  const pill=document.getElementById('rolePill'); if(!pill)return;
+  const handle=()=>{
+    const role=checkSessionRole();
+    if(role==='banker'){
+      // Admins get the Admin modal (Session tab for reassign/end).
+      // Non-admin bankers just scroll to the wizard top — they're already in banker mode.
+      if(currentMember?.role==='admin' && typeof openAdminModal==='function'){
+        openAdminModal();
+        setTimeout(()=>{
+          const sessTab=document.querySelector('.adminTab[data-pane="session"]');
+          if(sessTab && typeof sessTab.click==='function') sessTab.click();
+        },50);
+      }else{
+        window.scrollTo({top:0,behavior:'smooth'});
+      }
+    }else{
+      // Participant / spectator — scroll to their hero
+      const hero=document.getElementById('pHero');
+      if(hero) hero.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  };
+  pill.addEventListener('click',handle);
+  pill.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();handle();}});
+})();
+
+// Step 4c: Wire the "Check connection" button in the waiting hero.
+// Queries Firebase's internal .info/connected node for real connection status.
+(function wireCheckConnBtn(){
+  const btn=document.getElementById('pCheckConnBtn'); if(!btn)return;
+  btn.addEventListener('click',async()=>{
+    if(!db){toast('❌ Firebase not ready');return}
+    try{
+      const snap=await db.ref('.info/connected').once('value');
+      if(snap.val()===true){
+        toast('🟢 Listening · no session yet',2400);
+      }else{
+        toast('🔴 Not connected — check your network',3200);
+      }
+    }catch(err){
+      toast('⚠️ Connection check failed',2800);
+    }
+  });
+})();
+
 // Orchestrator: toggle body class + render hero when in participant mode.
+// Step 4a: Also detects role transitions and fires a welcome toast so users
+// notice when they've been reassigned / a new session started / session ended.
+// Transitions we announce (when lastKnownRole is not null — first render is silent):
+//   participant -> banker              : "You're banking now"
+//   banker -> participant              : "Someone else is banking now"
+//   null-session -> any active role    : "New session started"
+//   any active role -> null-session    : "Session ended"
+//   participant -> participant (new code) : "New session started" (rare: old ended + new started)
+// Also: when transitioning TO banker mid-session, auto-jump to Step 4 (Results)
+// so the new banker lands where they need to be to collect cashouts.
 function applySessionRole(){
-  const role=checkSessionRole();
+  const role=checkSessionRole();                // 'banker' | 'participant' | null (not signed in)
+  const code=activeSession?.code||null;
+  const bankerName=activeSession?.banker?.name||activeSession?.startedByName||leagueMembers[activeSession?.startedBy]?.name||'someone';
+
   document.body.classList.toggle('participant-mode',role==='participant');
   if(role==='participant')renderParticipantHome();
+  renderRolePill();
+
+  // Transition detection — only fire toasts after we've seen at least one render.
+  // On first render (lastKnownRole===null), we just prime the cache silently.
+  const isFirstRender = lastKnownRole===null;
+  if(!isFirstRender && role!==null){
+    const roleChanged = role!==lastKnownRole;
+    const sessionChanged = code!==lastKnownSessionCode;
+    const hadSession = !!lastKnownSessionCode;
+    const hasSession = !!code;
+
+    if(!hasSession && hadSession){
+      // Session just ended
+      toast('✅ Session ended', 2800);
+    }else if(hasSession && !hadSession){
+      // Brand-new session started while we were signed in
+      if(role==='banker'){
+        toast(`🎰 You're banking session ${code}`, 3200);
+        // Jump to Results so the new banker lands where the action is
+        if(typeof goToStep==='function') goToStep(4);
+      }else{
+        toast(`🎲 New session ${code} started — ${bankerName} is banking`, 3200);
+      }
+    }else if(hasSession && hadSession && sessionChanged){
+      // Rare: one session ended and a new one started between renders
+      if(role==='banker'){
+        toast(`🎰 You're banking session ${code}`, 3200);
+        if(typeof goToStep==='function') goToStep(4);
+      }else{
+        toast(`🎲 New session ${code} started — ${bankerName} is banking`, 3200);
+      }
+    }else if(hasSession && roleChanged){
+      // Same session, your role within it changed = banker reassignment
+      if(role==='banker'){
+        toast(`🎰 You're banking session ${code} now`, 3200);
+        if(typeof goToStep==='function') goToStep(4);
+      }else{
+        // banker -> participant in the same session
+        toast(`👥 ${bankerName} is banking now`, 2800);
+      }
+    }
+  }
+
+  lastKnownRole=role;
+  lastKnownSessionCode=code;
 }
 
 $("bannerResumeBtn").addEventListener("click",async()=>{const code=$("bannerResumeBtn").dataset.code;if(code)await resumeSession(code)});
