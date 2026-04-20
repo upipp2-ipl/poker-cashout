@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="ipl-build" content="analytics-v1.1-role-gating-2026-04-19"/>
   <title>IPL – Player Analytics</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -87,6 +88,11 @@
     .signInGate .gateLink:hover{filter:brightness(1.1)}
     body.gated{overflow:hidden}
     body.gated>*:not(.signInGate):not(#toast){visibility:hidden}
+    /* Step 5: role gating — regular users see analytics read-only (admin tools hidden) */
+    body.user-mode [data-admin-only]{display:none !important}
+    .roleBadge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:999px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-left:6px}
+    .roleBadge.admin{background:rgba(245,197,66,.18);color:var(--warn);border:1px solid rgba(245,197,66,.30)}
+    .roleBadge.user{background:rgba(122,167,255,.12);color:var(--accent);border:1px solid rgba(122,167,255,.22)}
     @media(max-width:700px){.chartGrid{grid-template-columns:1fr}}
     @media(max-width:600px){.kpiRow{grid-template-columns:1fr 1fr}.tbl{font-size:11px}.tbl th,.tbl td{padding:6px 4px}}
   </style>
@@ -117,7 +123,7 @@
       <button class="themeToggle" id="themeToggle">🌙</button>
     </div>
   </div>
-  <div class="migBanner" id="migBanner">
+  <div class="migBanner" id="migBanner" data-admin-only>
     <div class="migTitle">📦 Migrate local session history?</div>
     <div class="migMsg">Found <span id="migCount">0</span> session(s) in this device's local storage that aren't in Firebase yet. Migrating will push them to Firebase so all your devices (and the RF Fund page) can see the full history. A safety backup is kept in this browser even after migration.</div>
     <div class="migBtns">
@@ -193,6 +199,17 @@
   }
   // Signed in — show name + sign-out, continue normal boot
   $("signedInAs").textContent="👤 "+_cachedMember.name;
+  // Step 5: role-gating — users get a read-only view (admin-only tools hidden via CSS)
+  const _role=(_cachedMember.role==='admin')?'admin':'user';
+  if(_role!=='admin'){document.body.classList.add("user-mode")}
+  // Append a subtle role badge next to the name so the user knows what access level they have
+  (function(){
+    const host=$("signedInAs"); if(!host)return;
+    const badge=document.createElement('span');
+    badge.className='roleBadge '+_role;
+    badge.textContent=_role==='admin'?'admin':'read-only';
+    host.appendChild(badge);
+  })();
   $("signOutBtn").style.display="";
   $("signOutBtn").addEventListener("click",()=>{
     if(!confirm("Sign out?"))return;
@@ -262,6 +279,7 @@
   const MIG_DONE_KEY="ipl_migration_done";
   const MIG_BACKUP_KEY="ipl_migration_backup";
   function checkMigration(fbDates){
+    if(_role!=='admin')return; // Step 5: users can't migrate, don't bother scanning
     if(localStorage.getItem(MIG_DISMISSED_KEY)||localStorage.getItem(MIG_DONE_KEY))return;
     const local=getLocalHistory();
     const missing=local.filter(s=>s&&s.date&&!fbDates.has(s.date));
