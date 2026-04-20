@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.3-invite-prefetch-fix-2026-04-19"/>
+<meta name="ipl-build" content="v2.5-session-roles-step3-2026-04-19"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -172,6 +172,8 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .authSpinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;margin:24px auto}
 .authMsg{min-height:18px;font-size:12px;color:var(--muted);margin-top:12px;white-space:pre-wrap;word-break:break-word;line-height:1.4}
 .authMsg.err{color:var(--bad);font-weight:500}.authMsg.ok{color:var(--good);font-weight:500}
+.rosterOptBox{margin:12px 0 0;padding:12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);text-align:left}
+.rosterOptBox input[type="checkbox"]{accent-color:var(--accent);width:16px;height:16px}
 .authScreen .btn{margin-top:10px;width:100%;padding:13px}
 .textBtn{background:transparent;border:1px solid transparent;color:var(--muted);font-size:12px;padding:10px;margin-top:6px;cursor:pointer}.textBtn:hover{color:var(--text)}
 .memberSelectList{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px;max-height:42vh;overflow-y:auto}
@@ -246,6 +248,40 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .stepNav{display:flex;gap:8px;justify-content:space-between;margin:18px 0 8px}
 .stepNav .btn{min-width:100px;padding:11px 16px;font-size:13px;font-weight:600}
 .stepNav .spacer{flex:1}
+/* ===== Participant Mode (Step 1 session-roles v2.5) ===== */
+/* When body has .participant-mode, hide wizard chrome and show participant home. */
+body.participant-mode #stepBar,
+body.participant-mode .stepPanel,
+body.participant-mode .stepNav,
+body.participant-mode #modeToggle,
+body.participant-mode #lockedOverlay{display:none !important}
+body.participant-mode .footer{display:none}
+#participantHome{display:none}
+body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
+.pHome{margin:6px 0 14px}
+.pHomeHero{border-radius:16px;padding:20px 18px;text-align:center;background:linear-gradient(135deg,rgba(122,167,255,.14),rgba(43,213,118,.10));border:1px solid var(--card-border);box-shadow:var(--sh);margin-bottom:14px}
+.pHomeHero.live{background:linear-gradient(135deg,rgba(43,213,118,.18),rgba(122,167,255,.10));border-color:rgba(43,213,118,.35)}
+.pHomeHero.waiting{background:linear-gradient(135deg,rgba(245,197,66,.12),rgba(122,167,255,.08));border-color:rgba(245,197,66,.25)}
+.pHomeKicker{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.pHomeKicker .pDot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:6px;vertical-align:middle}
+.pHomeHero.live .pHomeKicker .pDot{background:var(--good);animation:pulse 1.5s infinite}
+.pHomeHero.waiting .pHomeKicker .pDot{background:var(--warn)}
+.pHomeHero h1{font-size:22px;font-weight:800;margin:0 0 6px;color:var(--text)}
+.pHomeHero .pHomeSub{font-size:13px;color:var(--muted);margin:0}
+.pHomeHero .pHomeMeta{font-size:12px;color:var(--muted);margin-top:10px}
+.pHomeHero .pHomeMeta b{color:var(--text)}
+.pHomeCTA{display:block;margin:14px auto 0;padding:14px 22px;background:var(--good);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;width:100%;max-width:320px;box-shadow:0 4px 16px rgba(43,213,118,.3);text-decoration:none;text-align:center}
+.pHomeCTA:hover{filter:brightness(1.08)}
+.pHomeCTA.submitted{background:var(--muted);box-shadow:none;cursor:default}
+.pHomeCTA.submitted:hover{filter:none}
+.pHomeTools{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:6px}
+.pHomeTool{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 14px;border-radius:14px;border:1px solid var(--card-border);background:var(--bg2);color:var(--text);text-decoration:none;cursor:pointer;touch-action:manipulation;transition:all .15s;box-shadow:var(--sh);min-height:96px}
+.pHomeTool:hover{transform:translateY(-2px);border-color:var(--accent)}
+.pHomeTool .pTIcon{font-size:26px;margin-bottom:6px}
+.pHomeTool .pTLabel{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.pHomeTool .pTSub{font-size:11px;color:var(--muted);text-align:center}
+.pHomeNote{font-size:12px;color:var(--muted);text-align:center;margin:16px 0 4px;padding:10px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--card-border)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 /* ===== Admin Modal ===== */
 .adminBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;touch-action:manipulation}
 .adminBtn:hover{background:var(--hover)}
@@ -263,6 +299,47 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .adminDialog .adminPane{display:none}
 .adminDialog .adminPane.active{display:block}
 @media(max-width:560px){.adminDialog{padding:12px;border-radius:12px;max-height:calc(100vh - 20px)}.adminOverlay{padding:10px}}
+/* ===== Banker Picker Modal (v2.5 session roles — Step 2) ===== */
+.bankerOverlay{position:fixed;inset:0;z-index:550;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.bankerOverlay.open{display:flex}
+.bankerDialog{max-width:440px;width:100%;background:var(--bg);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);padding:18px;display:flex;flex-direction:column;max-height:calc(100vh - 40px)}
+.bankerDialog .bpHd{margin-bottom:12px}
+.bankerDialog .bpHd h2{margin:0 0 4px;font-size:18px;font-weight:800;color:var(--text)}
+.bankerDialog .bpHd p{margin:0;font-size:13px;color:var(--muted)}
+.bankerDialog .bpList{flex:1;overflow-y:auto;margin:12px 0;padding:4px 0;display:flex;flex-direction:column;gap:6px;max-height:50vh}
+.bpOption{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg2);cursor:pointer;touch-action:manipulation;transition:all .12s}
+.bpOption:hover{border-color:var(--accent);background:var(--hover)}
+.bpOption.selected{border-color:var(--good);background:linear-gradient(135deg,rgba(43,213,118,.12),rgba(122,167,255,.08));box-shadow:0 0 0 2px rgba(43,213,118,.25)}
+.bpOption .bpRadio{width:20px;height:20px;border-radius:50%;border:2px solid var(--card-border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.bpOption.selected .bpRadio{border-color:var(--good);background:var(--good)}
+.bpOption.selected .bpRadio::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+.bpOption .bpInfo{flex:1;min-width:0}
+.bpOption .bpName{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+.bpOption .bpName .bpYou{font-size:9px;font-weight:700;color:#fff;background:var(--accent);padding:2px 6px;border-radius:4px;letter-spacing:.04em}
+.bpOption .bpRoleBadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
+.bpOption .bpRoleBadge.admin{background:rgba(245,197,66,.2);color:var(--warn)}
+.bpOption .bpRoleBadge.user{background:rgba(122,167,255,.2);color:var(--accent)}
+.bankerDialog .bpFoot{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--line);flex-shrink:0}
+.bankerDialog .bpFoot .btn{flex:1}
+.bankerDialog .bpWarn{font-size:12px;color:var(--warn);margin-top:10px;padding:8px 10px;border-radius:8px;background:rgba(245,197,66,.08);border:1px solid rgba(245,197,66,.2);display:none}
+.bankerDialog .bpWarn.show{display:block}
+/* ===== Session Admin Pane (v2.5 session roles — Step 3) ===== */
+.sessCard{padding:14px;border-radius:14px;border:1px solid var(--card-border);background:var(--bg2);margin-bottom:10px}
+.sessCard.live{border-color:var(--good);background:linear-gradient(135deg,rgba(43,213,118,.08),rgba(122,167,255,.04))}
+.sessCard .sessHd{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.sessCard .sessHd .sessTitle{font-size:15px;font-weight:800;color:var(--text);flex:1;min-width:0}
+.sessCard .sessBadge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.04em;background:var(--good);color:#fff;text-transform:uppercase;animation:sessPulse 2s ease-in-out infinite}
+@keyframes sessPulse{0%,100%{opacity:1}50%{opacity:.7}}
+.sessCard .sessSub{font-size:12px;color:var(--muted);margin-bottom:12px}
+.sessCard .sessRow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.sessCard .sessRow:first-of-type{border-top:none;padding-top:4px}
+.sessCard .sessRowK{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;min-width:70px;flex-shrink:0}
+.sessCard .sessRowV{font-size:14px;font-weight:600;color:var(--text);flex:1;min-width:0;word-break:break-word}
+.sessCard .sessRowAct{flex-shrink:0}
+.sessCard .sessFoot{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.sessCard .sessFoot .btn{flex:1;min-width:140px}
+.sessEmpty{padding:20px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--card-border);border-radius:12px;background:var(--bg2)}
+.sessEmpty .sessEmojiLg{font-size:32px;margin-bottom:6px;opacity:.6}
 /* ===== Players card collapse ===== */
 #playersBody.collapsed{display:none}
 </style>
@@ -281,7 +358,7 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
     <div class="authScreen hidden" id="auth-quick"><h2 id="quickTitle">Welcome back</h2><p id="quickSub"></p><div class="pinDots" id="quickDots"></div><div class="pinPad" id="quickPad"></div><div class="authMsg" id="quickMsg"></div><button class="textBtn" id="quickSwitch" type="button">Not you? Sign in as someone else</button></div>
     <div class="authScreen hidden" id="auth-adminpin"><h2>Admin PIN</h2><p>Enter your 5-digit admin PIN.</p><div class="pinDots" id="adminDots"></div><div class="pinPad" id="adminPad"></div><div class="authMsg" id="adminMsg"></div><button class="textBtn" id="adminBack" type="button">← Back</button></div>
     <div class="authScreen hidden" id="auth-invite"><h2>Invite Code</h2><p>Enter the code from your admin.</p><input id="inviteCodeInput" class="codeInput" type="text" placeholder="IPL-XXXX" maxlength="12"/><button class="btn primary" id="inviteVerifyBtn" type="button">Continue</button><div class="authMsg" id="inviteMsg"></div><button class="textBtn" id="inviteBack" type="button">← Back</button></div>
-    <div class="authScreen hidden" id="auth-setup"><h2>Set up account</h2><p>Your name as shown to other bankers.</p><input id="setupNameInput" class="nameInput" type="text" placeholder="e.g. Raj" maxlength="20" autocapitalize="words"/><p style="margin-top:14px">Create a 4-digit PIN.</p><div class="pinDots" id="setupDots"></div><div class="pinPad" id="setupPad"></div><div class="authMsg" id="setupMsg"></div></div>
+    <div class="authScreen hidden" id="auth-setup"><h2>Set up account</h2><p>Your name as shown to other bankers.</p><input id="setupNameInput" class="nameInput" type="text" placeholder="e.g. Raj" maxlength="20" autocapitalize="words"/><div class="rosterOptBox"><label style="display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px;margin:0;cursor:pointer"><input type="checkbox" id="setupAddRoster" checked style="width:auto;margin:0"/>Also add me to the Regular Players list</label><div id="setupRosterNameWrap" style="margin-top:8px"><p style="font-size:11px;margin:0 0 4px">Name on the Regular Players list (for game-night cashout tracking):</p><input id="setupRosterName" class="nameInput" type="text" placeholder="(defaults to name above)" maxlength="20" autocapitalize="words" style="margin-bottom:0"/></div></div><p style="margin-top:14px">Create a 4-digit PIN.</p><div class="pinDots" id="setupDots"></div><div class="pinPad" id="setupPad"></div><div class="authMsg" id="setupMsg"></div></div>
   </div>
 </div>
 <div class="pullIndicator" id="pullIndicator"><span class="pullIcon">↓</span><span class="pullText">Pull to refresh</span></div>
@@ -295,6 +372,22 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 <button class="adminBtn" id="openAdminModal" type="button" data-admin-only style="margin-left:auto">⚙️ Admin</button>
 </div>
 <div class="sessionBanner hidden" id="activeSessionBanner"><span class="bDot"></span><div class="bContent"><span class="bTitle" id="bannerTitle">Session in progress</span><span class="bSub" id="bannerSub"></span></div><button class="btn small primary" id="bannerCashoutBtn" type="button" style="display:none">💰 Cashout</button><button class="btn small" id="bannerResumeBtn" type="button" style="display:none">Resume</button><button class="btn small gold" id="bannerTakeoverBtn" type="button" style="display:none">Take over</button></div>
+<!-- ===== PARTICIPANT HOME (v2.5 session roles) ===== -->
+<div id="participantHome" class="pHome">
+  <div class="pHomeHero" id="pHero">
+    <div class="pHomeKicker" id="pHeroKicker"><span class="pDot"></span><span id="pHeroKickerText">Checking session…</span></div>
+    <h1 id="pHeroTitle">—</h1>
+    <p class="pHomeSub" id="pHeroSub">—</p>
+    <div class="pHomeMeta" id="pHeroMeta" style="display:none"></div>
+    <a class="pHomeCTA" id="pHeroCTA" style="display:none" href="#">💰 Submit your cashout</a>
+  </div>
+  <div class="pHomeTools">
+    <a class="pHomeTool" href="rf-fund.html"><span class="pTIcon">💰</span><span class="pTLabel">RF Fund</span><span class="pTSub">View balance &amp; history</span></a>
+    <a class="pHomeTool" href="analytics.html"><span class="pTIcon">📊</span><span class="pTLabel">Analytics</span><span class="pTSub">Leaderboards &amp; stats</span></a>
+    <a class="pHomeTool" href="odds.html"><span class="pTIcon">🎲</span><span class="pTLabel">Odds Calculator</span><span class="pTSub">Pot odds &amp; equity</span></a>
+  </div>
+  <div class="pHomeNote" id="pHomeNote" style="display:none"></div>
+</div>
 <div class="modeToggle" id="modeToggle"><button class="modeBtn active" data-mode="cash" type="button">♠ Cash Game</button><button class="modeBtn" data-mode="tournament" type="button">🏆 Tournament</button></div>
 <div class="top"><div><h1 id="topTitle">Poker Cashout</h1><div class="sub" id="topSub"></div></div><div class="topPills"><div id="liveBadge" class="pill live" style="display:none"><span class="dot"></span><span id="liveText">LIVE</span></div><div id="lockBadge" class="pill secondary" style="display:none"><span class="dot" style="background:var(--accent)"></span><span>LOCKED</span></div><div id="pill" class="pill warn"><span class="dot"></span><span id="pillText">Audit: pending</span></div><button class="themeToggle" id="themeToggle" type="button">🌙</button></div></div>
 <div class="stepBar" id="stepBar">
@@ -362,6 +455,7 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
     <div class="adminHd"><h2>⚙️ Admin</h2><button class="adminClose" id="adminClose" type="button">×</button></div>
     <div class="adminTabs">
       <button class="adminTab active" data-pane="members" type="button">👥 Members</button>
+      <button class="adminTab" data-pane="session" type="button">🎰 Session</button>
       <button class="adminTab" data-pane="rf" type="button">💰 RF Expenses</button>
       <button class="adminTab" data-pane="stats" type="button">📊 Stats</button>
       <button class="adminTab" data-pane="history" type="button">📜 History</button>
@@ -370,6 +464,12 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
     <div class="adminBody">
       <div class="adminPane active" data-pane="members">
         <div class="card" id="memberMgmtCard"><div class="hd"><h2>👥 Members</h2><div class="btnbar"><button class="btn small" id="addInviteBtn" type="button">+ Generate Invite</button></div></div><div class="bd"><div class="note" style="margin:0 0 10px">Active members (<span id="memberCount">0</span>)</div><div id="membersList"></div><div class="sep"></div><div class="note" style="margin:0 0 10px">Invite codes</div><div id="invitesList"></div></div></div>
+      </div>
+      <div class="adminPane" data-pane="session">
+        <div class="card"><div class="hd"><h2>🎰 Session Control</h2></div><div class="bd">
+          <div class="note" style="margin:0 0 10px">Manage the currently active session. Reassign the banker mid-game, or force-end a session if something's gone wrong.</div>
+          <div id="sessionAdminBody"></div>
+        </div></div>
       </div>
       <div class="adminPane" data-pane="rf">
         <div class="card" id="rfExpenseCard"><div class="hd"><h2>💰 RF Fund Expenses</h2><a href="rf-fund.html" style="font-size:11px;color:var(--accent);text-decoration:none">Full manager →</a></div><div class="bd">
@@ -395,6 +495,21 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
           <button class="btn" id="pinSetBtn" type="button">🔑 Change admin PIN</button>
         </div></div>
       </div>
+    </div>
+  </div>
+</div>
+<!-- ===== Banker Picker Modal (v2.5 session roles — Step 2) ===== -->
+<div class="bankerOverlay" id="bankerPickerOverlay">
+  <div class="bankerDialog" id="bankerPickerDialog" role="dialog" aria-labelledby="bpTitle">
+    <div class="bpHd">
+      <h2 id="bpTitle">Who's banking tonight?</h2>
+      <p>Pick the person handling chips, payouts, and settlement for this session.</p>
+    </div>
+    <div class="bpList" id="bpMemberList"></div>
+    <div class="bpWarn" id="bpWarn"></div>
+    <div class="bpFoot">
+      <button class="btn" id="bpCancel" type="button">Cancel</button>
+      <button class="btn primary" id="bpConfirm" type="button">Start Session</button>
     </div>
   </div>
 </div>
@@ -438,8 +553,23 @@ function savePaid(){try{localStorage.setItem(PAY_KEY,JSON.stringify(paidMap))}ca
 let allSubmittedSounded=false;
 const savedCashouts=new Set();
 function makePlayer(n){return{id:uid(),name:n||"Player",buyins:[{id:uid(),counts:clone(DEFAULTS.defaultPack)}],cashout:{black:0,purple:0,yellow:0,pink:0,orange:0}}}
-function defaultState(){return{sessionName:"",buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[makePlayer("Player 1"),makePlayer("Player 2")],place1:"",place2:"",place3:"",split1:50,split2:30,split3:20,tourneyPack:{black:0,purple:0,yellow:0,pink:0,orange:0}}}
-function sanitize(s){if(!s||typeof s!=="object")return defaultState();s.sessionName=typeof s.sessionName==="string"?s.sessionName:"";s.buyinUsd=Number(s.buyinUsd);if(!Number.isFinite(s.buyinUsd)||s.buyinUsd<=0)s.buyinUsd=DEFAULTS.buyinUsd;s.taxRate=Number(s.taxRate);if(!Number.isFinite(s.taxRate)||s.taxRate<0)s.taxRate=DEFAULTS.taxRate;s.locked=!!s.locked;s.bankId=typeof s.bankId==="string"?s.bankId:null;if(!s.chipValues)s.chipValues={};for(const c of COLORS){const v=Number(s.chipValues[c]);s.chipValues[c]=Number.isFinite(v)&&v>0?v:DEFAULTS.chipValues[c]}if(!Array.isArray(s.players)||!s.players.length)s.players=[makePlayer("Player 1")];for(const p of s.players){if(!p.id)p.id=uid();if(typeof p.name!=="string")p.name="Player";if(!Array.isArray(p.buyins)||!p.buyins.length)p.buyins=[{id:uid(),counts:clone(DEFAULTS.defaultPack)}];for(const b of p.buyins){if(!b.id)b.id=uid();if(!b.counts)b.counts=clone(DEFAULTS.defaultPack);for(const c of COLORS){const n=Number(b.counts[c]);b.counts[c]=Number.isFinite(n)&&n>=0?n:0}}if(!p.cashout)p.cashout={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(p.cashout[c]);p.cashout[c]=Number.isFinite(n)&&n>=0?n:0}}const ids=s.players.map(p=>p.id);if(!s.bankId||!ids.includes(s.bankId))s.bankId=ids[0]||null;s.place1=s.place1||"";s.place2=s.place2||"";s.place3=s.place3||"";s.split1=Number(s.split1)||50;s.split2=Number(s.split2)||30;s.split3=Number(s.split3)||20;if(!s.tourneyPack)s.tourneyPack={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(s.tourneyPack[c]);s.tourneyPack[c]=Number.isFinite(n)&&n>=0?n:0}return s}
+function defaultState(){return{sessionName:"",buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[makePlayer("Player 1"),makePlayer("Player 2")],place1:"",place2:"",place3:"",split1:50,split2:30,split3:20,tourneyPack:{black:0,purple:0,yellow:0,pink:0,orange:0},ownerId:null}}
+function clearStaleGameState(){
+  try{localStorage.removeItem(KEY)}catch{}
+  state=defaultState();
+  if(currentMember)state.ownerId=currentMember.id;
+}
+function checkStateOwnership(){
+  // If the saved state belongs to a different member (e.g. admin's draft leaked to a user-role member), clear it.
+  // For admins we keep their draft. For user-role members, fresh draft on first sign-in for that member.
+  if(!currentMember)return;
+  if(!state.ownerId){state.ownerId=currentMember.id;save();return}
+  if(state.ownerId!==currentMember.id){
+    try{localStorage.removeItem(KEY)}catch{}
+    state=defaultState();state.ownerId=currentMember.id;save();
+  }
+}
+function sanitize(s){if(!s||typeof s!=="object")return defaultState();s.sessionName=typeof s.sessionName==="string"?s.sessionName:"";s.buyinUsd=Number(s.buyinUsd);if(!Number.isFinite(s.buyinUsd)||s.buyinUsd<=0)s.buyinUsd=DEFAULTS.buyinUsd;s.taxRate=Number(s.taxRate);if(!Number.isFinite(s.taxRate)||s.taxRate<0)s.taxRate=DEFAULTS.taxRate;s.locked=!!s.locked;s.bankId=typeof s.bankId==="string"?s.bankId:null;s.ownerId=typeof s.ownerId==="string"?s.ownerId:null;if(!s.chipValues)s.chipValues={};for(const c of COLORS){const v=Number(s.chipValues[c]);s.chipValues[c]=Number.isFinite(v)&&v>0?v:DEFAULTS.chipValues[c]}if(!Array.isArray(s.players)||!s.players.length)s.players=[makePlayer("Player 1")];for(const p of s.players){if(!p.id)p.id=uid();if(typeof p.name!=="string")p.name="Player";if(!Array.isArray(p.buyins)||!p.buyins.length)p.buyins=[{id:uid(),counts:clone(DEFAULTS.defaultPack)}];for(const b of p.buyins){if(!b.id)b.id=uid();if(!b.counts)b.counts=clone(DEFAULTS.defaultPack);for(const c of COLORS){const n=Number(b.counts[c]);b.counts[c]=Number.isFinite(n)&&n>=0?n:0}}if(!p.cashout)p.cashout={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(p.cashout[c]);p.cashout[c]=Number.isFinite(n)&&n>=0?n:0}}const ids=s.players.map(p=>p.id);if(!s.bankId||!ids.includes(s.bankId))s.bankId=ids[0]||null;s.place1=s.place1||"";s.place2=s.place2||"";s.place3=s.place3||"";s.split1=Number(s.split1)||50;s.split2=Number(s.split2)||30;s.split3=Number(s.split3)||20;if(!s.tourneyPack)s.tourneyPack={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(s.tourneyPack[c]);s.tourneyPack[c]=Number.isFinite(n)&&n>=0?n:0}return s}
 let state=(()=>{try{return sanitize(JSON.parse(localStorage.getItem(KEY)))}catch{return defaultState()}})();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{};syncStateToFirebase()}
 
@@ -619,6 +749,11 @@ function setupInviteEntry(){
 function setupInviteComplete(code){
   showAuthScreen('auth-setup');
   setAuthMsg('setupMsg','');$("setupNameInput").value='';
+  // Reset roster opt-in UI
+  $("setupAddRoster").checked=true;
+  $("setupRosterName").value='';
+  $("setupRosterNameWrap").style.display='';
+  $("setupAddRoster").onchange=()=>{$("setupRosterNameWrap").style.display=$("setupAddRoster").checked?'':'none'};
   bindPinPad($("setupPad"),$("setupDots"),4,async(pin,fail)=>{
     const name=$("setupNameInput").value.trim();
     if(!name){setAuthMsg('setupMsg',"Enter your name first");fail();return}
@@ -681,8 +816,16 @@ function setupInviteComplete(code){
         setAuthMsg('setupMsg',msg);fail();return;
       }
       await db.ref('league/members/'+memberId).set({name,role:'user',pinHash:hash,createdAt:Date.now(),deviceId,inviteCode:code,pinLength:4});
+      // Optionally add to the regular players roster (checkbox default: yes)
+      if($("setupAddRoster").checked){
+        const rn=($("setupRosterName").value||'').trim()||name;
+        try{await db.ref('league/roster/'+rn).set({name:rn,addedAt:Date.now(),addedBy:memberId,memberId})}catch{/* non-fatal */}
+      }
       currentMember={id:memberId,name,role:'user',pinHash:hash};
-      saveCachedMember(currentMember);onAuthSuccess();
+      saveCachedMember(currentMember);
+      // Fresh game state for a fresh account — don't inherit any stale draft
+      clearStaleGameState();
+      onAuthSuccess();
     }catch(err){setAuthMsg('setupMsg',"Failed: "+(err.code||err.message||String(err)));fail()}
   });
 }
@@ -722,9 +865,9 @@ function startLeagueListeners(){
     const r=snap.val()||{};leagueRoster=Object.values(r).map(e=>e.name).filter(Boolean);
     renderRosterChips();
   });
-  db.ref('league/active_session').on('value',snap=>{activeSession=snap.val();watchActiveSessionDetails();renderActiveBanner()});
+  db.ref('league/active_session').on('value',snap=>{activeSession=snap.val();watchActiveSessionDetails();renderActiveBanner();applySessionRole();renderSessionAdminPane()});
   if(currentMember.role==='admin'){
-    db.ref('league/members').on('value',snap=>{leagueMembers=snap.val()||{};renderMembers()});
+    db.ref('league/members').on('value',snap=>{leagueMembers=snap.val()||{};renderMembers();renderRosterChips()});
     db.ref('league/invite_codes').on('value',snap=>{leagueInvites=snap.val()||{};renderInvites()});
     db.ref('session_archive').on('value',snap=>{const arc=snap.val()||{};sessionArchive=Object.entries(arc).map(([id,s])=>({id,...s})).sort((a,b)=>new Date(b.date)-new Date(a.date));renderHistory();renderStats();renderRfExpenses()});
     db.ref('rf_fund/expenses').on('value',snap=>{const e=snap.val()||{};rfExpenses=Object.entries(e).map(([id,x])=>({id,...x})).sort((a,b)=>new Date(b.date)-new Date(a.date));renderRfExpenses()});
@@ -745,7 +888,7 @@ function watchActiveSessionDetails(){
   if(!activeSession||!activeSession.code)return;
   activeSessionDetailRef=db.ref('sessions/'+activeSession.code);
   activeSessionDetailCb=activeSessionDetailRef.on('value',snap=>{
-    activeSessionData=snap.val();renderActiveBanner();
+    activeSessionData=snap.val();renderActiveBanner();applySessionRole();renderSessionAdminPane();
   });
 }
 
@@ -804,6 +947,102 @@ function renderActiveBanner(){
     if(startBtn)startBtn.disabled=true;
   }
 }
+
+// ==== PARTICIPANT HOME (v2.5 session roles — Step 1) ====
+// Determines whether the current signed-in member should see the banker/wizard UI
+// or the participant home UI for the current state of the league.
+// Returns 'banker' | 'participant' | null (not signed in).
+function checkSessionRole(){
+  if(!currentMember) return null;
+  // No active session: admin sees wizard (so they can start one); user sees participant home.
+  if(!activeSession) return currentMember.role==='admin' ? 'banker' : 'participant';
+  // Active session: explicit banker wins; backward-compat falls back to startedBy
+  // (sessions started before v2.5 shipped have no banker field yet).
+  const bankerId=activeSession.banker?.memberId||activeSession.startedBy;
+  return bankerId===currentMember.id ? 'banker' : 'participant';
+}
+
+// Populate the participant home hero + note based on current league state.
+// Four cases: no session (waiting) / I'm a player who hasn't cashed out / I've submitted / I'm a spectator.
+function renderParticipantHome(){
+  const hero=$("pHero");
+  const kicker=$("pHeroKickerText");
+  const titleEl=$("pHeroTitle");
+  const subEl=$("pHeroSub");
+  const metaEl=$("pHeroMeta");
+  const ctaEl=$("pHeroCTA");
+  const noteEl=$("pHomeNote");
+  if(!hero||!currentMember)return;
+  // Reset visual state each render
+  hero.classList.remove("live","waiting");
+  metaEl.style.display="none";metaEl.innerHTML="";
+  ctaEl.style.display="none";ctaEl.className="pHomeCTA";ctaEl.textContent="";ctaEl.removeAttribute("href");ctaEl.onclick=null;
+  noteEl.style.display="none";noteEl.textContent="";
+
+  if(!activeSession){
+    // No active session at all — waiting state
+    hero.classList.add("waiting");
+    kicker.textContent="WAITING";
+    titleEl.textContent="No session yet tonight";
+    subEl.textContent="Your admin hasn't started a session yet. Check back in a bit.";
+    noteEl.style.display="block";
+    noteEl.textContent="You can still check your stats or use the odds calculator below.";
+    return;
+  }
+
+  // There IS an active session. Figure out if I'm a player in it.
+  const myName=(currentMember?.name||'').toLowerCase().trim();
+  const playerNamesLc=(activeSessionData?.config?.playerNames||[]).map(n=>(n||'').toLowerCase().trim());
+  const sessionPlayerNameExact=(activeSessionData?.config?.playerNames||[]).find(n=>(n||'').toLowerCase().trim()===myName);
+  const amPlayer=!!myName&&playerNamesLc.includes(myName);
+  const cashouts=activeSessionData?.cashouts||{};
+  const myCashoutKey=sessionPlayerNameExact?Object.keys(cashouts).find(k=>k.toLowerCase().trim()===myName):null;
+  const myCashout=myCashoutKey?cashouts[myCashoutKey]:null;
+  const iCashedOut=!!(myCashout&&(myCashout.submitted||myCashout.adminOverride));
+  const sessionLocked=!!activeSessionData?.results?.locked;
+
+  hero.classList.add("live");
+  kicker.textContent="LIVE";
+  const when=new Date(activeSession.startedAt||Date.now()).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  const bankerName=activeSession.banker?.name||activeSession.startedByName||leagueMembers[activeSession.startedBy]?.name||'someone';
+  const sessionName=activeSessionData?.config?.sessionName||activeSession.code;
+
+  if(amPlayer){
+    titleEl.textContent=`🎰 You're in "${sessionName}"`;
+    subEl.textContent=`Started by ${bankerName} at ${when}`;
+    metaEl.style.display="block";
+    metaEl.innerHTML=`Session code: <b>${esc(activeSession.code)}</b>`;
+    if(sessionLocked){
+      // Session already locked — nothing for them to do
+      ctaEl.style.display="inline-flex";
+      ctaEl.className="pHomeCTA submitted";
+      ctaEl.textContent="🔒 Session locked";
+    }else if(iCashedOut){
+      ctaEl.style.display="inline-flex";
+      ctaEl.className="pHomeCTA submitted";
+      ctaEl.textContent="✓ Cashout submitted";
+    }else{
+      ctaEl.style.display="inline-flex";
+      const pname=sessionPlayerNameExact||currentMember.name;
+      ctaEl.href=`player.html?session=${encodeURIComponent(activeSession.code)}&name=${encodeURIComponent(pname)}`;
+      ctaEl.textContent="💰 Submit your cashout";
+    }
+  }else{
+    // Spectator — not a player in this session
+    titleEl.textContent=`🎯 Session ${activeSession.code} in progress`;
+    subEl.textContent=`${bankerName} is banking tonight · Started at ${when}`;
+    noteEl.style.display="block";
+    noteEl.textContent="You're not a player in this session.";
+  }
+}
+
+// Orchestrator: toggle body class + render hero when in participant mode.
+function applySessionRole(){
+  const role=checkSessionRole();
+  document.body.classList.toggle('participant-mode',role==='participant');
+  if(role==='participant')renderParticipantHome();
+}
+
 $("bannerResumeBtn").addEventListener("click",async()=>{const code=$("bannerResumeBtn").dataset.code;if(code)await resumeSession(code)});
 $("bannerTakeoverBtn").addEventListener("click",async()=>{const code=$("bannerTakeoverBtn").dataset.code;if(!code)return;if(!confirm(`Take over session ${code}?`))return;await resumeSession(code)});
 $("bannerCashoutBtn").addEventListener("click",()=>{
@@ -931,20 +1170,222 @@ async function startOnlineSession(){
   const names=state.players.map(p=>p.name.trim()).filter(Boolean);
   if(!names.length){toast("Add players first");return}
   const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names: "+dupes.join(", "));return}
+  // v2.5 Step 2: open banker picker before actually creating the session.
+  // Step 3: now parameterized — pass explicit mode and callback (keeps the default behavior).
+  openBankerPicker({mode:'start',onConfirm:doStartSession});
+}
+
+// Actual session creation — called after admin picks a banker.
+async function doStartSession(bankerMemberId,bankerName){
+  const names=state.players.map(p=>p.name.trim()).filter(Boolean);
+  if(!names.length){toast("Add players first");return}
   $("startOnline").innerHTML="Starting…";$("startOnline").disabled=true;
   const code=generateCode();
-  const lockResult=await db.ref('league/active_session').transaction(current=>{if(current!==null&&current!==undefined)return;return{code,startedBy:currentMember.id,startedByName:currentMember.name,startedAt:Date.now()}});
+  const payload={code,startedBy:currentMember.id,startedByName:currentMember.name,startedAt:Date.now(),banker:{memberId:bankerMemberId,name:bankerName}};
+  const lockResult=await db.ref('league/active_session').transaction(current=>{if(current!==null&&current!==undefined)return;return payload});
   if(!lockResult.committed){toast("Someone else just started a session");$("startOnline").innerHTML="Start Online";$("startOnline").disabled=false;return}
   onlineSessionCode=code;localStorage.setItem(ACTIVE_KEY,code);
   const cashouts={};names.forEach(n=>{cashouts[n]={submitted:false,buyinCount:1,timestamp:Date.now(),black:0,purple:0,yellow:0,pink:0,orange:0}});
   try{
-    await db.ref("sessions/"+code+"/config").set({sessionName:state.sessionName||"Poker Night",buyinUsd:state.buyinUsd,taxRate:state.taxRate,chipValues:clone(state.chipValues),playerNames:names,createdAt:Date.now(),createdBy:currentMember.id,createdByName:currentMember.name});
+    await db.ref("sessions/"+code+"/config").set({sessionName:state.sessionName||"Poker Night",buyinUsd:state.buyinUsd,taxRate:state.taxRate,chipValues:clone(state.chipValues),playerNames:names,createdAt:Date.now(),createdBy:currentMember.id,createdByName:currentMember.name,bankerId:bankerMemberId,bankerName:bankerName});
     await db.ref("sessions/"+code+"/cashouts").set(cashouts);
     await db.ref("sessions/"+code+"/admin_state").set({state:JSON.stringify(state),mode,updatedAt:Date.now()});
-    showOnlineUI(code);toast("Online: "+code);listenForCashouts(code);syncBuyinsToFirebase();
+    const isSelf=bankerMemberId===currentMember.id;
+    showOnlineUI(code);toast(isSelf?("Online: "+code):(`Session ${code} started — ${bankerName} is banking`));listenForCashouts(code);syncBuyinsToFirebase();
   }catch(err){toast("Error: "+err.message);await db.ref('league/active_session').remove().catch(()=>{});onlineSessionCode=null}
   $("startOnline").innerHTML="Start Online";$("startOnline").disabled=false;
 }
+
+// ==== BANKER PICKER MODAL (v2.5 session roles — Step 2, parameterized in Step 3) ====
+// Mode-aware: 'start' = starting a new session; 'reassign' = swapping banker on a live session.
+// Callers pass an onConfirm callback so the same modal serves both flows (Option A).
+let bankerPickerSelection=null;
+let bankerPickerMode='start';
+let bankerPickerOnConfirm=null;
+function openBankerPicker(opts){
+  opts=opts||{};
+  bankerPickerMode=opts.mode||'start';
+  bankerPickerOnConfirm=typeof opts.onConfirm==='function'?opts.onConfirm:null;
+  // Default selection: caller-provided, else current admin
+  bankerPickerSelection=opts.initialSelection||currentMember.id;
+  // Customize header + confirm button text per mode
+  const titleEl=$("bpTitle");
+  const subEl=titleEl?titleEl.nextElementSibling:null;
+  const confirmBtn=$("bpConfirm");
+  if(bankerPickerMode==='reassign'){
+    if(titleEl)titleEl.textContent="Reassign banker";
+    if(subEl)subEl.textContent="Hand off the banking duties to another member. The session stays live.";
+    if(confirmBtn)confirmBtn.textContent="Reassign";
+  }else{
+    if(titleEl)titleEl.textContent="Who's banking tonight?";
+    if(subEl)subEl.textContent="Pick the person handling chips, payouts, and settlement for this session.";
+    if(confirmBtn)confirmBtn.textContent="Start Session";
+  }
+  renderBankerPicker();
+  $("bankerPickerOverlay").classList.add("open");
+}
+function closeBankerPicker(){
+  $("bankerPickerOverlay").classList.remove("open");
+  bankerPickerSelection=null;
+  bankerPickerMode='start';
+  bankerPickerOnConfirm=null;
+  $("bpWarn").classList.remove("show");$("bpWarn").textContent="";
+}
+function renderBankerPicker(){
+  const list=$("bpMemberList");
+  const entries=Object.entries(leagueMembers||{});
+  if(!entries.length){
+    list.innerHTML='<div class="note" style="margin:0;text-align:center">No registered members yet.</div>';
+    $("bpConfirm").disabled=true;
+    return;
+  }
+  $("bpConfirm").disabled=false;
+  // Sort: current member first, then admins, then users, then alphabetical
+  entries.sort(([aId,a],[bId,b])=>{
+    if(aId===currentMember.id)return -1;
+    if(bId===currentMember.id)return 1;
+    if(a.role!==b.role)return a.role==='admin'?-1:1;
+    return (a.name||'').localeCompare(b.name||'');
+  });
+  list.innerHTML=entries.map(([id,m])=>{
+    const isMe=id===currentMember.id;
+    const isSelected=id===bankerPickerSelection;
+    const roleBadge=`<span class="bpRoleBadge ${m.role}">${m.role}</span>`;
+    const youBadge=isMe?'<span class="bpYou">YOU</span>':'';
+    return`<div class="bpOption${isSelected?' selected':''}" data-bpid="${id}" data-bpname="${esc(m.name||'')}"><div class="bpRadio"></div><div class="bpInfo"><div class="bpName">${esc(m.name||'')}${youBadge}</div></div>${roleBadge}</div>`;
+  }).join("");
+  // Show warning if the chosen banker isn't also a player in tonight's lineup
+  updateBankerWarning();
+}
+function updateBankerWarning(){
+  const warn=$("bpWarn");
+  if(!bankerPickerSelection){warn.classList.remove("show");return}
+  const pickedMember=leagueMembers[bankerPickerSelection];
+  if(!pickedMember){warn.classList.remove("show");return}
+  const pickedName=(pickedMember.name||'').toLowerCase().trim();
+  // In start mode check against local draft; in reassign mode check against the live session's roster
+  const playerNames=bankerPickerMode==='reassign'
+    ?(activeSessionData?.config?.playerNames||[]).map(n=>(n||'').toLowerCase().trim()).filter(Boolean)
+    :state.players.map(p=>p.name.trim().toLowerCase()).filter(Boolean);
+  if(playerNames.length&&!playerNames.includes(pickedName)){
+    warn.innerHTML=`⚠ <b>${esc(pickedMember.name)}</b> isn't in tonight's player list. They'll bank but won't cash out.`;
+    warn.classList.add("show");
+  }else{
+    warn.classList.remove("show");
+  }
+}
+$("bpMemberList").addEventListener("click",e=>{
+  const opt=e.target.closest(".bpOption");if(!opt)return;
+  bankerPickerSelection=opt.dataset.bpid;
+  renderBankerPicker();
+});
+$("bpCancel").addEventListener("click",closeBankerPicker);
+$("bpConfirm").addEventListener("click",async()=>{
+  if(!bankerPickerSelection){toast("Pick a banker first");return}
+  const m=leagueMembers[bankerPickerSelection];
+  if(!m){toast("Selected member not found");return}
+  const bankerId=bankerPickerSelection,bankerName=m.name;
+  const cb=bankerPickerOnConfirm;
+  closeBankerPicker();
+  // Option A: dispatch through the caller-provided callback. Default (from startOnlineSession) → doStartSession.
+  if(typeof cb==='function'){
+    await cb(bankerId,bankerName);
+  }else{
+    await doStartSession(bankerId,bankerName);
+  }
+});
+// Tap outside dialog to cancel
+$("bankerPickerOverlay").addEventListener("click",e=>{if(e.target===$("bankerPickerOverlay"))closeBankerPicker()});
+
+// ==== SESSION ADMIN PANE (v2.5 session roles — Step 3) ====
+// Renders the "🎰 Session" admin-modal tab: shows the current active session (if any),
+// with controls to reassign the banker or force-end the session.
+function renderSessionAdminPane(){
+  const body=$("sessionAdminBody");if(!body)return;
+  if(!activeSession){
+    body.innerHTML=`<div class="sessEmpty"><div class="sessEmojiLg">🎲</div><div><b>No active session right now.</b></div><div style="margin-top:4px;font-size:12px">Close this modal and tap <b>Start Online</b> in the wizard to begin.</div></div>`;
+    return;
+  }
+  const when=new Date(activeSession.startedAt||Date.now()).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const startedBy=activeSession.startedByName||leagueMembers[activeSession.startedBy]?.name||'someone';
+  const bankerName=activeSession.banker?.name||activeSession.startedByName||leagueMembers[activeSession.startedBy]?.name||'(unset)';
+  const bankerId=activeSession.banker?.memberId||activeSession.startedBy;
+  const sessionName=activeSessionData?.config?.sessionName||activeSession.code;
+  const playerCount=(activeSessionData?.config?.playerNames||[]).length;
+  const cashouts=activeSessionData?.cashouts||{};
+  const submittedCount=Object.values(cashouts).filter(c=>c&&(c.submitted||c.adminOverride)).length;
+  const isLocked=!!activeSessionData?.results?.locked;
+  body.innerHTML=`
+    <div class="sessCard live">
+      <div class="sessHd">
+        <div class="sessTitle">${esc(sessionName)}</div>
+        <span class="sessBadge">${isLocked?'Locked':'Live'}</span>
+      </div>
+      <div class="sessSub">Code <b>${esc(activeSession.code)}</b> · started by ${esc(startedBy)} · ${esc(when)}</div>
+      <div class="sessRow">
+        <div class="sessRowK">Banker</div>
+        <div class="sessRowV">${esc(bankerName)}</div>
+        <div class="sessRowAct"><button class="btn small" id="sessReassignBtn" type="button" ${isLocked?'disabled':''}>Reassign</button></div>
+      </div>
+      <div class="sessRow">
+        <div class="sessRowK">Progress</div>
+        <div class="sessRowV">${submittedCount} / ${playerCount} cashouts submitted</div>
+      </div>
+      <div class="sessFoot">
+        <button class="btn small danger" id="sessEndBtn" type="button">⏹ End Session</button>
+      </div>
+    </div>
+    <div class="note" style="margin:6px 2px 0;font-size:11px">Reassigning the banker won't disturb chip counts or cashouts. Ending the session releases the league lock so a new one can start — it does <b>not</b> delete session data.</div>
+  `;
+  const reassignBtn=$("sessReassignBtn");if(reassignBtn)reassignBtn.addEventListener("click",()=>openReassignBankerPicker(bankerId));
+  const endBtn=$("sessEndBtn");if(endBtn)endBtn.addEventListener("click",confirmEndActiveSession);
+}
+
+// Open the (shared) banker picker in reassign mode, preselecting the current banker.
+function openReassignBankerPicker(currentBankerId){
+  if(!activeSession){toast("No active session");return}
+  if(currentMember.role!=='admin'){toast("Admin only");return}
+  openBankerPicker({mode:'reassign',initialSelection:currentBankerId||activeSession.banker?.memberId||activeSession.startedBy,onConfirm:doReassignBanker});
+}
+
+// Write the new banker into league/active_session + mirror into sessions/{code}/config.
+async function doReassignBanker(bankerMemberId,bankerName){
+  if(!activeSession){toast("No active session");return}
+  const code=activeSession.code;
+  try{
+    await db.ref('league/active_session/banker').set({memberId:bankerMemberId,name:bankerName});
+    // Mirror into the session config so downstream pages (player.html, analytics.html) see it
+    await db.ref('sessions/'+code+'/config').update({bankerId:bankerMemberId,bankerName:bankerName});
+    const isSelf=bankerMemberId===currentMember.id;
+    toast(isSelf?`You're now banking ${code}`:`Banker reassigned to ${bankerName}`);
+    // Step 1's active_session listener will re-run applySessionRole() and flip everyone's UI
+  }catch(err){
+    toast("Reassign failed: "+err.message);
+  }
+}
+
+// Confirm + force-end the active session. Releases the league lock without deleting session data.
+async function confirmEndActiveSession(){
+  if(!activeSession){toast("No active session");return}
+  if(currentMember.role!=='admin'){toast("Admin only");return}
+  const code=activeSession.code;
+  if(!confirm(`End session ${code}?\n\nThis releases the league lock so a new session can start. Chip counts and cashouts are NOT deleted — you can still view this session in History.`))return;
+  try{
+    await db.ref('league/active_session').remove();
+    // If this admin was the banker / host, also clear local tracking
+    if(onlineSessionCode===code){
+      if(firebaseListener){db.ref('sessions/'+code+'/cashouts').off('value',firebaseListener);firebaseListener=null}
+      onlineSessionCode=null;localStorage.removeItem(ACTIVE_KEY);
+      $("onlineOff").style.display="block";$("onlineOn").style.display="none";
+      $("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";
+      $("liveBadge").style.display="none";
+    }
+    toast(`Session ${code} ended`);
+  }catch(err){
+    toast("End failed: "+err.message);
+  }
+}
+
 function showOnlineUI(code){$("onlineOff").style.display="none";$("onlineOn").style.display="block";$("sessionCodeDisplay").textContent=code;const url=getPlayerPageUrl(code);$("playerLinkDisplay").textContent=url;$("qrWrap").innerHTML="";try{const cv=document.createElement("canvas");cv.style.borderRadius="10px";new QRious({element:cv,value:url,size:180,backgroundAlpha:1,foreground:"#1a1f2e",background:"#ffffff",level:"M"});$("qrWrap").appendChild(cv)}catch(e){}$("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";$("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`}
 async function stopOnlineSession(){
   if(firebaseListener&&onlineSessionCode){db.ref("sessions/"+onlineSessionCode+"/cashouts").off("value",firebaseListener);firebaseListener=null}
@@ -981,9 +1422,9 @@ function buildPayoutLines(){if(mode==="tournament"){const t=calcTournament(),bn=
 function renderPayouts(){const card=$("payoutCard");if(!state.locked){card.style.display="none";return}card.style.display="block";const lines=buildPayoutLines();$("payoutLines").innerHTML=lines.map(l=>{const ip=!!paidMap[l.key];return`<div class="payLine ${ip?"paid":""}" data-paykey="${l.key}"><div class="payBg ${ip?"toUnpay":"toBePaid"}">${ip?"← Undo":"Paid ✓ →"}</div><div class="payContent"><div><span style="font-size:12px;font-weight:600">${esc(l.label)}</span><br><span class="muted" style="font-size:11px">${l.type==="collect"?"Buy-in":"Payout"}</span></div><div style="text-align:right"><span style="font-weight:700">${fmtUsd(l.amount)}</span>${ip?'<br><span class="paidBadge">PAID</span>':''}</div></div></div>`}).join("");document.querySelectorAll(".payLine").forEach(el=>{let sx=0,sy=0,cx=0,swiping=false;el.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;cx=sx;swiping=true},{passive:true});el.addEventListener("touchmove",e=>{if(!swiping)return;const dy=e.touches[0].clientY-sy,dx=e.touches[0].clientX-sx;if(Math.abs(dy)>Math.abs(dx)){swiping=false;el.querySelector(".payContent").style.cssText="transition:transform .2s;transform:none";return}cx=e.touches[0].clientX;el.querySelector(".payContent").style.cssText=`transform:translateX(${Math.max(-80,Math.min(80,dx))}px);transition:none`},{passive:true});el.addEventListener("touchend",()=>{el.querySelector(".payContent").style.cssText="transition:transform .2s;transform:none";if(!swiping)return;swiping=false;const dx=cx-sx,key=el.dataset.paykey;if(dx>60&&!paidMap[key]){paidMap[key]=true;savePaid();renderPayouts();toast("Paid ✓")}else if(dx<-60&&paidMap[key]){delete paidMap[key];savePaid();renderPayouts();toast("Unmarked")}})})}
 function renderHistory(){const tb=$("historyBody"),em=$("historyEmpty");if(!tb)return;if(!sessionArchive.length){tb.innerHTML="";if(em)em.style.display="block";return}if(em)em.style.display="none";tb.innerHTML=sessionArchive.map(s=>{const d=new Date(s.date),ds=d.toLocaleDateString(undefined,{month:'short',day:'numeric'}),ts=d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});const dr=(s.players||[]).map(p=>{const cls=p.net>0?"good":(p.net<0?"bad":"muted");return`<tr class="sessionDetail" data-detail="${s.id}"><td></td><td>${esc(p.name)}</td><td class="num ${cls}">${p.net>=0?"+":""}${fmtUsd(p.net)}</td><td></td><td></td></tr>`}).join("");return`<tr class="sessionRow" data-sid="${s.id}"><td>${ds} <span class="muted" style="font-size:10px">${ts}</span></td><td>${esc(s.sessionName)}${s.archivedByName?` <span class="muted" style="font-size:9px">· by ${esc(s.archivedByName)}</span>`:''}</td><td class="num"><span class="modeBadge ${(s.mode||"cash")==="tournament"?"tourney":"cash"}">${(s.mode||"cash")==="tournament"?"🏆":"♠"}</span></td><td class="num">${s.playerCount}</td><td><button class="deleteSession" data-delsession="${s.id}" type="button">✕</button></td></tr>${dr}`}).join("")}
 function renderStats(){const sc=$("statsSessionCount"),sb=$("statsBody"),se=$("statsEmpty");if(!sb)return;if(sc)sc.textContent=`${sessionArchive.length} game${sessionArchive.length!==1?"s":""}`;if(!sessionArchive.length){sb.innerHTML="";if(se)se.style.display="block";return}if(se)se.style.display="none";const map={};for(const s of sessionArchive)for(const p of (s.players||[])){const k=p.name.trim().toLowerCase();if(!map[k])map[k]={name:p.name.trim(),sessions:0,wins:0,totalNet:0};const m=map[k];m.sessions++;m.totalNet+=p.net;if(p.net>0)m.wins++;m.name=p.name.trim()}sb.innerHTML=Object.values(map).sort((a,b)=>b.totalNet-a.totalNet).map(s=>{const wp=s.sessions?Math.round(s.wins/s.sessions*100):0,avg=s.sessions?s.totalNet/s.sessions:0,nc=s.totalNet>0?"statPositive":(s.totalNet<0?"statNegative":"statNeutral");return`<tr><td>${esc(s.name)}</td><td class="num">${s.sessions}</td><td class="num">${s.wins}</td><td class="num">${wp}%</td><td class="num ${nc}">${s.totalNet>=0?"+":""}${fmtUsd(s.totalNet)}</td><td class="num">${avg>=0?"+":""}${fmtUsd(avg)}</td></tr>`}).join("")}
-function renderRosterChips(){const cur=state.players.map(p=>p.name.trim().toLowerCase());const isAdmin=currentMember&&currentMember.role==='admin';$("rosterChips").innerHTML=leagueRoster.length?leagueRoster.map((n,i)=>{const inG=cur.includes(n.trim().toLowerCase());return`<div class="rosterChip" data-ridx="${i}"><div class="rc-name">${esc(n)}</div><div class="rc-add ${inG?"disabled":""}" data-radd="${esc(n)}">${inG?"✓ In game":"+ Add"}</div>${isAdmin?`<div class="rc-del" data-rdel="${esc(n)}">Delete</div>`:''}</div>`}).join(""):'<div class="note" style="margin:0">No regular players yet.'+(isAdmin?' Add below.':'')+'</div>'}
+function renderRosterChips(){const cur=state.players.map(p=>p.name.trim().toLowerCase());const isAdmin=currentMember&&currentMember.role==='admin';const memberNames=new Set(Object.values(leagueMembers||{}).map(m=>(m.name||'').trim().toLowerCase()));$("rosterChips").innerHTML=leagueRoster.length?leagueRoster.map((n,i)=>{const inG=cur.includes(n.trim().toLowerCase());const isMember=memberNames.has(n.trim().toLowerCase());const star=isMember?'<span title="Registered member — can be banker for the night" style="color:var(--warn);margin-right:4px;font-size:11px">⭐</span>':'';return`<div class="rosterChip" data-ridx="${i}">${star}<div class="rc-name">${esc(n)}</div><div class="rc-add ${inG?"disabled":""}" data-radd="${esc(n)}">${inG?"✓ In game":"+ Add"}</div>${isAdmin?`<div class="rc-del" data-rdel="${esc(n)}">Delete</div>`:''}</div>`}).join(""):'<div class="note" style="margin:0">No regular players yet.'+(isAdmin?' Add below.':'')+'</div>'}
 function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderRosterChips();save()}
-function startAppUI(){state=sanitize(state);const lastCode=localStorage.getItem(ACTIVE_KEY);if(lastCode)$("resumeCode").value=lastCode;setMode("cash");renderAllFull()}
+function startAppUI(){state=sanitize(state);checkStateOwnership();const lastCode=localStorage.getItem(ACTIVE_KEY);if(lastCode)$("resumeCode").value=lastCode;setMode("cash");renderAllFull();applySessionRole()}
 
 // ==== EVENT HANDLERS ====
 $("modeToggle").addEventListener("click",e=>{const b=e.target.closest(".modeBtn");if(b)setMode(b.dataset.mode)});
@@ -1065,7 +1506,7 @@ $("stepNext").addEventListener("click",()=>{
   goToStep(currentStep+1);
 });
 // ===== Admin modal controller =====
-function openAdminModal(){$("adminOverlay").classList.add("open")}
+function openAdminModal(){$("adminOverlay").classList.add("open");renderSessionAdminPane()}
 function closeAdminModal(){$("adminOverlay").classList.remove("open")}
 $("openAdminModal").addEventListener("click",openAdminModal);
 $("adminClose").addEventListener("click",closeAdminModal);
