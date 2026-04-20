@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-session-roles-step4c-2026-04-19"/>
+<meta name="ipl-build" content="v2.5-session-roles-step4f-2026-04-19"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -304,6 +304,16 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 .pPresenceChip .pDotOnline{width:5px;height:5px;border-radius:50%;background:var(--good)}
 .pCheckConn{display:inline-flex;align-items:center;gap:6px;margin:12px auto 0;padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation}
 .pCheckConn:hover{border-color:var(--accent);color:var(--text)}
+/* Step 4e: End-session undo banner — fixed bottom-center with countdown */
+.endUndoBanner{position:fixed;bottom:18px;left:12px;right:12px;z-index:60;max-width:420px;margin:0 auto;display:none;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;border:1px solid rgba(245,100,100,.35);background:linear-gradient(135deg,rgba(245,100,100,.14),rgba(245,197,66,.10));box-shadow:0 10px 28px rgba(0,0,0,.30);backdrop-filter:blur(10px)}
+.endUndoBanner.open{display:flex}
+.endUndoText{flex:1;min-width:0;font-size:13px;color:var(--text);font-weight:600}
+.endUndoText b{color:var(--bad)}
+.endUndoCount{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;margin-left:4px}
+.endUndoBtn{flex-shrink:0;padding:8px 14px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation}
+.endUndoBtn:hover{filter:brightness(1.1)}
+.endUndoBtn:active{transform:scale(.97)}
+@media(min-width:600px){.endUndoBanner{left:50%;right:auto;transform:translateX(-50%);max-width:460px}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 /* ===== Admin Modal ===== */
 .adminBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;touch-action:manipulation}
@@ -339,6 +349,8 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 .bpOption .bpInfo{flex:1;min-width:0}
 .bpOption .bpName{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
 .bpOption .bpName .bpYou{font-size:9px;font-weight:700;color:#fff;background:var(--accent);padding:2px 6px;border-radius:4px;letter-spacing:.04em}
+/* Step 4f: "Current" gold badge shown on the current banker in reassign mode */
+.bpOption .bpName .bpCurrent{font-size:9px;font-weight:700;color:#1a1400;background:linear-gradient(135deg,#f5c542,#e6a82e);padding:2px 6px;border-radius:4px;letter-spacing:.04em;box-shadow:0 0 0 1px rgba(245,197,66,.5)}
 .bpOption .bpRoleBadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
 .bpOption .bpRoleBadge.admin{background:rgba(245,197,66,.2);color:var(--warn)}
 .bpOption .bpRoleBadge.user{background:rgba(122,167,255,.2);color:var(--accent)}
@@ -369,6 +381,11 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 </head>
 <body>
 <div class="toastBox" id="toastBox"></div>
+<!-- Step 4e: End-session undo banner — slides in when admin ends a session, gives 5s to reverse -->
+<div class="endUndoBanner" id="endUndoBanner" role="alert" aria-live="polite">
+  <div class="endUndoText">Ending session <b id="endUndoCode">—</b><span class="endUndoCount" id="endUndoCount">5s</span></div>
+  <button class="endUndoBtn" id="endUndoBtn" type="button">↩ Undo</button>
+</div>
 <div class="offlineBanner" id="offlineBanner">⚠️ No internet connection — changes won't sync</div>
 <div class="authOverlay" id="authOverlay">
   <div class="authBox">
@@ -580,6 +597,11 @@ let lastKnownRole=null,lastKnownSessionCode=null;
 // Step 4c: Presence + last-session data for the waiting hero
 let presenceMap={},presenceRef=null,presenceStarted=false,presenceMembersRef=null;
 let lastSessionSummary=null; // {date, sessionName, bankerName, myNet} or null
+// Step 4e: End-session undo window state.
+// pendingSessionEnd holds {code, timerId, intervalId, startedAt} while the
+// 5-second grace window is open; null otherwise. Keeps the actual Firebase
+// removal delayed so the admin has a chance to undo.
+let pendingSessionEnd=null;
 let mode="cash";const collapsedPlayers=new Set();let onlineSessionCode=null,firebaseListener=null;
 let timerInterval=null,timerSeconds=600,timerRunning=false;
 let paidMap={};try{paidMap=JSON.parse(localStorage.getItem(PAY_KEY)||"{}")}catch{}
@@ -1456,7 +1478,11 @@ async function archiveCurrentSession(){
   });
   const totalRF=players.reduce((s,p)=>s+p.rfTax,0);
   const archiveId=uid();
-  const entry={id:archiveId,date:new Date().toISOString(),sessionName:(state.sessionName||"").trim()||"Untitled",mode,buyinUsd:state.buyinUsd,playerCount:players.length,totalRF,players,archivedBy:currentMember.id,archivedByName:currentMember.name};
+  // Step 4d: record the banker alongside the archiver so the natural-continuation
+  // shortcut (skip banker picker on next session) has real data to check against.
+  const bId=activeSession?.banker?.memberId||null;
+  const bName=activeSession?.banker?.name||null;
+  const entry={id:archiveId,date:new Date().toISOString(),sessionName:(state.sessionName||"").trim()||"Untitled",mode,buyinUsd:state.buyinUsd,playerCount:players.length,totalRF,players,archivedBy:currentMember.id,archivedByName:currentMember.name,bankerId:bId,bankerName:bName};
   if(sessionArchive[0]&&Math.abs(new Date(sessionArchive[0].date)-new Date(entry.date))<30000){toast("Already archived");return false}
   try{await db.ref('session_archive/'+archiveId).set(entry);return true}catch(err){toast("Archive failed: "+err.message);return false}
 }
@@ -1480,13 +1506,42 @@ async function startOnlineSession(){
   const names=state.players.map(p=>p.name.trim()).filter(Boolean);
   if(!names.length){toast("Add players first");return}
   const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names: "+dupes.join(", "));return}
+  // Step 4d: Banker-chooses-themselves shortcut. Skip the picker when the choice
+  // is obvious: either there's only one member in the league, or the last archived
+  // session was also banked by the current user (natural continuation).
+  // Fallback: for archives written before Step 4d, bankerId may be missing —
+  // we fall back to archivedBy, which is often (though not always) the banker.
+  const skip=shouldSkipBankerPicker();
+  if(skip.skip){
+    // Skip visible — tell the admin what we did and how to change banker if needed
+    await doStartSession(currentMember.id,currentMember.name,{skippedPicker:true,reason:skip.reason});
+    return;
+  }
   // v2.5 Step 2: open banker picker before actually creating the session.
   // Step 3: now parameterized — pass explicit mode and callback (keeps the default behavior).
   openBankerPicker({mode:'start',onConfirm:doStartSession});
 }
 
+// Step 4d: Decide whether the banker picker should be skipped.
+// Returns {skip:boolean, reason:string} — reason used for the success toast.
+function shouldSkipBankerPicker(){
+  if(!currentMember)return{skip:false,reason:''};
+  // Rule 1: only-member case — you're the only member in the league
+  const memberCount=Object.keys(leagueMembers||{}).length;
+  if(memberCount<=1)return{skip:true,reason:'solo'};
+  // Rule 2: natural continuation — most recent archive was banked by you.
+  // Fall back to archivedBy for pre-Step-4d archives (best effort).
+  const recent=sessionArchive&&sessionArchive[0];
+  if(recent){
+    const lastBankerId=recent.bankerId||recent.archivedBy||null;
+    if(lastBankerId===currentMember.id)return{skip:true,reason:'continuation'};
+  }
+  return{skip:false,reason:''};
+}
+
 // Actual session creation — called after admin picks a banker.
-async function doStartSession(bankerMemberId,bankerName){
+async function doStartSession(bankerMemberId,bankerName,opts){
+  opts=opts||{};
   const names=state.players.map(p=>p.name.trim()).filter(Boolean);
   if(!names.length){toast("Add players first");return}
   $("startOnline").innerHTML="Starting…";$("startOnline").disabled=true;
@@ -1501,7 +1556,19 @@ async function doStartSession(bankerMemberId,bankerName){
     await db.ref("sessions/"+code+"/cashouts").set(cashouts);
     await db.ref("sessions/"+code+"/admin_state").set({state:JSON.stringify(state),mode,updatedAt:Date.now()});
     const isSelf=bankerMemberId===currentMember.id;
-    showOnlineUI(code);toast(isSelf?("Online: "+code):(`Session ${code} started — ${bankerName} is banking`));listenForCashouts(code);syncBuyinsToFirebase();
+    showOnlineUI(code);
+    // Step 4d: richer toast when we skipped the picker so the admin knows (a)
+    // what code the session got, (b) that they're banking, and (c) how to change it.
+    let msg;
+    if(opts.skippedPicker){
+      msg = opts.reason==='solo'
+        ? `🎰 Session ${code} started · You're banking (only member)`
+        : `🎰 Session ${code} started · You're banking · Change via ⚙️ Admin → Session`;
+    }else{
+      msg = isSelf?("Online: "+code):(`Session ${code} started — ${bankerName} is banking`);
+    }
+    toast(msg, opts.skippedPicker?4200:2200);
+    listenForCashouts(code);syncBuyinsToFirebase();
   }catch(err){toast("Error: "+err.message);await db.ref('league/active_session').remove().catch(()=>{});onlineSessionCode=null}
   $("startOnline").innerHTML="Start Online";$("startOnline").disabled=false;
 }
@@ -1550,8 +1617,16 @@ function renderBankerPicker(){
     return;
   }
   $("bpConfirm").disabled=false;
-  // Sort: current member first, then admins, then users, then alphabetical
+  // Step 4f: identify the current banker when we're in reassign mode
+  const currentBankerId=bankerPickerMode==='reassign'
+    ?(activeSession?.banker?.memberId||activeSession?.startedBy||null)
+    :null;
+  // Sort: current banker first (reassign mode), then current member, then admins, then users, then alphabetical
   entries.sort(([aId,a],[bId,b])=>{
+    if(currentBankerId){
+      if(aId===currentBankerId)return -1;
+      if(bId===currentBankerId)return 1;
+    }
     if(aId===currentMember.id)return -1;
     if(bId===currentMember.id)return 1;
     if(a.role!==b.role)return a.role==='admin'?-1:1;
@@ -1560,9 +1635,11 @@ function renderBankerPicker(){
   list.innerHTML=entries.map(([id,m])=>{
     const isMe=id===currentMember.id;
     const isSelected=id===bankerPickerSelection;
+    const isCurrentBanker=currentBankerId&&id===currentBankerId;
     const roleBadge=`<span class="bpRoleBadge ${m.role}">${m.role}</span>`;
+    const currentBadge=isCurrentBanker?'<span class="bpCurrent">CURRENT</span>':'';
     const youBadge=isMe?'<span class="bpYou">YOU</span>':'';
-    return`<div class="bpOption${isSelected?' selected':''}" data-bpid="${id}" data-bpname="${esc(m.name||'')}"><div class="bpRadio"></div><div class="bpInfo"><div class="bpName">${esc(m.name||'')}${youBadge}</div></div>${roleBadge}</div>`;
+    return`<div class="bpOption${isSelected?' selected':''}" data-bpid="${id}" data-bpname="${esc(m.name||'')}"><div class="bpRadio"></div><div class="bpInfo"><div class="bpName">${esc(m.name||'')}${currentBadge}${youBadge}</div></div>${roleBadge}</div>`;
   }).join("");
   // Show warning if the chosen banker isn't also a player in tonight's lineup
   updateBankerWarning();
@@ -1625,24 +1702,27 @@ function renderSessionAdminPane(){
   const cashouts=activeSessionData?.cashouts||{};
   const submittedCount=Object.values(cashouts).filter(c=>c&&(c.submitted||c.adminOverride)).length;
   const isLocked=!!activeSessionData?.results?.locked;
+  // Step 4e: pending end state disables Reassign + changes End button label
+  const isEnding=!!(pendingSessionEnd&&pendingSessionEnd.code===activeSession.code);
+  const endBtnLabel=isEnding?'⏳ Ending…':'⏹ End Session';
   body.innerHTML=`
     <div class="sessCard live">
       <div class="sessHd">
         <div class="sessTitle">${esc(sessionName)}</div>
-        <span class="sessBadge">${isLocked?'Locked':'Live'}</span>
+        <span class="sessBadge">${isLocked?'Locked':(isEnding?'Ending':'Live')}</span>
       </div>
       <div class="sessSub">Code <b>${esc(activeSession.code)}</b> · started by ${esc(startedBy)} · ${esc(when)}</div>
       <div class="sessRow">
         <div class="sessRowK">Banker</div>
         <div class="sessRowV">${esc(bankerName)}</div>
-        <div class="sessRowAct"><button class="btn small" id="sessReassignBtn" type="button" ${isLocked?'disabled':''}>Reassign</button></div>
+        <div class="sessRowAct"><button class="btn small" id="sessReassignBtn" type="button" ${(isLocked||isEnding)?'disabled':''}>Reassign</button></div>
       </div>
       <div class="sessRow">
         <div class="sessRowK">Progress</div>
         <div class="sessRowV">${submittedCount} / ${playerCount} cashouts submitted</div>
       </div>
       <div class="sessFoot">
-        <button class="btn small danger" id="sessEndBtn" type="button">⏹ End Session</button>
+        <button class="btn small danger" id="sessEndBtn" type="button" ${isEnding?'disabled':''}>${endBtnLabel}</button>
       </div>
     </div>
     <div class="note" style="margin:6px 2px 0;font-size:11px">Reassigning the banker won't disturb chip counts or cashouts. Ending the session releases the league lock so a new one can start — it does <b>not</b> delete session data.</div>
@@ -1675,11 +1755,63 @@ async function doReassignBanker(bankerMemberId,bankerName){
 }
 
 // Confirm + force-end the active session. Releases the league lock without deleting session data.
+// Step 4e: End-session flow with 5-second undo window.
+// Rather than writing to Firebase immediately, the "End Session" button now
+// opens a local undo banner. The Firebase write (active_session.remove) only
+// happens after the timer expires — so tapping Undo within 5s keeps the
+// session alive with zero multi-device side effects (no other devices ever
+// saw the session end, because Firebase wasn't touched).
+const END_UNDO_MS=5000;
+
 async function confirmEndActiveSession(){
   if(!activeSession){toast("No active session");return}
   if(currentMember.role!=='admin'){toast("Admin only");return}
+  if(pendingSessionEnd){return} // already pending — ignore double-taps
   const code=activeSession.code;
-  if(!confirm(`End session ${code}?\n\nThis releases the league lock so a new session can start. Chip counts and cashouts are NOT deleted — you can still view this session in History.`))return;
+  if(!confirm(`End session ${code}?\n\nYou'll have 5 seconds to undo. Chip counts and cashouts are NOT deleted — you can still view this session in History.`))return;
+  startEndUndoWindow(code);
+}
+
+function startEndUndoWindow(code){
+  // Open the banner
+  const banner=$("endUndoBanner"), codeEl=$("endUndoCode"), countEl=$("endUndoCount"), undoBtn=$("endUndoBtn");
+  if(!banner||!undoBtn)return;
+  if(codeEl)codeEl.textContent=code;
+  let remaining=Math.ceil(END_UNDO_MS/1000);
+  if(countEl)countEl.textContent=remaining+'s';
+  banner.classList.add('open');
+  // Interval updates the countdown text each second
+  const intervalId=setInterval(()=>{
+    remaining--;
+    if(countEl&&remaining>=0)countEl.textContent=remaining+'s';
+  },1000);
+  // Timer actually ends the session when it fires
+  const timerId=setTimeout(()=>{ finalizeEndSession(code); }, END_UNDO_MS);
+  pendingSessionEnd={code,timerId,intervalId,startedAt:Date.now()};
+  // Wire undo button (replace prior handler if any via cloneNode trick)
+  const fresh=undoBtn.cloneNode(true);
+  undoBtn.parentNode.replaceChild(fresh,undoBtn);
+  fresh.addEventListener('click',cancelEndSession);
+  // Re-render admin pane so End button shows pending state
+  renderSessionAdminPane();
+}
+
+function cancelEndSession(){
+  if(!pendingSessionEnd)return;
+  clearTimeout(pendingSessionEnd.timerId);
+  clearInterval(pendingSessionEnd.intervalId);
+  const code=pendingSessionEnd.code;
+  pendingSessionEnd=null;
+  const banner=$("endUndoBanner"); if(banner)banner.classList.remove('open');
+  toast(`✓ Kept session ${code} active`,2600);
+  renderSessionAdminPane();
+}
+
+async function finalizeEndSession(code){
+  if(!pendingSessionEnd||pendingSessionEnd.code!==code)return;
+  clearInterval(pendingSessionEnd.intervalId);
+  pendingSessionEnd=null;
+  const banner=$("endUndoBanner"); if(banner)banner.classList.remove('open');
   try{
     await db.ref('league/active_session').remove();
     // If this admin was the banker / host, also clear local tracking
