@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-session-roles-step4f-2026-04-19"/>
+<meta name="ipl-build" content="v2.5-step5b-silent-auth-user-nav-2026-04-19"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -407,8 +407,8 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 <div class="wrap">
 <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
 <a href="index.html" style="padding:8px 14px;border-radius:10px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;text-decoration:none">♠ Admin</a>
-<a href="rf-fund.html" data-admin-only style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">💰 RF Fund</a>
-<a href="analytics.html" data-admin-only style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">📊 Analytics</a>
+<a href="rf-fund.html" style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">💰 RF Fund</a>
+<a href="analytics.html" style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">📊 Analytics</a>
 <button class="adminBtn" id="openAdminModal" type="button" data-admin-only style="margin-left:auto">⚙️ Admin</button>
 </div>
 <div class="sessionBanner hidden" id="activeSessionBanner"><span class="bDot"></span><div class="bContent"><span class="bTitle" id="bannerTitle">Session in progress</span><span class="bSub" id="bannerSub"></span></div><button class="btn small primary" id="bannerCashoutBtn" type="button" style="display:none">💰 Cashout</button><button class="btn small" id="bannerResumeBtn" type="button" style="display:none">Resume</button><button class="btn small gold" id="bannerTakeoverBtn" type="button" style="display:none">Take over</button></div>
@@ -648,8 +648,42 @@ async function initAuth(){
   try{
     const [pinSnap,nameSnap]=await Promise.all([db.ref('league/master_pin_hash').once('value'),db.ref('league/admin_name').once('value')]);
     masterPinHash=pinSnap.val();adminName=nameSnap.val()||'Umakanth';
-    if(!masterPinHash){setupFirstRun()}
-    else{const cached=loadCachedMember();if(cached&&cached.id){setupQuickLogin(cached)}else{setupWelcome()}}
+    if(!masterPinHash){setupFirstRun();return}
+    const cached=loadCachedMember();
+    if(!cached||!cached.id){setupWelcome();return}
+    // Step 5: silent re-auth. If we have a cached member with a pinHash, verify
+    // against the live DB record. If everything still matches, skip the PIN
+    // prompt entirely — the user already proved identity on this device.
+    try{
+      const memberSnap=await db.ref('league/members/'+cached.id).once('value');
+      const m=memberSnap.val();
+      if(!m){
+        // Account was removed — clear cache and go to welcome
+        clearCachedMember();setupWelcome();return;
+      }
+      if(m.needsAdminPinUpgrade){
+        // Promotion flow still needs explicit PIN entry
+        setupQuickLogin(cached);return;
+      }
+      if(cached.pinHash && cached.pinHash===m.pinHash){
+        // Silent restore: cache matches DB, let them in without prompting
+        currentMember={id:cached.id,name:m.name,role:m.role,pinHash:m.pinHash};
+        saveCachedMember(currentMember); // refresh cache with any renames
+        onAuthSuccess({silent:true});
+        return;
+      }
+      // PIN changed somewhere else OR cache is missing pinHash — require PIN
+      setupQuickLogin(cached);
+    }catch(err){
+      // Offline / read failed — trust the cache so we don't lock out an already-signed-in user.
+      // If pinHash is somehow missing, fall back to the PIN prompt since we have nothing to trust.
+      if(cached.pinHash && cached.name && cached.role){
+        currentMember={id:cached.id,name:cached.name,role:cached.role,pinHash:cached.pinHash};
+        onAuthSuccess({silent:true,offline:true});
+      }else{
+        setupQuickLogin(cached);
+      }
+    }
   }catch(err){
     showAuthScreen('auth-welcome');setAuthMsg('adminMsg',"Connection issue: "+err.message);setTimeout(()=>setupWelcome(),800);
   }
@@ -885,7 +919,8 @@ function setupInviteComplete(code){
     }catch(err){setAuthMsg('setupMsg',"Failed: "+(err.code||err.message||String(err)));fail()}
   });
 }
-function onAuthSuccess(){
+function onAuthSuccess(opts){
+  opts=opts||{};
   $("authOverlay").classList.add("hidden");
   $("statusStrip").classList.remove("hidden");
   $("statusUser").textContent=currentMember.name;
@@ -894,7 +929,13 @@ function onAuthSuccess(){
   applyRoleGating();
   startLeagueListeners();
   startAppUI();
-  toast(`Welcome, ${currentMember.name}!`);
+  // Step 5: silent restores skip the welcome toast. Offline restores get a
+  // subtle heads-up so the user knows why the app feels less live.
+  if(opts.offline){
+    toast("⚠️ Offline mode — reconnect for live updates",3200);
+  }else if(!opts.silent){
+    toast(`Welcome, ${currentMember.name}!`);
+  }
 }
 $("statusSignout").addEventListener("click",()=>{if(confirm("Sign out?")){clearCachedMember();location.reload()}});
 $("themeToggle").addEventListener("click",()=>{theme=theme==="dark"?"light":"dark";applyTheme()});
