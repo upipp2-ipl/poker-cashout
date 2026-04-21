@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step5b-silent-auth-user-nav-2026-04-19"/>
+<meta name="ipl-build" content="v2.5-step6-invite-instructions-2026-04-19"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -93,6 +93,16 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .totwrap{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;flex:1;min-width:250px}.totwrap .tot{max-width:200px}
 @media(max-width:420px){.totwrap{min-width:0}.totwrap .tot{max-width:none}}
 .toastBox{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+/* Step 6: Invite message preview modal */
+.invitePrevOverlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.60);display:none;align-items:center;justify-content:center;padding:16px}
+.invitePrevOverlay.open{display:flex}
+.invitePrevDialog{width:100%;max-width:460px;background:var(--bg2);border:1px solid var(--card-border);border-radius:14px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.40);display:flex;flex-direction:column;gap:10px}
+.invitePrevHd{display:flex;align-items:center;justify-content:space-between}
+.invitePrevHd h3{margin:0;font-size:15px;font-weight:700}
+.invitePrevClose{background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0 4px;line-height:1;touch-action:manipulation}
+.invitePrevNote{font-size:11px;color:var(--muted)}
+#invitePrevText{width:100%;min-height:220px;padding:10px;border-radius:8px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.5;resize:vertical;box-sizing:border-box}
+.invitePrevBtns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .toast{padding:9px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--card-border);color:var(--text);font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(-8px) scale(.96);animation:toastIn .25s ease forwards;pointer-events:auto}
 .toast.out{animation:toastOut .2s ease forwards}
 @keyframes toastIn{to{opacity:1;transform:translateY(0) scale(1)}}@keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.96)}}@keyframes spin{to{transform:rotate(360deg)}}
@@ -381,6 +391,21 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 </head>
 <body>
 <div class="toastBox" id="toastBox"></div>
+<!-- Step 6: Invite preview modal — opens when admin taps "Copy invite" on non-HTTPS/unsupported browsers, or can be used to preview before sending -->
+<div class="invitePrevOverlay" id="invitePrevOverlay" role="dialog" aria-modal="true" aria-labelledby="invitePrevTitle">
+  <div class="invitePrevDialog">
+    <div class="invitePrevHd">
+      <h3 id="invitePrevTitle">📋 Invite message</h3>
+      <button class="invitePrevClose" id="invitePrevClose" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="invitePrevNote">Tap the box to select all, then long-press to copy. Or copy the text manually.</div>
+    <textarea id="invitePrevText" readonly></textarea>
+    <div class="invitePrevBtns">
+      <button class="btn small" id="invitePrevRetry" type="button">Try copy again</button>
+      <button class="btn small primary" id="invitePrevDone" type="button">Done</button>
+    </div>
+  </div>
+</div>
 <!-- Step 4e: End-session undo banner — slides in when admin ends a session, gives 5s to reverse -->
 <div class="endUndoBanner" id="endUndoBanner" role="alert" aria-live="polite">
   <div class="endUndoText">Ending session <b id="endUndoCode">—</b><span class="endUndoCount" id="endUndoCount">5s</span></div>
@@ -1467,16 +1492,22 @@ function renderInvites(){
     if(isLegacy&&inv.used&&inv.usedBy){const n=leagueMembers[inv.usedBy]?.name;if(n)redeemers.push(n);}
     if(redeemers.length)metaParts.push(`<span>👥 ${redeemers.map(esc).join(', ')}</span>`);
     const metaHtml=metaParts.length?`<div class="iMeta">${metaParts.join('')}</div>`:'';
-    return`<div class="inviteRow"><div class="iCode">${esc(code)}</div>${statusHtml}${isOpen?`<button class="iBtn copy" data-copy-code="${esc(code)}" type="button">Copy</button>`:''}<button class="iBtn" data-del-invite="${esc(code)}" type="button">✕</button>${metaHtml}</div>`;
+    return`<div class="inviteRow"><div class="iCode">${esc(code)}</div>${statusHtml}${isOpen?`<button class="iBtn copy" data-copy-msg="${esc(code)}" type="button" title="Copy full invite message with instructions">📋 Copy invite</button><button class="iBtn" data-copy-code="${esc(code)}" type="button" title="Copy just the code">Code</button>`:''}<button class="iBtn" data-del-invite="${esc(code)}" type="button">✕</button>${metaHtml}</div>`;
   }).join("");
 }
 $("addInviteBtn").addEventListener("click",async()=>{
   const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='IPL-';for(let i=0;i<4;i++)code+=chars[Math.floor(Math.random()*chars.length)];
   try{
     const now=Date.now();
-    await db.ref('league/invite_codes/'+code).set({createdBy:currentMember.id,createdAt:now,maxUses:5,uses:0,expiresAt:now+(2*24*60*60*1000)});
-    try{await navigator.clipboard?.writeText(code)}catch{}
-    toast(`Invite ${code} (5 uses · 2 days · copied)`);
+    const inv={createdBy:currentMember.id,createdAt:now,maxUses:5,uses:0,expiresAt:now+(2*24*60*60*1000)};
+    await db.ref('league/invite_codes/'+code).set(inv);
+    // Step 6: copy the full onboarding message instead of just the bare code —
+    // most admins want to paste this into a text/email and send.
+    const msg=buildInviteMessage(code,inv);
+    let copied=false;
+    try{await navigator.clipboard?.writeText(msg);copied=true}catch{}
+    if(copied){toast(`📋 ${code} created — full invite copied, paste & send`,3600)}
+    else{toast(`${code} created (5 uses · 2 days)`);openInvitePreview(code,msg)}
   }catch(err){toast("Failed: "+err.message)}
 });
 document.addEventListener("change",async e=>{
@@ -1498,6 +1529,20 @@ document.addEventListener("change",async e=>{
 document.addEventListener("click",async e=>{
   const rm=e.target.closest("[data-remove-member]");if(rm){const id=rm.dataset.removeMember;const name=leagueMembers[id]?.name||'member';if(!confirm(`Remove ${name}? They'll lose access.`))return;try{await db.ref('league/members/'+id).remove();toast(`${name} removed`)}catch(err){toast("Failed: "+err.message)}return}
   const cp=e.target.closest("[data-copy-code]");if(cp){const code=cp.dataset.copyCode;try{await navigator.clipboard.writeText(code);toast(`Copied ${code}`)}catch{toast(code)}return}
+  // Step 6: Copy full invite message (URL + instructions + code)
+  const cm=e.target.closest("[data-copy-msg]");if(cm){
+    const code=cm.dataset.copyMsg;
+    const inv=leagueInvites[code]||null;
+    const msg=buildInviteMessage(code,inv);
+    try{
+      await navigator.clipboard.writeText(msg);
+      toast(`📋 Invite message copied — paste into text/email`,3200);
+    }catch{
+      // Clipboard unavailable (e.g. non-HTTPS context) — show the message so admin can manually select + copy
+      openInvitePreview(code,msg);
+    }
+    return;
+  }
   const di=e.target.closest("[data-del-invite]");if(di){const code=di.dataset.delInvite;if(!confirm(`Delete invite code ${code}?`))return;try{await db.ref('league/invite_codes/'+code).remove();toast("Code deleted")}catch(err){toast("Failed: "+err.message)}return}
 },true);
 
@@ -1542,6 +1587,66 @@ function fmtTimer(s){return`${String(Math.floor(s/60)).padStart(2,"0")}:${String
 function renderTimer(){const d=$("timerDisplay");d.textContent=fmtTimer(timerSeconds);d.className="timerDisplay"+(timerSeconds<=30&&timerSeconds>0?" danger":(timerSeconds<=60?" warn":""))}
 function generateCode(){const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let c="";for(let i=0;i<4;i++)c+=ch[Math.floor(Math.random()*ch.length)];return c}
 function getPlayerPageUrl(code){return window.location.href.replace(/\/[^/]*$/,"/")+`player.html?code=${code}`}
+// Step 6: helpers for shareable invite messages.
+// getAppRootUrl returns the folder-root URL of the app so recipients land on
+// index.html and see the auth gate (invite button lives there).
+function getAppRootUrl(){return window.location.href.replace(/\/[^/]*$/,"/")}
+// buildInviteMessage returns a multi-line onboarding message with the invite
+// code, the app URL, step-by-step sign-up instructions, and Add-to-Home-Screen
+// hints. Reads real expiry + uses data from the invite entry so the recipient
+// knows exactly how much time they have.
+function buildInviteMessage(code,inv){
+  const url=getAppRootUrl();
+  const now=Date.now();
+  // Remaining uses
+  const maxUses=inv?.maxUses||5;
+  const uses=inv?.uses||0;
+  const remainingUses=Math.max(0,maxUses-uses);
+  // Time left (rounded to the nearest useful unit)
+  let expiryLine='';
+  if(inv?.expiresAt){
+    const rem=inv.expiresAt-now;
+    if(rem>0){
+      const h=Math.floor(rem/3600000);
+      if(h>=24){expiryLine=`⏰ Code expires in ${Math.floor(h/24)} day${Math.floor(h/24)===1?'':'s'}`}
+      else if(h>=1){expiryLine=`⏰ Code expires in ${h} hour${h===1?'':'s'}`}
+      else{expiryLine=`⏰ Code expires in ${Math.max(1,Math.floor(rem/60000))} minutes`}
+    }
+  }
+  const usesLine=`🎟️ ${remainingUses} use${remainingUses===1?'':'s'} remaining`;
+  const footer=[expiryLine,usesLine].filter(Boolean).join(' · ');
+  return [
+    `🎰 You're invited to join Innovation Poker League!`,
+    ``,
+    `1. Open this link:`,
+    `   ${url}`,
+    ``,
+    `2. Tap "🎟️ I have an invite code"`,
+    ``,
+    `3. Enter your invite code: ${code}`,
+    ``,
+    `4. Pick your name (or type a new one) and set a 4-digit PIN`,
+    ``,
+    `💡 Tip: Add this page to your home screen for easy access`,
+    `   • iPhone: Safari → Share → "Add to Home Screen"`,
+    `   • Android: Chrome → ⋮ → "Install app" or "Add to Home screen"`,
+    footer?``:null,
+    footer||null
+  ].filter(x=>x!==null).join('\n');
+}
+// Step 6: Open the invite preview overlay. Used as a fallback when
+// navigator.clipboard.writeText fails. The textarea is focusable + selectable
+// so admins can long-press-copy or manually copy on any browser.
+function openInvitePreview(code,msg){
+  const overlay=$("invitePrevOverlay"), ta=$("invitePrevText");
+  if(!overlay||!ta)return;
+  ta.value=msg;
+  ta.dataset.code=code;
+  overlay.classList.add('open');
+  // Auto-select for one-tap copy
+  setTimeout(()=>{ta.focus();ta.select();},50);
+}
+function closeInvitePreview(){const o=$("invitePrevOverlay");if(o)o.classList.remove('open')}
 
 async function startOnlineSession(){
   const names=state.players.map(p=>p.name.trim()).filter(Boolean);
@@ -1995,6 +2100,16 @@ $("openAdminModal").addEventListener("click",openAdminModal);
 $("adminClose").addEventListener("click",closeAdminModal);
 $("adminOverlay").addEventListener("click",e=>{if(e.target===$("adminOverlay"))closeAdminModal()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("adminOverlay").classList.contains("open"))closeAdminModal()});
+// Step 6: Invite preview modal wiring
+$("invitePrevClose").addEventListener("click",closeInvitePreview);
+$("invitePrevDone").addEventListener("click",closeInvitePreview);
+$("invitePrevOverlay").addEventListener("click",e=>{if(e.target===$("invitePrevOverlay"))closeInvitePreview()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("invitePrevOverlay").classList.contains("open"))closeInvitePreview()});
+$("invitePrevRetry").addEventListener("click",async()=>{
+  const ta=$("invitePrevText"); if(!ta)return;
+  try{await navigator.clipboard.writeText(ta.value);toast('📋 Copied!',2000);closeInvitePreview()}
+  catch{toast('Clipboard still unavailable — long-press the text to copy',3600)}
+});
 document.querySelectorAll(".adminTab").forEach(t=>t.addEventListener("click",()=>{
   const pane=t.dataset.pane;
   document.querySelectorAll(".adminTab").forEach(x=>x.classList.toggle("active",x===t));
