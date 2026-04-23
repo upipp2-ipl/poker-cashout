@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step6-invite-instructions-2026-04-19"/>
+<meta name="ipl-build" content="v2.5-step7-signin-search-2026-04-23"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -194,9 +194,16 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .rosterOptBox input[type="checkbox"]{accent-color:var(--accent);width:16px;height:16px}
 .authScreen .btn{margin-top:10px;width:100%;padding:13px}
 .textBtn{background:transparent;border:1px solid transparent;color:var(--muted);font-size:12px;padding:10px;margin-top:6px;cursor:pointer}.textBtn:hover{color:var(--text)}
-.memberSelectList{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px;max-height:42vh;overflow-y:auto}
-.memberSelectRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border:1px solid var(--card-border);border-radius:10px;background:var(--hover);color:var(--text);cursor:pointer;text-align:left;width:100%;font-size:15px;font-weight:600;touch-action:manipulation}
+.memberSearchWrap{position:relative;margin:6px 0 4px}
+.memberSearchInput{width:100%;padding:13px 14px 13px 40px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);font-size:16px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+.memberSearchInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(122,167,255,.10)}
+.memberSearchInput::placeholder{color:var(--muted)}
+.memberSearchIcon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;opacity:.5}
+.memberSelectList{display:flex;flex-direction:column;gap:4px;margin:6px 0 4px;max-height:38vh;overflow-y:auto}
+.memberSelectList.hidden{display:none}
+.memberSelectRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--card-border);border-radius:10px;background:var(--hover);color:var(--text);cursor:pointer;text-align:left;width:100%;font-size:15px;font-weight:600;touch-action:manipulation;transition:all .12s}
 .memberSelectRow:hover,.memberSelectRow:active{background:var(--bg2);border-color:var(--accent)}
+.memberSelectRow.highlighted{background:var(--bg2);border-color:var(--accent)}
 .memberSelectRow .msBadge{flex-shrink:0;font-size:10px;padding:3px 8px;border-radius:6px;background:var(--accent);color:#fff;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
 .memberSelectRow .msBadge.user{background:var(--bg3);color:var(--muted)}
 .memberSelectEmpty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
@@ -419,7 +426,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
     <div class="authScreen" id="auth-loading"><div class="authSpinner"></div><div class="authMsg">Connecting to league…</div></div>
     <div class="authScreen hidden" id="auth-firstrun"><h2>Welcome!</h2><p>You're the founding admin, <b>Umakanth</b>. Set a 5-digit PIN to secure your league.</p><div class="pinDots" id="firstrunDots"></div><div class="pinPad" id="firstrunPad"></div><div class="authMsg" id="firstrunMsg"></div></div>
     <div class="authScreen hidden" id="auth-welcome"><h2>Sign in</h2><p>Choose how to enter.</p><button class="btn primary" id="wSignInBtn" type="button">👤 Sign in with your name + PIN</button><button class="btn" id="wInviteBtn" type="button">🎟️ I have an invite code</button><button class="textBtn" id="wAdminBtn" type="button" style="margin-top:14px;font-size:11px;opacity:.65">Admin recovery (master PIN)</button></div>
-    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Tap your name to sign in.</p><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
+    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Type your name to find yourself.</p><div class="memberSearchWrap"><span class="memberSearchIcon">&#x1F50D;</span><input class="memberSearchInput" id="memberSearchInput" type="text" placeholder="Start typing your name&hellip;" autocomplete="off" autocorrect="off" spellcheck="false"/></div><div class="memberSelectList hidden" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">&larr; Back</button></div>
     <div class="authScreen hidden" id="auth-quick"><h2 id="quickTitle">Welcome back</h2><p id="quickSub"></p><div class="pinDots" id="quickDots"></div><div class="pinPad" id="quickPad"></div><div class="authMsg" id="quickMsg"></div><button class="textBtn" id="quickSwitch" type="button">Not you? Sign in as someone else</button></div>
     <div class="authScreen hidden" id="auth-adminpin"><h2>Admin PIN</h2><p>Enter your 5-digit admin PIN.</p><div class="pinDots" id="adminDots"></div><div class="pinPad" id="adminPad"></div><div class="authMsg" id="adminMsg"></div><button class="textBtn" id="adminBack" type="button">← Back</button></div>
     <div class="authScreen hidden" id="auth-invite"><h2>Invite Code</h2><p>Enter the code from your admin.</p><input id="inviteCodeInput" class="codeInput" type="text" placeholder="IPL-XXXX" maxlength="12"/><button class="btn primary" id="inviteVerifyBtn" type="button">Continue</button><div class="authMsg" id="inviteMsg"></div><button class="textBtn" id="inviteBack" type="button">← Back</button></div>
@@ -741,29 +748,55 @@ function setupWelcome(){
 async function setupSignIn(){
   showAuthScreen('auth-signin');
   const list=$("memberSelectList");
+  const searchInput=$("memberSearchInput");
   setAuthMsg('signInMsg','');
-  list.innerHTML='<div class="memberSelectEmpty">Loading members…</div>';
+  list.classList.add('hidden');
+  list.innerHTML='';
+  searchInput.value='';
   $("signInBack").onclick=setupWelcome;
+  // Focus keyboard after brief delay (avoids iOS animation jank)
+  setTimeout(()=>searchInput.focus(),120);
+  let allMembers=[];
   try{
     const snap=await db.ref('league/members').once('value');
     const members=snap.val()||{};
-    const entries=Object.entries(members).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
-    if(!entries.length){
-      list.innerHTML='<div class="memberSelectEmpty">No members yet. Use an invite code to join the league.</div>';
+    if(!Object.keys(members).length){
+      setAuthMsg('signInMsg','No members yet. Use an invite code to join the league.');
       return;
     }
-    list.innerHTML=entries.map(([id,m])=>{
+    allMembers=Object.entries(members).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
+  }catch(err){
+    setAuthMsg('signInMsg','Error loading members: '+esc(err.message));
+    return;
+  }
+  function renderMatches(query){
+    const q=(query||'').trim().toLowerCase();
+    // Show nothing until user types at least 1 character
+    if(!q){list.classList.add('hidden');list.innerHTML='';return}
+    const matched=allMembers.filter(([,m])=>(m.name||'').toLowerCase().includes(q));
+    list.classList.remove('hidden');
+    if(!matched.length){
+      list.innerHTML='<div class="memberSelectEmpty">No match — check spelling or use an invite code.</div>';
+      return;
+    }
+    list.innerHTML=matched.map(([id,m])=>{
       const admin=m.role==='admin';
-      return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span><span class="msBadge${admin?'':' user'}">${admin?'Admin':'Member'}</span></button>`;
+      return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span></button>`;
     }).join('');
     list.querySelectorAll('[data-msid]').forEach(btn=>{
       btn.addEventListener('click',()=>{
-        setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'← Pick a different name'});
+        setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'Not you? Try a different name'});
       });
     });
-  }catch(err){
-    list.innerHTML=`<div class="memberSelectEmpty">Error loading members: ${esc(err.message)}</div>`;
   }
+  searchInput.oninput=e=>renderMatches(e.target.value);
+  // Allow pressing Enter to pick the first (or only) result
+  searchInput.onkeydown=e=>{
+    if(e.key==='Enter'){
+      const first=list.querySelector('.memberSelectRow');
+      if(first)first.click();
+    }
+  };
 }
 async function setupQuickLogin(cached,opts){
   opts=opts||{};
