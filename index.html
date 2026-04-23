@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step7b-auth-scrollock-2026-04-23"/>
+<meta name="ipl-build" content="v2.5-step8-players-first-2026-04-23"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -194,20 +194,12 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .rosterOptBox input[type="checkbox"]{accent-color:var(--accent);width:16px;height:16px}
 .authScreen .btn{margin-top:10px;width:100%;padding:13px}
 .textBtn{background:transparent;border:1px solid transparent;color:var(--muted);font-size:12px;padding:10px;margin-top:6px;cursor:pointer}.textBtn:hover{color:var(--text)}
-.memberSearchWrap{position:relative;margin:6px 0 4px}
-.memberSearchInput{width:100%;padding:13px 14px 13px 40px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);font-size:16px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
-.memberSearchInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(122,167,255,.10)}
-.memberSearchInput::placeholder{color:var(--muted)}
-.memberSearchIcon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;opacity:.5}
-.memberSelectList{display:flex;flex-direction:column;gap:4px;margin:6px 0 4px;max-height:38vh;overflow-y:auto}
-.memberSelectList.hidden{display:none}
-.memberSelectRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--card-border);border-radius:10px;background:var(--hover);color:var(--text);cursor:pointer;text-align:left;width:100%;font-size:15px;font-weight:600;touch-action:manipulation;transition:all .12s}
+.memberSelectList{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px;max-height:42vh;overflow-y:auto}
+.memberSelectRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border:1px solid var(--card-border);border-radius:10px;background:var(--hover);color:var(--text);cursor:pointer;text-align:left;width:100%;font-size:15px;font-weight:600;touch-action:manipulation}
 .memberSelectRow:hover,.memberSelectRow:active{background:var(--bg2);border-color:var(--accent)}
 .memberSelectRow .msBadge{flex-shrink:0;font-size:10px;padding:3px 8px;border-radius:6px;background:var(--accent);color:#fff;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
 .memberSelectRow .msBadge.user{background:var(--bg3);color:var(--muted)}
 .memberSelectEmpty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
-/* Auth overlay open: prevent body scroll-through */
-body.auth-open{overflow:hidden;touch-action:none}
 .authScreen input{font-size:18px;padding:13px}
 .authScreen input.codeInput{text-align:center;letter-spacing:3px;text-transform:uppercase;font-weight:700}
 .authScreen input.nameInput{text-align:left}
@@ -427,7 +419,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
     <div class="authScreen" id="auth-loading"><div class="authSpinner"></div><div class="authMsg">Connecting to league…</div></div>
     <div class="authScreen hidden" id="auth-firstrun"><h2>Welcome!</h2><p>You're the founding admin, <b>Umakanth</b>. Set a 5-digit PIN to secure your league.</p><div class="pinDots" id="firstrunDots"></div><div class="pinPad" id="firstrunPad"></div><div class="authMsg" id="firstrunMsg"></div></div>
     <div class="authScreen hidden" id="auth-welcome"><h2>Sign in</h2><p>Choose how to enter.</p><button class="btn primary" id="wSignInBtn" type="button">👤 Sign in with your name + PIN</button><button class="btn" id="wInviteBtn" type="button">🎟️ I have an invite code</button><button class="textBtn" id="wAdminBtn" type="button" style="margin-top:14px;font-size:11px;opacity:.65">Admin recovery (master PIN)</button></div>
-    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Type your name to find yourself.</p><div class="memberSearchWrap"><span class="memberSearchIcon">&#x1F50D;</span><input class="memberSearchInput" id="memberSearchInput" type="text" placeholder="Start typing your name&hellip;" autocomplete="off" autocorrect="off" spellcheck="false"/></div><div class="memberSelectList hidden" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">&larr; Back</button></div>
+    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Tap your name to sign in.</p><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
     <div class="authScreen hidden" id="auth-quick"><h2 id="quickTitle">Welcome back</h2><p id="quickSub"></p><div class="pinDots" id="quickDots"></div><div class="pinPad" id="quickPad"></div><div class="authMsg" id="quickMsg"></div><button class="textBtn" id="quickSwitch" type="button">Not you? Sign in as someone else</button></div>
     <div class="authScreen hidden" id="auth-adminpin"><h2>Admin PIN</h2><p>Enter your 5-digit admin PIN.</p><div class="pinDots" id="adminDots"></div><div class="pinPad" id="adminPad"></div><div class="authMsg" id="adminMsg"></div><button class="textBtn" id="adminBack" type="button">← Back</button></div>
     <div class="authScreen hidden" id="auth-invite"><h2>Invite Code</h2><p>Enter the code from your admin.</p><input id="inviteCodeInput" class="codeInput" type="text" placeholder="IPL-XXXX" maxlength="12"/><button class="btn primary" id="inviteVerifyBtn" type="button">Continue</button><div class="authMsg" id="inviteMsg"></div><button class="textBtn" id="inviteBack" type="button">← Back</button></div>
@@ -642,7 +634,7 @@ function savePaid(){try{localStorage.setItem(PAY_KEY,JSON.stringify(paidMap))}ca
 let allSubmittedSounded=false;
 const savedCashouts=new Set();
 function makePlayer(n){return{id:uid(),name:n||"Player",buyins:[{id:uid(),counts:clone(DEFAULTS.defaultPack)}],cashout:{black:0,purple:0,yellow:0,pink:0,orange:0}}}
-function defaultState(){return{sessionName:"",buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[makePlayer("Player 1"),makePlayer("Player 2")],place1:"",place2:"",place3:"",split1:50,split2:30,split3:20,tourneyPack:{black:0,purple:0,yellow:0,pink:0,orange:0},ownerId:null}}
+function defaultState(){return{sessionName:"",buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[],place1:"",place2:"",place3:"",split1:50,split2:30,split3:20,tourneyPack:{black:0,purple:0,yellow:0,pink:0,orange:0},ownerId:null}}
 function clearStaleGameState(){
   try{localStorage.removeItem(KEY)}catch{}
   state=defaultState();
@@ -658,12 +650,12 @@ function checkStateOwnership(){
     state=defaultState();state.ownerId=currentMember.id;save();
   }
 }
-function sanitize(s){if(!s||typeof s!=="object")return defaultState();s.sessionName=typeof s.sessionName==="string"?s.sessionName:"";s.buyinUsd=Number(s.buyinUsd);if(!Number.isFinite(s.buyinUsd)||s.buyinUsd<=0)s.buyinUsd=DEFAULTS.buyinUsd;s.taxRate=Number(s.taxRate);if(!Number.isFinite(s.taxRate)||s.taxRate<0)s.taxRate=DEFAULTS.taxRate;s.locked=!!s.locked;s.bankId=typeof s.bankId==="string"?s.bankId:null;s.ownerId=typeof s.ownerId==="string"?s.ownerId:null;if(!s.chipValues)s.chipValues={};for(const c of COLORS){const v=Number(s.chipValues[c]);s.chipValues[c]=Number.isFinite(v)&&v>0?v:DEFAULTS.chipValues[c]}if(!Array.isArray(s.players)||!s.players.length)s.players=[makePlayer("Player 1")];for(const p of s.players){if(!p.id)p.id=uid();if(typeof p.name!=="string")p.name="Player";if(!Array.isArray(p.buyins)||!p.buyins.length)p.buyins=[{id:uid(),counts:clone(DEFAULTS.defaultPack)}];for(const b of p.buyins){if(!b.id)b.id=uid();if(!b.counts)b.counts=clone(DEFAULTS.defaultPack);for(const c of COLORS){const n=Number(b.counts[c]);b.counts[c]=Number.isFinite(n)&&n>=0?n:0}}if(!p.cashout)p.cashout={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(p.cashout[c]);p.cashout[c]=Number.isFinite(n)&&n>=0?n:0}}const ids=s.players.map(p=>p.id);if(!s.bankId||!ids.includes(s.bankId))s.bankId=ids[0]||null;s.place1=s.place1||"";s.place2=s.place2||"";s.place3=s.place3||"";s.split1=Number(s.split1)||50;s.split2=Number(s.split2)||30;s.split3=Number(s.split3)||20;if(!s.tourneyPack)s.tourneyPack={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(s.tourneyPack[c]);s.tourneyPack[c]=Number.isFinite(n)&&n>=0?n:0}return s}
+function sanitize(s){if(!s||typeof s!=="object")return defaultState();s.sessionName=typeof s.sessionName==="string"?s.sessionName:"";s.buyinUsd=Number(s.buyinUsd);if(!Number.isFinite(s.buyinUsd)||s.buyinUsd<=0)s.buyinUsd=DEFAULTS.buyinUsd;s.taxRate=Number(s.taxRate);if(!Number.isFinite(s.taxRate)||s.taxRate<0)s.taxRate=DEFAULTS.taxRate;s.locked=!!s.locked;s.bankId=typeof s.bankId==="string"?s.bankId:null;s.ownerId=typeof s.ownerId==="string"?s.ownerId:null;if(!s.chipValues)s.chipValues={};for(const c of COLORS){const v=Number(s.chipValues[c]);s.chipValues[c]=Number.isFinite(v)&&v>0?v:DEFAULTS.chipValues[c]}if(!Array.isArray(s.players))s.players=[];for(const p of s.players){if(!p.id)p.id=uid();if(typeof p.name!=="string")p.name="Player";if(!Array.isArray(p.buyins)||!p.buyins.length)p.buyins=[{id:uid(),counts:clone(DEFAULTS.defaultPack)}];for(const b of p.buyins){if(!b.id)b.id=uid();if(!b.counts)b.counts=clone(DEFAULTS.defaultPack);for(const c of COLORS){const n=Number(b.counts[c]);b.counts[c]=Number.isFinite(n)&&n>=0?n:0}}if(!p.cashout)p.cashout={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(p.cashout[c]);p.cashout[c]=Number.isFinite(n)&&n>=0?n:0}}const ids=s.players.map(p=>p.id);if(s.players.length&&(!s.bankId||!ids.includes(s.bankId)))s.bankId=ids[0]||null;if(!s.players.length)s.bankId=null;s.place1=s.place1||"";s.place2=s.place2||"";s.place3=s.place3||"";s.split1=Number(s.split1)||50;s.split2=Number(s.split2)||30;s.split3=Number(s.split3)||20;if(!s.tourneyPack)s.tourneyPack={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(s.tourneyPack[c]);s.tourneyPack[c]=Number.isFinite(n)&&n>=0?n:0}return s}
 let state=(()=>{try{return sanitize(JSON.parse(localStorage.getItem(KEY)))}catch{return defaultState()}})();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{};syncStateToFirebase()}
 
 // ==== AUTH FLOW ====
-function showAuthScreen(id){document.querySelectorAll('.authScreen').forEach(s=>s.classList.add('hidden'));$(id).classList.remove('hidden');document.body.classList.add('auth-open')}
+function showAuthScreen(id){document.querySelectorAll('.authScreen').forEach(s=>s.classList.add('hidden'));$(id).classList.remove('hidden')}
 function setAuthMsg(id,msg,cls='err'){const el=$(id);if(el){el.textContent=msg;el.className='authMsg '+(msg?cls:'')}}
 function bindPinPad(padEl,dotsEl,length,onComplete){
   const keys=[1,2,3,4,5,6,7,8,9,"cancel",0,"back"];
@@ -749,46 +741,29 @@ function setupWelcome(){
 async function setupSignIn(){
   showAuthScreen('auth-signin');
   const list=$("memberSelectList");
-  const searchInput=$("memberSearchInput");
   setAuthMsg('signInMsg','');
-  list.classList.add('hidden');
-  list.innerHTML='';
-  searchInput.value='';
+  list.innerHTML='<div class="memberSelectEmpty">Loading members…</div>';
   $("signInBack").onclick=setupWelcome;
-  setTimeout(()=>searchInput.focus(),120);
-  let allMembers=[];
   try{
     const snap=await db.ref('league/members').once('value');
     const members=snap.val()||{};
-    if(!Object.keys(members).length){
-      setAuthMsg('signInMsg','No members yet. Use an invite code to join the league.');
+    const entries=Object.entries(members).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
+    if(!entries.length){
+      list.innerHTML='<div class="memberSelectEmpty">No members yet. Use an invite code to join the league.</div>';
       return;
     }
-    allMembers=Object.entries(members).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
-  }catch(err){
-    setAuthMsg('signInMsg','Error loading members: '+esc(err.message));
-    return;
-  }
-  function renderMatches(query){
-    const q=(query||'').trim().toLowerCase();
-    if(!q){list.classList.add('hidden');list.innerHTML='';return}
-    const matched=allMembers.filter(([,m])=>(m.name||'').toLowerCase().includes(q));
-    list.classList.remove('hidden');
-    if(!matched.length){
-      list.innerHTML='<div class="memberSelectEmpty">No match — check spelling or use an invite code.</div>';
-      return;
-    }
-    list.innerHTML=matched.map(([id,m])=>`<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span></button>`).join('');
+    list.innerHTML=entries.map(([id,m])=>{
+      const admin=m.role==='admin';
+      return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span><span class="msBadge${admin?'':' user'}">${admin?'Admin':'Member'}</span></button>`;
+    }).join('');
     list.querySelectorAll('[data-msid]').forEach(btn=>{
       btn.addEventListener('click',()=>{
-        setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'Not you? Try a different name'});
+        setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'← Pick a different name'});
       });
     });
+  }catch(err){
+    list.innerHTML=`<div class="memberSelectEmpty">Error loading members: ${esc(err.message)}</div>`;
   }
-  searchInput.oninput=e=>renderMatches(e.target.value);
-  searchInput.onkeydown=e=>{
-    if(e.key==='Enter'){const first=list.querySelector('.memberSelectRow');if(first)first.click();}
-  };
 }
 async function setupQuickLogin(cached,opts){
   opts=opts||{};
@@ -972,7 +947,6 @@ function setupInviteComplete(code){
 function onAuthSuccess(opts){
   opts=opts||{};
   $("authOverlay").classList.add("hidden");
-  document.body.classList.remove("auth-open");  // release body scroll-lock
   $("statusStrip").classList.remove("hidden");
   $("statusUser").textContent=currentMember.name;
   $("statusRole").textContent=currentMember.role;
@@ -2025,7 +1999,7 @@ async function resumeSession(code){
 // ==== RENDER FUNCTIONS ====
 function colorCell(col,vu,ct,kind,pid,bid){const d=state.locked?"disabled":"";return`<div class="cell" data-color="${col}"><div class="ctop"><span class="sw ${SW[col]}"></span><span class="cname">${col[0].toUpperCase()+col.slice(1)}</span><span class="cval">${vu.toLocaleString()}</span></div><div class="stepper"><button class="sbtn" data-step="-1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" ${d}>−</button><input type="number" step="1" inputmode="numeric" min="0" max="999" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" value="${ct??0}" ${d}/><button class="sbtn" data-step="1" data-kind="${kind}" data-p="${pid}" data-b="${bid||""}" data-c="${col}" ${d}>+</button></div></div>`}
 function renderJumpNav(){$("jumpNav").innerHTML=state.players.length<=2?"":state.players.map((p,i)=>`<span class="jbtn" data-jump="${p.id}"><span class="pColorDot" style="background:${playerColor(i)};width:8px;height:8px;margin-right:4px"></span>${esc(p.name)}</span>`).join("")}
-function renderStatic(){$("playerCount").textContent=state.players.length;$("sessionName").value=state.sessionName;$("buyinUsd").value=state.buyinUsd;$("taxRate").value=Math.round(state.taxRate*100);$("split1").value=state.split1;$("split2").value=state.split2;$("split3").value=state.split3;for(const c of COLORS)$("v_"+c).value=state.chipValues[c];$("lockSession").textContent=state.locked?"Unlock":"Lock";$("lockSession").classList.toggle("danger",state.locked);$("lockBadge").style.display=state.locked?"inline-flex":"none";$("lockedOverlay").style.display=state.locked?"block":"none";["sessionName","split1","split2","split3"].forEach(id=>{const el=$(id);if(el)el.disabled=!!state.locked});const isAdmin=currentMember&&currentMember.role==='admin';["buyinUsd","taxRate","v_black","v_purple","v_yellow","v_pink","v_orange"].forEach(id=>{const el=$(id);if(el)el.disabled=state.locked||!isAdmin});const bs=$("bankSelect");bs.innerHTML=state.players.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");bs.value=state.bankId||(state.players[0]?.id||"");bs.disabled=!!state.locked;$("addPlayer").disabled=!!state.locked;$("resetAll").disabled=!!state.locked}
+function renderStatic(){autoSetBanker();$("playerCount").textContent=state.players.length;$("sessionName").value=state.sessionName;$("buyinUsd").value=state.buyinUsd;$("taxRate").value=Math.round(state.taxRate*100);$("split1").value=state.split1;$("split2").value=state.split2;$("split3").value=state.split3;for(const c of COLORS)$("v_"+c).value=state.chipValues[c];$("lockSession").textContent=state.locked?"Unlock":"Lock";$("lockSession").classList.toggle("danger",state.locked);$("lockBadge").style.display=state.locked?"inline-flex":"none";$("lockedOverlay").style.display=state.locked?"block":"none";["sessionName","split1","split2","split3"].forEach(id=>{const el=$(id);if(el)el.disabled=!!state.locked});const isAdmin=currentMember&&currentMember.role==='admin';["buyinUsd","taxRate","v_black","v_purple","v_yellow","v_pink","v_orange"].forEach(id=>{const el=$(id);if(el)el.disabled=state.locked||!isAdmin});const bs=$("bankSelect");bs.innerHTML=state.players.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");bs.value=state.bankId||(state.players[0]?.id||"");bs.disabled=!!state.locked;$("addPlayer").disabled=!!state.locked;$("resetAll").disabled=!!state.locked}
 function renderTourneyChipPack(){const w=$("tourneyChipPack");if(!w)return;const cv=state.chipValues;w.innerHTML=COLORS.map(c=>`<div class="cell" data-color="${c}"><div class="ctop"><span class="sw ${SW[c]}"></span><span class="cname">${c[0].toUpperCase()+c.slice(1)}</span><span class="cval">${cv[c].toLocaleString()}</span></div><div class="stepper"><button class="sbtn" data-step="-1" data-kind="tpack" data-c="${c}" ${state.locked?"disabled":""}>−</button><input type="number" step="1" inputmode="numeric" data-kind="tpack" data-c="${c}" value="${state.tourneyPack[c]}" ${state.locked?"disabled":""}/><button class="sbtn" data-step="1" data-kind="tpack" data-c="${c}" ${state.locked?"disabled":""}>+</button></div></div>`).join("");const u=ufc(state.tourneyPack,cv);$("tourneyPackValue").innerHTML=`Pack: <b>${u.toLocaleString()}</b> units (~ <b>${fmtUsd(u2d(u))}</b>)`}
 function renderPlayersFull(){if(mode==="tournament"){$("players").innerHTML=state.players.map((p,pi)=>{const rc=p.buyins.length,tu=p.buyins.reduce((s,b)=>s+ufc(b.counts,state.chipValues),0),cs=COLORS.map(c=>{const v=p.buyins[0].counts[c];return v?`<span style="display:inline-flex;align-items:center;gap:3px;margin-right:6px"><span class="sw ${SW[c]}" style="width:8px;height:8px"></span>${v}</span>`:""}).filter(Boolean).join("");return`<div class="player" data-p="${p.id}" id="player_${p.id}"><div class="phd"><span class="pColorDot" style="background:${playerColor(pi)}"></span><div class="pname"><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" ${state.locked?"disabled":""} style="font-weight:600;background:transparent;border-color:transparent;padding:5px 8px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'"/><div style="font-size:11px;color:var(--muted);margin-top:2px;padding-left:8px">${cs} · ${fmtUsd(u2d(tu))} (${rc} buy-in${rc>1?"s":""})</div></div><div class="pactions"><button class="btn small" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="removeRebuy" data-p="${p.id}" ${state.locked||rc<=1?"disabled":""}>− Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>✕</button></div></div></div>`}).join("");renderTourneyChipPack();[1,2,3].forEach(i=>{const sel=$("place"+i),cur=state["place"+i];sel.innerHTML='<option value="">Select</option>'+state.players.map(p=>`<option value="${p.id}" ${p.id===cur?"selected":""}>${esc(p.name)}</option>`).join("");sel.disabled=!!state.locked});renderTournamentSummary()}else{$("players").innerHTML=state.players.map((p,pi)=>{const isCol=collapsedPlayers.has(p.id),bh=p.buyins.map((b,i)=>{const t=i===0?"Buy-in 1":`Rebuy ${i}`,du=ufc(b.counts,state.chipValues);return`<div class="miniCard"><div class="miniHd"><b>${t}</b><button class="btn small danger" data-act="delBuyin" data-p="${p.id}" data-b="${b.id}" ${(state.locked||p.buyins.length===1)?"disabled":""}>Remove</button></div><div class="miniBd"><div class="chips">${COLORS.map(c=>colorCell(c,state.chipValues[c],b.counts[c],"buyin",p.id,b.id)).join("")}</div><div class="note">Dispensed: <b>${du.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(du))}</b>)</div></div></div>`}).join("");const ou=ufc(p.cashout,state.chipValues);const hasChips=tcc(p.cashout)>0;const isSaved=savedCashouts.has(p.id);const statusHtml=isSaved?'<span class="cashoutStatus saved">🟢 Saved</span>':hasChips?'<span class="cashoutStatus pending">🟡 Unsaved</span>':'<span class="cashoutStatus pending">⚪ Pending</span>';const saveBtnHtml=state.locked?'':`<button class="saveBtn ${isSaved?"done":""}" data-savecashout="${p.id}" type="button">${isSaved?"✅ Saved":"💾 Save cashout"}</button>`;return`<div class="player ${isCol?"is-collapsed":""}" data-p="${p.id}" id="player_${p.id}"><div class="phd"><span class="chevron" data-act="togglePlayer" data-p="${p.id}">▼</span><span class="pColorDot" style="background:${playerColor(pi)}"></span><div class="pname"><span class="pNameDisplay" data-p="${p.id}" style="font-weight:600;padding:5px 8px;display:inline-block;font-size:16px">${esc(p.name)}</span><input type="text" value="${esc(p.name)}" data-kind="name" data-p="${p.id}" ${state.locked?"disabled":""} maxlength="20" class="pNameEdit" style="font-weight:600;background:transparent;border-color:var(--accent);padding:5px 8px;display:none" onblur="this.style.display='none';this.previousElementSibling.style.display='inline-block';this.previousElementSibling.textContent=this.value"/>${state.locked?"":'<button type="button" class="pNamePencil" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px 6px;margin-left:2px;touch-action:manipulation" onclick="const inp=this.previousElementSibling;const spn=inp.previousElementSibling;spn.style.display=\'none\';inp.style.display=\'inline-block\';inp.focus()">✏️</button>'}<div class="pSummaryInline">${shortSummary(p)} ${statusHtml}</div></div><div class="pactions"><button class="btn small" data-act="addRebuy" data-p="${p.id}" ${state.locked?"disabled":""}>+ Rebuy</button><button class="btn small danger" data-act="delPlayer" data-p="${p.id}" ${state.locked?"disabled":""}>Remove</button></div></div><div class="pbd ${isCol?"collapsed":""}"><div class="outblock"><label>Buy-ins & Rebuys</label></div>${bh}<div class="cashoutSection"><label>Cashout (chips OUT) ${statusHtml}</label><div class="presetBar" style="margin-top:6px">${state.locked?"":Object.entries(CHIP_PRESETS).map(([k,v])=>`<button class="presetBtn" data-cashpreset="${k}" data-presetp="${p.id}" type="button">${k==="standard"?"🎰 Std":k==="half"?"½":k==="heavy"?"💰":"🪶"}</button>`).join("")+`<button class="presetBtn" data-cashpreset="clear" data-presetp="${p.id}" type="button">✕</button>`}</div><div class="chips" style="margin-top:6px">${COLORS.map(c=>colorCell(c,state.chipValues[c],p.cashout[c],"cashout",p.id,"")).join("")}</div><div class="note">Cashout: <b>${ou.toLocaleString()}</b> (~ <b>${fmtUsd(u2d(ou))}</b>)</div>${saveBtnHtml}</div><div class="outblock"><label>Summary</label><pre>${esc(outputBlockText(p))}</pre></div></div></div>`}).join("")}}
 function renderTournamentSummary(){const t=calcTournament(),tb=$("tourneySummaryBody"),md=["🥇","🥈","🥉"];tb.innerHTML=t.results.map((r,i)=>{if(!r)return`<tr><td>${md[i]}</td><td class="muted">Not selected</td><td></td><td></td><td></td><td></td><td></td></tr>`;const cls=r.net>0?"good":(r.net<0?"bad":"muted");return`<tr><td>${md[i]}</td><td>${esc(r.name)}</td><td class="num">${r.buyins}</td><td class="num">${fmtUsd(r.prize)}</td><td class="num">${fmtUsd(r.rf)}</td><td class="num">${fmtUsd(r.payout)}</td><td class="num ${cls}">${r.net>=0?"+":""}${fmtUsd(r.net)}</td></tr>`}).join("");state.players.filter(p=>![state.place1,state.place2,state.place3].includes(p.id)).forEach(p=>{const bt=p.buyins.length*state.buyinUsd;tb.innerHTML+=`<tr><td></td><td>${esc(p.name)}</td><td class="num">${p.buyins.length}</td><td class="num">₥0.00</td><td class="num">₥0.00</td><td class="num">₥0.00</td><td class="num bad">-${fmtUsd(bt)}</td></tr>`});$("tourneyInfoText").textContent=`Pool: ${fmtUsd(t.pool)} · Split: ${state.split1}/${state.split2}/${state.split3} · RF: ${Math.round(state.taxRate*100)}%`;const tp=t.results.reduce((s,r)=>s+(r?r.payout:0),0),tr2=t.results.reduce((s,r)=>s+(r?r.rf:0),0);$("t_gross").textContent=fmtUsd(t.pool);$("t_rf").textContent=fmtUsd(tr2);$("t_final").textContent=fmtUsd(tp)}
@@ -2038,7 +2012,17 @@ function renderHistory(){const tb=$("historyBody"),em=$("historyEmpty");if(!tb)r
 function renderStats(){const sc=$("statsSessionCount"),sb=$("statsBody"),se=$("statsEmpty");if(!sb)return;if(sc)sc.textContent=`${sessionArchive.length} game${sessionArchive.length!==1?"s":""}`;if(!sessionArchive.length){sb.innerHTML="";if(se)se.style.display="block";return}if(se)se.style.display="none";const map={};for(const s of sessionArchive)for(const p of (s.players||[])){const k=p.name.trim().toLowerCase();if(!map[k])map[k]={name:p.name.trim(),sessions:0,wins:0,totalNet:0};const m=map[k];m.sessions++;m.totalNet+=p.net;if(p.net>0)m.wins++;m.name=p.name.trim()}sb.innerHTML=Object.values(map).sort((a,b)=>b.totalNet-a.totalNet).map(s=>{const wp=s.sessions?Math.round(s.wins/s.sessions*100):0,avg=s.sessions?s.totalNet/s.sessions:0,nc=s.totalNet>0?"statPositive":(s.totalNet<0?"statNegative":"statNeutral");return`<tr><td>${esc(s.name)}</td><td class="num">${s.sessions}</td><td class="num">${s.wins}</td><td class="num">${wp}%</td><td class="num ${nc}">${s.totalNet>=0?"+":""}${fmtUsd(s.totalNet)}</td><td class="num">${avg>=0?"+":""}${fmtUsd(avg)}</td></tr>`}).join("")}
 function renderRosterChips(){const cur=state.players.map(p=>p.name.trim().toLowerCase());const isAdmin=currentMember&&currentMember.role==='admin';const memberNames=new Set(Object.values(leagueMembers||{}).map(m=>(m.name||'').trim().toLowerCase()));$("rosterChips").innerHTML=leagueRoster.length?leagueRoster.map((n,i)=>{const inG=cur.includes(n.trim().toLowerCase());const isMember=memberNames.has(n.trim().toLowerCase());const star=isMember?'<span title="Registered member — can be banker for the night" style="color:var(--warn);margin-right:4px;font-size:11px">⭐</span>':'';return`<div class="rosterChip" data-ridx="${i}">${star}<div class="rc-name">${esc(n)}</div><div class="rc-add ${inG?"disabled":""}" data-radd="${esc(n)}">${inG?"✓ In game":"+ Add"}</div>${isAdmin?`<div class="rc-del" data-rdel="${esc(n)}">Delete</div>`:''}</div>`}).join(""):'<div class="note" style="margin:0">No regular players yet.'+(isAdmin?' Add below.':'')+'</div>'}
 function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderRosterChips();save()}
-function startAppUI(){state=sanitize(state);checkStateOwnership();const lastCode=localStorage.getItem(ACTIVE_KEY);if(lastCode)$("resumeCode").value=lastCode;setMode("cash");renderAllFull();applySessionRole()}
+function startAppUI(){
+  state=sanitize(state);checkStateOwnership();
+  const lastCode=localStorage.getItem(ACTIVE_KEY);if(lastCode)$("resumeCode").value=lastCode;
+  setMode("cash");renderAllFull();applySessionRole();
+  // Always open on Step 2 (Players) — force roster expanded
+  goToStep(2);
+  rosterOpen=true;
+  $("rosterBody").classList.add("open");
+  $("rosterChev").textContent="▲";
+  setCollapseState("rosterBody",true);
+}
 
 // ==== EVENT HANDLERS ====
 $("modeToggle").addEventListener("click",e=>{const b=e.target.closest(".modeBtn");if(b)setMode(b.dataset.mode)});
@@ -2095,6 +2079,19 @@ $("playersBody").classList.toggle("collapsed",!playersOpen);
 $("togglePlayersBody").textContent=playersOpen?"Collapse":"Expand";
 $("togglePlayersBody").addEventListener("click",()=>{playersOpen=!playersOpen;$("playersBody").classList.toggle("collapsed",!playersOpen);$("togglePlayersBody").textContent=playersOpen?"Collapse":"Expand";setCollapseState("playersBody",playersOpen)});
 // ===== Wizard step controller =====
+// Auto-set bankId to signed-in member if they're in the player list,
+// but only when bankId hasn't been deliberately set to someone else.
+function autoSetBanker(){
+  if(!currentMember||!state.players.length)return;
+  const meInGame=state.players.find(p=>p.name.trim().toLowerCase()===currentMember.name.trim().toLowerCase());
+  if(!meInGame)return; // signed-in user not in tonight's game — leave as-is
+  const ids=state.players.map(p=>p.id);
+  // Only auto-set if bankId is null, or points to a player no longer in the list
+  if(!state.bankId||!ids.includes(state.bankId)){
+    state.bankId=meInGame.id;
+    save();
+  }
+}
 let currentStep=1;const visitedSteps=new Set([1]);
 function goToStep(n){
   n=Math.max(1,Math.min(5,Number(n)||1));
