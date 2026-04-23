@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step7-signin-search-2026-04-23"/>
+<meta name="ipl-build" content="v2.5-step7b-auth-scrollock-2026-04-23"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -203,10 +203,11 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .memberSelectList.hidden{display:none}
 .memberSelectRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--card-border);border-radius:10px;background:var(--hover);color:var(--text);cursor:pointer;text-align:left;width:100%;font-size:15px;font-weight:600;touch-action:manipulation;transition:all .12s}
 .memberSelectRow:hover,.memberSelectRow:active{background:var(--bg2);border-color:var(--accent)}
-.memberSelectRow.highlighted{background:var(--bg2);border-color:var(--accent)}
 .memberSelectRow .msBadge{flex-shrink:0;font-size:10px;padding:3px 8px;border-radius:6px;background:var(--accent);color:#fff;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
 .memberSelectRow .msBadge.user{background:var(--bg3);color:var(--muted)}
 .memberSelectEmpty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
+/* Auth overlay open: prevent body scroll-through */
+body.auth-open{overflow:hidden;touch-action:none}
 .authScreen input{font-size:18px;padding:13px}
 .authScreen input.codeInput{text-align:center;letter-spacing:3px;text-transform:uppercase;font-weight:700}
 .authScreen input.nameInput{text-align:left}
@@ -662,7 +663,7 @@ let state=(()=>{try{return sanitize(JSON.parse(localStorage.getItem(KEY)))}catch
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{};syncStateToFirebase()}
 
 // ==== AUTH FLOW ====
-function showAuthScreen(id){document.querySelectorAll('.authScreen').forEach(s=>s.classList.add('hidden'));$(id).classList.remove('hidden')}
+function showAuthScreen(id){document.querySelectorAll('.authScreen').forEach(s=>s.classList.add('hidden'));$(id).classList.remove('hidden');document.body.classList.add('auth-open')}
 function setAuthMsg(id,msg,cls='err'){const el=$(id);if(el){el.textContent=msg;el.className='authMsg '+(msg?cls:'')}}
 function bindPinPad(padEl,dotsEl,length,onComplete){
   const keys=[1,2,3,4,5,6,7,8,9,"cancel",0,"back"];
@@ -754,7 +755,6 @@ async function setupSignIn(){
   list.innerHTML='';
   searchInput.value='';
   $("signInBack").onclick=setupWelcome;
-  // Focus keyboard after brief delay (avoids iOS animation jank)
   setTimeout(()=>searchInput.focus(),120);
   let allMembers=[];
   try{
@@ -771,7 +771,6 @@ async function setupSignIn(){
   }
   function renderMatches(query){
     const q=(query||'').trim().toLowerCase();
-    // Show nothing until user types at least 1 character
     if(!q){list.classList.add('hidden');list.innerHTML='';return}
     const matched=allMembers.filter(([,m])=>(m.name||'').toLowerCase().includes(q));
     list.classList.remove('hidden');
@@ -779,10 +778,7 @@ async function setupSignIn(){
       list.innerHTML='<div class="memberSelectEmpty">No match — check spelling or use an invite code.</div>';
       return;
     }
-    list.innerHTML=matched.map(([id,m])=>{
-      const admin=m.role==='admin';
-      return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span></button>`;
-    }).join('');
+    list.innerHTML=matched.map(([id,m])=>`<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span></button>`).join('');
     list.querySelectorAll('[data-msid]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'Not you? Try a different name'});
@@ -790,12 +786,8 @@ async function setupSignIn(){
     });
   }
   searchInput.oninput=e=>renderMatches(e.target.value);
-  // Allow pressing Enter to pick the first (or only) result
   searchInput.onkeydown=e=>{
-    if(e.key==='Enter'){
-      const first=list.querySelector('.memberSelectRow');
-      if(first)first.click();
-    }
+    if(e.key==='Enter'){const first=list.querySelector('.memberSelectRow');if(first)first.click();}
   };
 }
 async function setupQuickLogin(cached,opts){
@@ -980,6 +972,7 @@ function setupInviteComplete(code){
 function onAuthSuccess(opts){
   opts=opts||{};
   $("authOverlay").classList.add("hidden");
+  document.body.classList.remove("auth-open");  // release body scroll-lock
   $("statusStrip").classList.remove("hidden");
   $("statusUser").textContent=currentMember.name;
   $("statusRole").textContent=currentMember.role;
