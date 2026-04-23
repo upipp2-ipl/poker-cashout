@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step6-invite-instructions-2026-04-19"/>
+<meta name="ipl-build" content="v2.5-step6-invite-instructions-2026-04-19-name-search-share-fix-polish-2026-04-22"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -419,7 +419,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
     <div class="authScreen" id="auth-loading"><div class="authSpinner"></div><div class="authMsg">Connecting to league…</div></div>
     <div class="authScreen hidden" id="auth-firstrun"><h2>Welcome!</h2><p>You're the founding admin, <b>Umakanth</b>. Set a 5-digit PIN to secure your league.</p><div class="pinDots" id="firstrunDots"></div><div class="pinPad" id="firstrunPad"></div><div class="authMsg" id="firstrunMsg"></div></div>
     <div class="authScreen hidden" id="auth-welcome"><h2>Sign in</h2><p>Choose how to enter.</p><button class="btn primary" id="wSignInBtn" type="button">👤 Sign in with your name + PIN</button><button class="btn" id="wInviteBtn" type="button">🎟️ I have an invite code</button><button class="textBtn" id="wAdminBtn" type="button" style="margin-top:14px;font-size:11px;opacity:.65">Admin recovery (master PIN)</button></div>
-    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Tap your name to sign in.</p><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
+    <div class="authScreen hidden" id="auth-signin"><h2>Sign in</h2><p>Type 1-2 letters of your name, then choose your match.</p><div style="position:relative"><input id="signInNameInput" class="nameInput" type="text" placeholder="Start typing your name or initials" maxlength="20" autocapitalize="words" autocomplete="name" style="padding-right:44px"/><button id="signInClearBtn" type="button" aria-label="Clear name search" class="textBtn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);margin:0;font-size:12px;display:none">✕</button></div><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
     <div class="authScreen hidden" id="auth-quick"><h2 id="quickTitle">Welcome back</h2><p id="quickSub"></p><div class="pinDots" id="quickDots"></div><div class="pinPad" id="quickPad"></div><div class="authMsg" id="quickMsg"></div><button class="textBtn" id="quickSwitch" type="button">Not you? Sign in as someone else</button></div>
     <div class="authScreen hidden" id="auth-adminpin"><h2>Admin PIN</h2><p>Enter your 5-digit admin PIN.</p><div class="pinDots" id="adminDots"></div><div class="pinPad" id="adminPad"></div><div class="authMsg" id="adminMsg"></div><button class="textBtn" id="adminBack" type="button">← Back</button></div>
     <div class="authScreen hidden" id="auth-invite"><h2>Invite Code</h2><p>Enter the code from your admin.</p><input id="inviteCodeInput" class="codeInput" type="text" placeholder="IPL-XXXX" maxlength="12"/><button class="btn primary" id="inviteVerifyBtn" type="button">Continue</button><div class="authMsg" id="inviteMsg"></div><button class="textBtn" id="inviteBack" type="button">← Back</button></div>
@@ -502,7 +502,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 
 <!-- ===== STEP 4: RESULTS ===== -->
 <div class="stepPanel" data-step="4">
-<div class="grid" id="cashAuditGrid"><div class="card"><div class="hd"><h2>Audit: IN vs OUT</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Color</th><th class="num">IN</th><th class="num">OUT</th><th class="num">Diff</th></tr></thead><tbody id="auditBody"></tbody></table></div></div></div><div class="card"><div class="hd"><h2>Summary</h2><button class="btn small" id="exportImage" type="button">📸 Share</button></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Buy-ins</th><th class="num">Gross</th><th class="num">RF</th><th class="num">Final</th><th class="num">Net</th></tr></thead><tbody id="summaryBody"></tbody></table></div><div class="rakeBar" id="rakeBar"></div><div class="payPreview" id="payPreview" style="display:none"><div class="ppTitle">💸 Payout Preview (who owes who)</div><div id="payPreviewLines"></div></div></div></div></div>
+<div class="grid" id="cashAuditGrid"><div class="card"><div class="hd"><h2>Audit: IN vs OUT</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Color</th><th class="num">IN</th><th class="num">OUT</th><th class="num">Diff</th></tr></thead><tbody id="auditBody"></tbody></table></div></div></div><div class="card"><div class="hd"><h2>Summary</h2><button class="btn small" id="exportImage" type="button">📸 Share / Download</button></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num">Buy-ins</th><th class="num">Gross</th><th class="num">RF</th><th class="num">Final</th><th class="num">Net</th></tr></thead><tbody id="summaryBody"></tbody></table></div><div class="rakeBar" id="rakeBar"></div><div class="payPreview" id="payPreview" style="display:none"><div class="ppTitle">💸 Payout Preview (who owes who)</div><div id="payPreviewLines"></div></div></div></div></div>
 <div class="card hidden" id="tournamentSummary" style="margin-top:14px"><div class="hd"><h2>🏆 Tournament Summary</h2></div><div class="bd"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Player</th><th class="num">Buy-ins</th><th class="num">Prize</th><th class="num">RF</th><th class="num">Payout</th><th class="num">Net</th></tr></thead><tbody id="tourneySummaryBody"></tbody></table></div><div class="outblock" style="margin-top:10px"><pre id="tourneyInfoText"></pre></div></div></div>
 </div><!-- /step 4 -->
 
@@ -740,7 +740,7 @@ function setupWelcome(){
 }
 async function setupSignIn(){
   showAuthScreen('auth-signin');
-  const list=$("memberSelectList");
+  const list=$("memberSelectList"),input=$("signInNameInput"),clearBtn=$("signInClearBtn");
   setAuthMsg('signInMsg','');
   list.innerHTML='<div class="memberSelectEmpty">Loading members…</div>';
   $("signInBack").onclick=setupWelcome;
@@ -752,15 +752,69 @@ async function setupSignIn(){
       list.innerHTML='<div class="memberSelectEmpty">No members yet. Use an invite code to join the league.</div>';
       return;
     }
-    list.innerHTML=entries.map(([id,m])=>{
-      const admin=m.role==='admin';
-      return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span><span class="msBadge${admin?'':' user'}">${admin?'Admin':'Member'}</span></button>`;
-    }).join('');
-    list.querySelectorAll('[data-msid]').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'← Pick a different name'});
+    function highlightName(name,query){
+      const safe=esc(name||'(unnamed)');
+      const q=(query||'').trim();
+      if(!q)return safe;
+      const lower=safe.toLowerCase();
+      const ql=q.toLowerCase();
+      const idx=lower.indexOf(ql);
+      if(idx<0)return safe;
+      return safe.slice(0,idx)+`<mark style="background:rgba(122,167,255,.22);color:inherit;padding:0 2px;border-radius:4px">${safe.slice(idx,idx+q.length)}</mark>`+safe.slice(idx+q.length);
+    }
+    function renderMatches(raw){
+      const q=(raw||'').trim().toLowerCase();
+      if(clearBtn) clearBtn.style.display=q?'inline-flex':'none';
+      if(!q){
+        list.innerHTML='<div class="memberSelectEmpty">Start typing 1-2 letters of your name or initials.</div>';
+        return;
+      }
+      const exact=[],starts=[],contains=[];
+      entries.forEach(([id,m])=>{
+        const name=(m.name||'').trim();
+        const lower=name.toLowerCase();
+        if(!lower)return;
+        if(lower===q) exact.push([id,m]);
+        else if(lower.startsWith(q)) starts.push([id,m]);
+        else if(lower.includes(q)) contains.push([id,m]);
       });
-    });
+      const results=[...exact,...starts,...contains].slice(0,8);
+      if(!results.length){
+        list.innerHTML='<div class="memberSelectEmpty">No matching member found. Try a different spelling, or use an invite code if you're new.</div>';
+        return;
+      }
+      list.innerHTML=results.map(([id,m])=>{
+        const admin=m.role==='admin';
+        return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}" data-msname="${esc(m.name||'(unnamed)')}"><span>${highlightName(m.name||'(unnamed)',raw)}</span><span class="msBadge${admin?'':' user'}">${admin?'Admin':'Member'}</span></button>`;
+      }).join('');
+      list.querySelectorAll('[data-msid]').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          setupQuickLogin({id:btn.dataset.msid,name:btn.dataset.msname},{onSwitch:setupSignIn,switchLabel:'← Pick a different name'});
+        });
+      });
+    }
+    if(input){
+      input.value='';
+      if(clearBtn){
+        clearBtn.onclick=()=>{input.value='';setAuthMsg('signInMsg','');renderMatches('');input.focus()};
+        clearBtn.style.display='none';
+      }
+      input.oninput=()=>{setAuthMsg('signInMsg','');renderMatches(input.value)};
+      input.onkeydown=(e)=>{
+        if(e.key==='Escape'&&input.value){
+          e.preventDefault();
+          input.value='';
+          renderMatches('');
+          return;
+        }
+        if(e.key==='Enter'){
+          const first=list.querySelector('[data-msid]');
+          if(first){e.preventDefault();first.click()}
+        }
+      };
+      setTimeout(()=>input.focus(),30);
+    }
+    renderMatches('');
   }catch(err){
     list.innerHTML=`<div class="memberSelectEmpty">Error loading members: ${esc(err.message)}</div>`;
   }
@@ -2042,7 +2096,7 @@ $("resumeCode").addEventListener("keydown",e=>{if(e.key==="Enter")$("resumeBtn")
 $("copyCode").addEventListener("click",()=>{if(onlineSessionCode)navigator.clipboard?.writeText(onlineSessionCode).then(()=>toast("Copied"))});
 $("copyLink").addEventListener("click",()=>{if(onlineSessionCode)navigator.clipboard?.writeText(getPlayerPageUrl(onlineSessionCode)).then(()=>toast("Copied"))});
 $("exportHistory").addEventListener("click",()=>{if(!sessionArchive.length){toast("Nothing");return}const rows=[["Date","Session","Mode","Player","Buy-ins","Gross","RF","Final","Net","ArchivedBy"]];sessionArchive.forEach(s=>{const d=new Date(s.date).toLocaleDateString();(s.players||[]).forEach(p=>{rows.push([d,s.sessionName,s.mode||"cash",p.name,p.buyins,p.gross?.toFixed(2),p.rfTax?.toFixed(2),p.final?.toFixed(2),p.net?.toFixed(2),s.archivedByName||''])})});const csv=rows.map(r=>r.map(c=>`"${(c??"").toString().replace(/"/g,'""')}"`).join(",")).join("\n");const blob=new Blob([csv],{type:"text/csv"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`ipl-history-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);toast("Exported ✓")});
-$("exportImage").addEventListener("click",()=>{const players=state.players.map((p,i)=>({name:p.name.trim(),color:playerColor(i),...calcPlayer(p)}));players.sort((a,b)=>b.netProfit-a.netProfit);const W=1080,pad=48;const totalPot=state.players.reduce((s,p)=>s+p.buyins.length*state.buyinUsd,0);const totalRake=players.reduce((s,p)=>s+p.rfTax,0);const headerH=200,playerCardH=160,gapH=16,footerH=130;const H=headerH+(players.length*(playerCardH+gapH))+footerH+pad;const cv=document.createElement("canvas");cv.width=W;cv.height=H;const ctx=cv.getContext("2d");ctx.fillStyle="#1a1f2e";ctx.fillRect(0,0,W,H);ctx.fillStyle="#e8eefc";ctx.font="bold 42px system-ui";ctx.textAlign="center";ctx.fillText("♠ ♥ IPL ♦ ♣",W/2,60);ctx.fillStyle="#7aa7ff";ctx.font="bold 28px system-ui";ctx.fillText(state.sessionName||"Poker Night",W/2,100);ctx.fillStyle="#8b95b0";ctx.font="22px system-ui";ctx.fillText(new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric',year:'numeric'}),W/2,132);ctx.font="20px system-ui";ctx.fillText(`Buy-in: ${fmtUsd(state.buyinUsd)} · RF: ${(state.taxRate*100).toFixed(0)}% · ${players.length} players · Pot: ${fmtUsd(totalPot)}`,W/2,164);let y=headerH;players.forEach((p)=>{const cX=pad,cY=y,cW=W-pad*2,cH=playerCardH;ctx.fillStyle="rgba(255,255,255,0.04)";ctx.fillRect(cX,cY,cW,cH);ctx.fillStyle=p.color;ctx.fillRect(cX,cY,8,cH);const iX=cX+32,iR=W-pad-20;ctx.fillStyle="#e8eefc";ctx.font="bold 30px system-ui";ctx.textAlign="left";ctx.fillText(p.name.slice(0,20),iX,cY+46);ctx.textAlign="right";ctx.font="bold 34px system-ui";ctx.fillStyle=p.netProfit>0?"#2bd576":(p.netProfit<0?"#ff5c7a":"#8b95b0");ctx.fillText((p.netProfit>=0?"+":"")+fmtUsd(p.netProfit),iR,cY+46);const dY=cY+90;const cols=[{label:"Buy-ins",value:p.buyinsCount+"× "+fmtUsd(state.buyinUsd),color:"#8b95b0"},{label:"Gross",value:fmtUsd(p.gross),color:"#e8eefc"},{label:"RF Tax",value:fmtUsd(p.rfTax),color:"#f5c542"},{label:"Final",value:fmtUsd(p.finalPayout),color:"#7aa7ff"}];const colW=(iR-iX)/cols.length;cols.forEach((c,ci)=>{const cx=iX+ci*colW;ctx.textAlign="left";ctx.fillStyle="rgba(139,149,176,0.7)";ctx.font="16px system-ui";ctx.fillText(c.label,cx,dY);ctx.fillStyle=c.color;ctx.font="bold 24px system-ui";ctx.fillText(c.value,cx,dY+32)});y+=playerCardH+gapH});y+=10;ctx.fillStyle="#8b95b0";ctx.font="22px system-ui";ctx.textAlign="center";ctx.fillText(`Pot: ${fmtUsd(totalPot)} · RF Rake: ${fmtUsd(totalRake)} · Payouts: ${fmtUsd(players.reduce((s,p)=>s+p.finalPayout,0))}`,W/2,y+36);ctx.fillStyle="rgba(139,149,176,0.35)";ctx.font="18px system-ui";ctx.fillText("Innovation Poker League ♠♥♦♣",W/2,y+72);cv.toBlob(blob=>{if(navigator.share&&navigator.canShare){const file=new File([blob],`ipl-${(state.sessionName||"results").replace(/\s+/g,"-")}.png`,{type:"image/png"});if(navigator.canShare({files:[file]})){navigator.share({files:[file],title:"IPL Results"}).catch(()=>{});return}}const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`ipl-results-${new Date().toISOString().slice(0,10)}.png`;a.click();URL.revokeObjectURL(url);toast("Image saved ✓")},"image/png")});
+$("exportImage").addEventListener("click",()=>{const players=state.players.map((p,i)=>({name:p.name.trim(),color:playerColor(i),...calcPlayer(p)}));players.sort((a,b)=>b.netProfit-a.netProfit);const W=1080,pad=48;const totalPot=state.players.reduce((s,p)=>s+p.buyins.length*state.buyinUsd,0);const totalRake=players.reduce((s,p)=>s+p.rfTax,0);const headerH=200,playerCardH=160,gapH=16,footerH=130;const H=headerH+(players.length*(playerCardH+gapH))+footerH+pad;const cv=document.createElement("canvas");cv.width=W;cv.height=H;const ctx=cv.getContext("2d");ctx.fillStyle="#1a1f2e";ctx.fillRect(0,0,W,H);ctx.fillStyle="#e8eefc";ctx.font="bold 42px system-ui";ctx.textAlign="center";ctx.fillText("♠ ♥ IPL ♦ ♣",W/2,60);ctx.fillStyle="#7aa7ff";ctx.font="bold 28px system-ui";ctx.fillText(state.sessionName||"Poker Night",W/2,100);ctx.fillStyle="#8b95b0";ctx.font="22px system-ui";ctx.fillText(new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric',year:'numeric'}),W/2,132);ctx.font="20px system-ui";ctx.fillText(`Buy-in: ${fmtUsd(state.buyinUsd)} · RF: ${(state.taxRate*100).toFixed(0)}% · ${players.length} players · Pot: ${fmtUsd(totalPot)}`,W/2,164);let y=headerH;players.forEach((p)=>{const cX=pad,cY=y,cW=W-pad*2,cH=playerCardH;ctx.fillStyle="rgba(255,255,255,0.04)";ctx.fillRect(cX,cY,cW,cH);ctx.fillStyle=p.color;ctx.fillRect(cX,cY,8,cH);const iX=cX+32,iR=W-pad-20;ctx.fillStyle="#e8eefc";ctx.font="bold 30px system-ui";ctx.textAlign="left";ctx.fillText(p.name.slice(0,20),iX,cY+46);ctx.textAlign="right";ctx.font="bold 34px system-ui";ctx.fillStyle=p.netProfit>0?"#2bd576":(p.netProfit<0?"#ff5c7a":"#8b95b0");ctx.fillText((p.netProfit>=0?"+":"")+fmtUsd(p.netProfit),iR,cY+46);const dY=cY+90;const cols=[{label:"Buy-ins",value:p.buyinsCount+"× "+fmtUsd(state.buyinUsd),color:"#8b95b0"},{label:"Gross",value:fmtUsd(p.gross),color:"#e8eefc"},{label:"RF Tax",value:fmtUsd(p.rfTax),color:"#f5c542"},{label:"Final",value:fmtUsd(p.finalPayout),color:"#7aa7ff"}];const colW=(iR-iX)/cols.length;cols.forEach((c,ci)=>{const cx=iX+ci*colW;ctx.textAlign="left";ctx.fillStyle="rgba(139,149,176,0.7)";ctx.font="16px system-ui";ctx.fillText(c.label,cx,dY);ctx.fillStyle=c.color;ctx.font="bold 24px system-ui";ctx.fillText(c.value,cx,dY+32)});y+=playerCardH+gapH});y+=10;ctx.fillStyle="#8b95b0";ctx.font="22px system-ui";ctx.textAlign="center";ctx.fillText(`Pot: ${fmtUsd(totalPot)} · RF Rake: ${fmtUsd(totalRake)} · Payouts: ${fmtUsd(players.reduce((s,p)=>s+p.finalPayout,0))}`,W/2,y+36);ctx.fillStyle="rgba(139,149,176,0.35)";ctx.font="18px system-ui";ctx.fillText("Innovation Poker League ♠♥♦♣",W/2,y+72);cv.toBlob(async blob=>{if(!blob){toast("Could not export image");return}const fileName=`ipl-results-${new Date().toISOString().slice(0,10)}.png`;const downloadBlob=()=>{const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)};if(navigator.share&&navigator.canShare&&typeof File!=="undefined"){const file=new File([blob],`ipl-${(state.sessionName||"results").replace(/\s+/g,"-")}.png`,{type:"image/png"});if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"IPL Results",text:"Innovation Poker League results"});return}catch(err){if(err&&err.name==="AbortError")return;downloadBlob();toast("Share not available here. Image downloaded instead.");return}}}downloadBlob();toast("Image downloaded. Open it from Downloads or Photos to share.")},"image/png")});
 $("rosterAddBtn").addEventListener("click",async()=>{if(currentMember.role!=='admin')return;const name=$("rosterNewName").value.trim();if(!name){toast("Enter a name");return}if(leagueRoster.some(n=>n.toLowerCase()===name.toLowerCase())){toast("Already in roster");return}try{await db.ref('league/roster/'+name).set({name,addedAt:Date.now(),addedBy:currentMember.id});$("rosterNewName").value="";toast(`${name} saved`)}catch(err){toast("Failed: "+err.message)}});
 $("rosterNewName").addEventListener("keydown",e=>{if(e.key==="Enter")$("rosterAddBtn").click()});
 $("rosterAddAll").addEventListener("click",()=>{if(state.locked)return;const cur=state.players.map(p=>p.name.trim().toLowerCase());let n=0;leagueRoster.forEach(nm=>{if(!cur.includes(nm.trim().toLowerCase())){const p=makePlayer(nm);if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);state.players.push(p);cur.push(nm.trim().toLowerCase());n++}});if(n){renderAllFull();toast(`${n} added`)}else toast("All in game already")});
