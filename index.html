@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step7a-wizard-reorder-2026-04-21"/>
+<meta name="ipl-build" content="v2.5-step7a.1-fixes-2026-04-21"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -434,7 +434,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
     <div class="authScreen" id="auth-loading"><div class="authSpinner"></div><div class="authMsg">Connecting to league…</div></div>
     <div class="authScreen hidden" id="auth-firstrun"><h2>Welcome!</h2><p>You're the founding admin, <b>Umakanth</b>. Set a 5-digit PIN to secure your league.</p><div class="pinDots" id="firstrunDots"></div><div class="pinPad" id="firstrunPad"></div><div class="authMsg" id="firstrunMsg"></div></div>
     <div class="authScreen hidden" id="auth-welcome"><h2>Sign in</h2><p>Choose how to enter.</p><button class="btn primary" id="wSignInBtn" type="button">👤 Sign in with your name + PIN</button><button class="btn" id="wInviteBtn" type="button">🎟️ I have an invite code</button><button class="textBtn" id="wAdminBtn" type="button" style="margin-top:14px;font-size:11px;opacity:.65">Admin recovery (master PIN)</button></div>
-    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Tap your name to sign in.</p><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
+    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Tap your name to sign in.</p><input type="text" id="memberSearchInput" placeholder="🔎 Type at least 2 letters to filter…" autocomplete="off" autocapitalize="words" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:15px;margin-bottom:8px;box-sizing:border-box"/><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
     <div class="authScreen hidden" id="auth-quick"><h2 id="quickTitle">Welcome back</h2><p id="quickSub"></p><div class="pinDots" id="quickDots"></div><div class="pinPad" id="quickPad"></div><div class="authMsg" id="quickMsg"></div><button class="textBtn" id="quickSwitch" type="button">Not you? Sign in as someone else</button></div>
     <div class="authScreen hidden" id="auth-adminpin"><h2>Admin PIN</h2><p>Enter your 5-digit admin PIN.</p><div class="pinDots" id="adminDots"></div><div class="pinPad" id="adminPad"></div><div class="authMsg" id="adminMsg"></div><button class="textBtn" id="adminBack" type="button">← Back</button></div>
     <div class="authScreen hidden" id="auth-invite"><h2>Invite Code</h2><p>Enter the code from your admin.</p><input id="inviteCodeInput" class="codeInput" type="text" placeholder="IPL-XXXX" maxlength="12"/><button class="btn primary" id="inviteVerifyBtn" type="button">Continue</button><div class="authMsg" id="inviteMsg"></div><button class="textBtn" id="inviteBack" type="button">← Back</button></div>
@@ -488,7 +488,8 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 <div class="card"><div class="hd"><h2>Session & Rules</h2><div class="btnbar"><button class="btn small gold" id="archiveSession" type="button" data-admin-only>Archive</button><button class="btn small danger" id="resetAll" type="button">Reset</button><button class="btn small" id="lockSession" type="button">Lock session</button><button class="btn small" id="toggleRules" type="button">Expand</button></div></div>
 <div class="bd" id="rulesBody" style="display:none">
 <div class="row"><div><label>Session name</label><input id="sessionName" type="text" placeholder="Friday poker"/></div><div><label>Buy-in (₥) <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><input id="buyinUsd" type="number" step="0.01" inputmode="decimal" data-league-setting/></div><div><label>RF Rate (%) <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><input id="taxRate" type="number" step="1" min="0" max="100" inputmode="numeric" placeholder="10" data-league-setting/></div></div>
-<div class="row" style="margin-top:8px"><div><label>Bank / Admin</label><select id="bankSelect"></select></div></div>
+<!-- Step 7a fix: removed legacy "Bank / Admin" dropdown (was here). Banker is picked on Step 1; bankId auto-derived. -->
+<select id="bankSelect" style="display:none"></select>
 <div id="chipValuesSection"><div class="sep"></div><label>Chip values (units per chip) <span class="muted" data-admin-only-hint style="font-size:9px">(league)</span></label><div class="row"><div><label>Black</label><input id="v_black" type="number" step="1" inputmode="numeric" data-league-setting/></div><div><label>Purple</label><input id="v_purple" type="number" step="1" inputmode="numeric" data-league-setting/></div><div><label>Yellow</label><input id="v_yellow" type="number" step="1" inputmode="numeric" data-league-setting/></div><div><label>Pink</label><input id="v_pink" type="number" step="1" inputmode="numeric" data-league-setting/></div><div><label>Orange</label><input id="v_orange" type="number" step="1" inputmode="numeric" data-league-setting/></div></div>
 <div class="sep"></div><label>Buy-in chip presets</label><div class="note" style="margin-top:0;margin-bottom:6px">Quick-fill buy-in chips for all players</div>
 <div class="presetBar"><button class="presetBtn" data-preset="standard" type="button">🎰 Standard (15/3/12/3/2)</button><button class="presetBtn" data-preset="half" type="button">½ Half (8/2/6/2/1)</button><button class="presetBtn" data-preset="heavy" type="button">💰 Heavy (20/5/15/5/3)</button><button class="presetBtn" data-preset="light" type="button">🪶 Light (10/2/8/2/1)</button></div>
@@ -765,7 +766,9 @@ function setupWelcome(){
 async function setupSignIn(){
   showAuthScreen('auth-signin');
   const list=$("memberSelectList");
+  const search=$("memberSearchInput");
   setAuthMsg('signInMsg','');
+  if(search){search.value='';search.focus()}
   list.innerHTML='<div class="memberSelectEmpty">Loading members…</div>';
   $("signInBack").onclick=setupWelcome;
   try{
@@ -776,15 +779,30 @@ async function setupSignIn(){
       list.innerHTML='<div class="memberSelectEmpty">No members yet. Use an invite code to join the league.</div>';
       return;
     }
-    list.innerHTML=entries.map(([id,m])=>{
-      const admin=m.role==='admin';
-      return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span><span class="msBadge${admin?'':' user'}">${admin?'Admin':'Member'}</span></button>`;
-    }).join('');
-    list.querySelectorAll('[data-msid]').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'← Pick a different name'});
+    // Step 7a fix: filtered render. Below 2 chars shows everyone; 2+ filters by
+    // case-insensitive substring match against member name. Helps when there
+    // are many members and scrolling becomes painful.
+    function renderFiltered(query){
+      const q=(query||'').trim().toLowerCase();
+      const visible=q.length>=2?entries.filter(([id,m])=>(m.name||'').toLowerCase().includes(q)):entries;
+      if(!visible.length){
+        list.innerHTML=`<div class="memberSelectEmpty">No members match "${esc(query)}"</div>`;
+        return;
+      }
+      list.innerHTML=visible.map(([id,m])=>{
+        const admin=m.role==='admin';
+        return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span><span class="msBadge${admin?'':' user'}">${admin?'Admin':'Member'}</span></button>`;
+      }).join('');
+      list.querySelectorAll('[data-msid]').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'← Pick a different name'});
+        });
       });
-    });
+    }
+    renderFiltered('');
+    if(search){
+      search.oninput=()=>renderFiltered(search.value);
+    }
   }catch(err){
     list.innerHTML=`<div class="memberSelectEmpty">Error loading members: ${esc(err.message)}</div>`;
   }
@@ -968,16 +986,39 @@ function setupInviteComplete(code){
     }catch(err){setAuthMsg('setupMsg',"Failed: "+(err.code||err.message||String(err)));fail()}
   });
 }
+// Step 7a fix: ensure the signed-in member (admin OR regular user) is also in
+// /league/roster so they appear in the "Regular Players" chip list. Idempotent.
+// Runs as fire-and-forget after sign-in. Failure is silent — non-critical.
+async function ensureAdminInRoster(){
+  if(!currentMember||!currentMember.name||!db)return;
+  const name=currentMember.name.trim();
+  if(!name)return;
+  try{
+    const snap=await db.ref('league/roster/'+name).once('value');
+    if(snap.exists())return; // already in roster
+    await db.ref('league/roster/'+name).set({
+      name,
+      addedAt:Date.now(),
+      addedBy:currentMember.id,
+      memberId:currentMember.id
+    });
+  }catch{ /* non-fatal */ }
+}
+
 function onAuthSuccess(opts){
   opts=opts||{};
   $("authOverlay").classList.add("hidden");
   $("statusStrip").classList.remove("hidden");
-  $("statusUser").textContent=currentMember.name;
-  $("statusRole").textContent=currentMember.role;
+  $("statusUser").textContent=currentMember.name;  $("statusRole").textContent=currentMember.role;
   $("statusRole").className='roleBadge '+currentMember.role;
   applyRoleGating();
   startLeagueListeners();
   startAppUI();
+  // Step 7a fix: silently ensure the signed-in admin appears in the roster.
+  // Pre-Step-7a, admins weren't auto-added to /league/roster, so they never
+  // showed up in the "Regular Players" chip strip. Idempotent — no-op if
+  // already present.
+  ensureAdminInRoster();
   // Step 5: silent restores skip the welcome toast. Offline restores get a
   // subtle heads-up so the user knows why the app feels less live.
   if(opts.offline){
@@ -2048,7 +2089,16 @@ function renderPayouts(){const card=$("payoutCard");if(!state.locked){card.style
 function renderHistory(){const tb=$("historyBody"),em=$("historyEmpty");if(!tb)return;if(!sessionArchive.length){tb.innerHTML="";if(em)em.style.display="block";return}if(em)em.style.display="none";tb.innerHTML=sessionArchive.map(s=>{const d=new Date(s.date),ds=d.toLocaleDateString(undefined,{month:'short',day:'numeric'}),ts=d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});const dr=(s.players||[]).map(p=>{const cls=p.net>0?"good":(p.net<0?"bad":"muted");return`<tr class="sessionDetail" data-detail="${s.id}"><td></td><td>${esc(p.name)}</td><td class="num ${cls}">${p.net>=0?"+":""}${fmtUsd(p.net)}</td><td></td><td></td></tr>`}).join("");return`<tr class="sessionRow" data-sid="${s.id}"><td>${ds} <span class="muted" style="font-size:10px">${ts}</span></td><td>${esc(s.sessionName)}${s.archivedByName?` <span class="muted" style="font-size:9px">· by ${esc(s.archivedByName)}</span>`:''}</td><td class="num"><span class="modeBadge ${(s.mode||"cash")==="tournament"?"tourney":"cash"}">${(s.mode||"cash")==="tournament"?"🏆":"♠"}</span></td><td class="num">${s.playerCount}</td><td><button class="deleteSession" data-delsession="${s.id}" type="button">✕</button></td></tr>${dr}`}).join("")}
 function renderStats(){const sc=$("statsSessionCount"),sb=$("statsBody"),se=$("statsEmpty");if(!sb)return;if(sc)sc.textContent=`${sessionArchive.length} game${sessionArchive.length!==1?"s":""}`;if(!sessionArchive.length){sb.innerHTML="";if(se)se.style.display="block";return}if(se)se.style.display="none";const map={};for(const s of sessionArchive)for(const p of (s.players||[])){const k=p.name.trim().toLowerCase();if(!map[k])map[k]={name:p.name.trim(),sessions:0,wins:0,totalNet:0};const m=map[k];m.sessions++;m.totalNet+=p.net;if(p.net>0)m.wins++;m.name=p.name.trim()}sb.innerHTML=Object.values(map).sort((a,b)=>b.totalNet-a.totalNet).map(s=>{const wp=s.sessions?Math.round(s.wins/s.sessions*100):0,avg=s.sessions?s.totalNet/s.sessions:0,nc=s.totalNet>0?"statPositive":(s.totalNet<0?"statNegative":"statNeutral");return`<tr><td>${esc(s.name)}</td><td class="num">${s.sessions}</td><td class="num">${s.wins}</td><td class="num">${wp}%</td><td class="num ${nc}">${s.totalNet>=0?"+":""}${fmtUsd(s.totalNet)}</td><td class="num">${avg>=0?"+":""}${fmtUsd(avg)}</td></tr>`}).join("")}
 function renderRosterChips(){const cur=state.players.map(p=>p.name.trim().toLowerCase());const isAdmin=currentMember&&currentMember.role==='admin';const memberNames=new Set(Object.values(leagueMembers||{}).map(m=>(m.name||'').trim().toLowerCase()));$("rosterChips").innerHTML=leagueRoster.length?leagueRoster.map((n,i)=>{const inG=cur.includes(n.trim().toLowerCase());const isMember=memberNames.has(n.trim().toLowerCase());const star=isMember?'<span title="Registered member — can be banker for the night" style="color:var(--warn);margin-right:4px;font-size:11px">⭐</span>':'';return`<div class="rosterChip" data-ridx="${i}">${star}<div class="rc-name">${esc(n)}</div><div class="rc-add ${inG?"disabled":""}" data-radd="${esc(n)}">${inG?"✓ In game":"+ Add"}</div>${isAdmin?`<div class="rc-del" data-rdel="${esc(n)}">Delete</div>`:''}</div>`}).join(""):'<div class="note" style="margin:0">No regular players yet.'+(isAdmin?' Add below.':'')+'</div>'}
-function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderRosterChips();renderBankerPickCard();save()}
+// Step 7a fix: keep state.bankId in sync with the planned banker's player record.
+// Called from renderAllFull so adding a player whose name matches the banker
+// retroactively links them. No-op if banker isn't in tonight's lineup.
+function reconcileBankerLink(){
+  if(!state.plannedBankerName)return;
+  const matched=state.players.find(p=>(p.name||'').trim().toLowerCase()===(state.plannedBankerName||'').trim().toLowerCase());
+  if(matched&&state.bankId!==matched.id){state.bankId=matched.id}
+}
+
+function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderRosterChips();renderBankerPickCard();reconcileBankerLink();save()}
 
 // Step 6 reorder: render the banker-pick card on Step 1.
 // Reads state.plannedBankerId/Name and toggles the card's visual state +
@@ -2074,6 +2124,13 @@ function renderBankerPickCard(){
 function saveBankerToState(memberId,memberName){
   state.plannedBankerId=memberId;
   state.plannedBankerName=memberName;
+  // Step 7a fix: auto-link state.bankId to the player record matching this banker's name.
+  // bankId drives Settlement step's "X → Bank" payout labels; without this link, the
+  // settlement screen would show stale data after a banker pick on Step 1.
+  // If the banker isn't in tonight's lineup (e.g. they're banking but not playing),
+  // bankId stays as-is — Settlement falls back to first player.
+  const matchedPlayer=state.players.find(p=>(p.name||'').trim().toLowerCase()===(memberName||'').trim().toLowerCase());
+  if(matchedPlayer)state.bankId=matchedPlayer.id;
   save();
   renderBankerPickCard();
   toast(`🎰 ${memberName} will bank tonight`,2400);
