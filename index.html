@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step8-race-hotfix-2026-04-25"/>
+<meta name="ipl-build" content="v2.5-step8b-session-cleanup-2026-04-25"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -1159,7 +1159,12 @@ function checkSessionRole(){
   // Active session: explicit banker wins; backward-compat falls back to startedBy
   // (sessions started before v2.5 shipped have no banker field yet).
   const bankerId=activeSession.banker?.memberId||activeSession.startedBy;
-  return bankerId===currentMember.id ? 'banker' : 'participant';
+  if(bankerId===currentMember.id) return 'banker';
+  // Admin always gets wizard access so they can manage/end sessions even if
+  // they're not the active banker. Without this, a session assigned to a
+  // non-admin banker locks the admin out of the wizard after archive.
+  if(currentMember.role==='admin') return 'banker';
+  return 'participant';
 }
 
 // Populate the participant home hero + note based on current league state.
@@ -2073,7 +2078,7 @@ async function finalizeEndSession(code){
 function showOnlineUI(code){$("onlineOff").style.display="none";$("onlineOn").style.display="block";$("sessionCodeDisplay").textContent=code;const url=getPlayerPageUrl(code);$("playerLinkDisplay").textContent=url;$("qrWrap").innerHTML="";try{const cv=document.createElement("canvas");cv.style.borderRadius="10px";new QRious({element:cv,value:url,size:180,backgroundAlpha:1,foreground:"#1a1f2e",background:"#ffffff",level:"M"});$("qrWrap").appendChild(cv)}catch(e){}$("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";$("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`}
 async function stopOnlineSession(){
   if(firebaseListener&&onlineSessionCode){db.ref("sessions/"+onlineSessionCode+"/cashouts").off("value",firebaseListener);firebaseListener=null}
-  if(activeSession&&activeSession.startedBy===currentMember.id&&activeSession.code===onlineSessionCode){try{await db.ref('league/active_session').remove()}catch{}}
+  if(activeSession){const isStarter=activeSession.startedBy===currentMember.id;const isBanker=activeSession.banker?.memberId===currentMember.id;const isAdmin=currentMember.role==='admin';if((isStarter||isBanker||isAdmin)&&activeSession.code===onlineSessionCode){try{await db.ref('league/active_session').remove()}catch{}}}
   onlineSessionCode=null;localStorage.removeItem(ACTIVE_KEY);
   $("onlineOff").style.display="block";$("onlineOn").style.display="none";$("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";$("liveBadge").style.display="none";
   toast("Online ended");
@@ -2310,7 +2315,7 @@ $("bankerPickBtn").addEventListener("click",()=>{
   openBankerPicker({mode:'start',initialSelection:state.plannedBankerId||currentMember.id,onConfirm:saveBankerToState});
 });
 $("resetAll").addEventListener("click",()=>{if(!state.locked&&confirm("Reset current session draft?")){localStorage.removeItem(KEY);state=defaultState();collapsedPlayers.clear();paidMap={};savePaid();renderAllFull();toast("Reset")}});
-$("lockSession").addEventListener("click",async()=>{const was=!state.locked;state.locked=!state.locked;save();if(state.locked&&was){const code=onlineSessionCode||localStorage.getItem(ACTIVE_KEY);if(code){onlineSessionCode=code;syncResultsToFirebase()}fireConfetti();const ok=await archiveCurrentSession();if(activeSession&&activeSession.startedBy===currentMember.id){try{await db.ref('league/active_session').remove()}catch{}}toast(ok?"Locked & archived 🔒":"Locked 🔒");renderAllFull();return}if(!state.locked)allSubmittedSounded=false;renderAllFull();toast(state.locked?"Locked 🔒":"Unlocked 🔓")});
+$("lockSession").addEventListener("click",async()=>{const was=!state.locked;state.locked=!state.locked;save();if(state.locked&&was){const code=onlineSessionCode||localStorage.getItem(ACTIVE_KEY);if(code){onlineSessionCode=code;syncResultsToFirebase()}fireConfetti();const ok=await archiveCurrentSession();if(activeSession){const isStarter=activeSession.startedBy===currentMember.id;const isBanker=activeSession.banker?.memberId===currentMember.id;const isAdmin=currentMember.role==='admin';if(isStarter||isBanker||isAdmin){try{await db.ref('league/active_session').remove()}catch{}}}if(onlineSessionCode){if(firebaseListener){db.ref('sessions/'+onlineSessionCode+'/cashouts').off('value',firebaseListener);firebaseListener=null}onlineSessionCode=null;localStorage.removeItem(ACTIVE_KEY);$("onlineOff").style.display="block";$("onlineOn").style.display="none";$("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";$("liveBadge").style.display="none"}toast(ok?"Locked & archived 🔒":"Locked 🔒");renderAllFull();return}if(!state.locked)allSubmittedSounded=false;renderAllFull();toast(state.locked?"Locked 🔒":"Unlocked 🔓")});
 $("archiveSession").addEventListener("click",async()=>{const ok=await archiveCurrentSession();if(ok)toast("Archived ✓")});
 $("clearHistory").addEventListener("click",async()=>{if(!confirm("Delete ALL history? This can't be undone."))return;try{await db.ref('session_archive').remove();toast("Cleared")}catch(err){toast("Failed: "+err.message)}});
 $("startOnline").addEventListener("click",startOnlineSession);
