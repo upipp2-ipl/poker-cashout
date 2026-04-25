@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step7b-auth-scrollock-2026-04-23"/>
+<meta name="ipl-build" content="v2.5-step7a-wizard-reorder-2026-04-21"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -194,20 +194,12 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .rosterOptBox input[type="checkbox"]{accent-color:var(--accent);width:16px;height:16px}
 .authScreen .btn{margin-top:10px;width:100%;padding:13px}
 .textBtn{background:transparent;border:1px solid transparent;color:var(--muted);font-size:12px;padding:10px;margin-top:6px;cursor:pointer}.textBtn:hover{color:var(--text)}
-.memberSearchWrap{position:relative;margin:6px 0 4px}
-.memberSearchInput{width:100%;padding:13px 14px 13px 40px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);font-size:16px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
-.memberSearchInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(122,167,255,.10)}
-.memberSearchInput::placeholder{color:var(--muted)}
-.memberSearchIcon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;opacity:.5}
-.memberSelectList{display:flex;flex-direction:column;gap:4px;margin:6px 0 4px;max-height:38vh;overflow-y:auto}
-.memberSelectList.hidden{display:none}
-.memberSelectRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--card-border);border-radius:10px;background:var(--hover);color:var(--text);cursor:pointer;text-align:left;width:100%;font-size:15px;font-weight:600;touch-action:manipulation;transition:all .12s}
+.memberSelectList{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px;max-height:42vh;overflow-y:auto}
+.memberSelectRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border:1px solid var(--card-border);border-radius:10px;background:var(--hover);color:var(--text);cursor:pointer;text-align:left;width:100%;font-size:15px;font-weight:600;touch-action:manipulation}
 .memberSelectRow:hover,.memberSelectRow:active{background:var(--bg2);border-color:var(--accent)}
 .memberSelectRow .msBadge{flex-shrink:0;font-size:10px;padding:3px 8px;border-radius:6px;background:var(--accent);color:#fff;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
 .memberSelectRow .msBadge.user{background:var(--bg3);color:var(--muted)}
 .memberSelectEmpty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
-/* Auth overlay open: prevent body scroll-through */
-body.auth-open{overflow:hidden;touch-action:none}
 .authScreen input{font-size:18px;padding:13px}
 .authScreen input.codeInput{text-align:center;letter-spacing:3px;text-transform:uppercase;font-weight:700}
 .authScreen input.nameInput{text-align:left}
@@ -369,6 +361,21 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 .bpOption .bpName .bpYou{font-size:9px;font-weight:700;color:#fff;background:var(--accent);padding:2px 6px;border-radius:4px;letter-spacing:.04em}
 /* Step 4f: "Current" gold badge shown on the current banker in reassign mode */
 .bpOption .bpName .bpCurrent{font-size:9px;font-weight:700;color:#1a1400;background:linear-gradient(135deg,#f5c542,#e6a82e);padding:2px 6px;border-radius:4px;letter-spacing:.04em;box-shadow:0 0 0 1px rgba(245,197,66,.5)}
+/* Step 6 reorder: banker pick card on Step 1 */
+.bankerPickCard{margin:14px 0 10px;padding:14px;border:2px dashed rgba(245,197,66,.40);border-radius:12px;background:rgba(245,197,66,.05)}
+.bankerPickCard.set{border-style:solid;border-color:rgba(43,213,118,.40);background:rgba(43,213,118,.05)}
+.bankerPickHd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.bankerPickHd b{font-size:14px}
+.bankerReq{color:var(--bad);font-weight:700;margin-left:2px}
+.bankerHint{font-size:10px;color:var(--muted);font-style:italic}
+.bankerPickCard.set .bankerHint{display:none}
+.bankerPickBody{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bankerStatus{flex:1;min-width:200px;font-size:13px}
+.bankerStatus.none{color:var(--muted);font-style:italic}
+.bankerStatus.set{color:var(--good);font-weight:700}
+.bankerStatus.set::before{content:"⭐ ";color:#f5c542}
+@keyframes bankerShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.bankerPickCard.shake{animation:bankerShake .55s ease}
 .bpOption .bpRoleBadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
 .bpOption .bpRoleBadge.admin{background:rgba(245,197,66,.2);color:var(--warn)}
 .bpOption .bpRoleBadge.user{background:rgba(122,167,255,.2);color:var(--accent)}
@@ -427,7 +434,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
     <div class="authScreen" id="auth-loading"><div class="authSpinner"></div><div class="authMsg">Connecting to league…</div></div>
     <div class="authScreen hidden" id="auth-firstrun"><h2>Welcome!</h2><p>You're the founding admin, <b>Umakanth</b>. Set a 5-digit PIN to secure your league.</p><div class="pinDots" id="firstrunDots"></div><div class="pinPad" id="firstrunPad"></div><div class="authMsg" id="firstrunMsg"></div></div>
     <div class="authScreen hidden" id="auth-welcome"><h2>Sign in</h2><p>Choose how to enter.</p><button class="btn primary" id="wSignInBtn" type="button">👤 Sign in with your name + PIN</button><button class="btn" id="wInviteBtn" type="button">🎟️ I have an invite code</button><button class="textBtn" id="wAdminBtn" type="button" style="margin-top:14px;font-size:11px;opacity:.65">Admin recovery (master PIN)</button></div>
-    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Type your name to find yourself.</p><div class="memberSearchWrap"><span class="memberSearchIcon">&#x1F50D;</span><input class="memberSearchInput" id="memberSearchInput" type="text" placeholder="Start typing your name&hellip;" autocomplete="off" autocorrect="off" spellcheck="false"/></div><div class="memberSelectList hidden" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">&larr; Back</button></div>
+    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Tap your name to sign in.</p><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
     <div class="authScreen hidden" id="auth-quick"><h2 id="quickTitle">Welcome back</h2><p id="quickSub"></p><div class="pinDots" id="quickDots"></div><div class="pinPad" id="quickPad"></div><div class="authMsg" id="quickMsg"></div><button class="textBtn" id="quickSwitch" type="button">Not you? Sign in as someone else</button></div>
     <div class="authScreen hidden" id="auth-adminpin"><h2>Admin PIN</h2><p>Enter your 5-digit admin PIN.</p><div class="pinDots" id="adminDots"></div><div class="pinPad" id="adminPad"></div><div class="authMsg" id="adminMsg"></div><button class="textBtn" id="adminBack" type="button">← Back</button></div>
     <div class="authScreen hidden" id="auth-invite"><h2>Invite Code</h2><p>Enter the code from your admin.</p><input id="inviteCodeInput" class="codeInput" type="text" placeholder="IPL-XXXX" maxlength="12"/><button class="btn primary" id="inviteVerifyBtn" type="button">Continue</button><div class="authMsg" id="inviteMsg"></div><button class="textBtn" id="inviteBack" type="button">← Back</button></div>
@@ -468,14 +475,15 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 <div class="modeToggle" id="modeToggle"><button class="modeBtn active" data-mode="cash" type="button">♠ Cash Game</button><button class="modeBtn" data-mode="tournament" type="button">🏆 Tournament</button></div>
 <div class="top"><div><h1 id="topTitle">Poker Cashout</h1><div class="sub" id="topSub"></div></div><div class="topPills"><div id="rolePill" class="pill role" style="display:none" role="button" tabindex="0"><span class="dot"></span><span id="rolePillText">—</span></div><div id="liveBadge" class="pill live" style="display:none"><span class="dot"></span><span id="liveText">LIVE</span></div><div id="lockBadge" class="pill secondary" style="display:none"><span class="dot" style="background:var(--accent)"></span><span>LOCKED</span></div><div id="pill" class="pill warn"><span class="dot"></span><span id="pillText">Audit: pending</span></div><button class="themeToggle" id="themeToggle" type="button">🌙</button></div></div>
 <div class="stepBar" id="stepBar">
-  <button class="step active" data-step="1" type="button"><span class="stepNum">1</span><span>Setup</span></button>
-  <button class="step" data-step="2" type="button"><span class="stepNum">2</span><span>Players</span></button>
+  <button class="step active" data-step="1" type="button"><span class="stepNum">1</span><span>Players</span></button>
+  <button class="step" data-step="2" type="button"><span class="stepNum">2</span><span>Setup</span></button>
   <button class="step" data-step="3" type="button"><span class="stepNum">3</span><span>Game</span></button>
   <button class="step" data-step="4" type="button"><span class="stepNum">4</span><span>Results</span></button>
   <button class="step" data-step="5" type="button"><span class="stepNum">5</span><span>Settlement</span></button>
 </div>
 <!-- ===== STEP 1: SETUP ===== -->
-<div class="stepPanel active" data-step="1">
+<!-- Step 6 reorder: Setup is now Step 2 (was Step 1). Players is Step 1. -->
+<div class="stepPanel" data-step="2">
 <div class="card timerCard hidden" id="timerCard" style="margin-bottom:14px"><div class="hd"><h2>⏱ Blinds Timer</h2><div class="btnbar"><button class="btn small" id="timerStart" type="button">Start</button><button class="btn small danger" id="timerReset" type="button">Reset</button></div></div><div class="bd"><div class="timerDisplay" id="timerDisplay">10:00</div><div class="row" style="max-width:300px;margin:0 auto"><div><label>Minutes</label><input id="timerMin" type="number" value="10" min="1" max="120" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:700"/></div></div></div></div>
 <div class="card"><div class="hd"><h2>Session & Rules</h2><div class="btnbar"><button class="btn small gold" id="archiveSession" type="button" data-admin-only>Archive</button><button class="btn small danger" id="resetAll" type="button">Reset</button><button class="btn small" id="lockSession" type="button">Lock session</button><button class="btn small" id="toggleRules" type="button">Expand</button></div></div>
 <div class="bd" id="rulesBody" style="display:none">
@@ -489,21 +497,29 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 <div class="sep"></div><div class="btnbar"><button class="btn" id="copyAll" type="button">Copy outputs</button></div>
 <div id="auditHint" class="auditHint" style="display:none"></div>
 </div></div>
-</div><!-- /step 1 -->
+</div><!-- /step 2 (was step 1: Setup) -->
 
-<!-- ===== STEP 2: PLAYERS ===== -->
-<div class="stepPanel" data-step="2">
+<!-- ===== STEP 1: PLAYERS (was Step 2 — moved per Step 6 reorder) ===== -->
+<div class="stepPanel active" data-step="1">
 <div class="card"><div class="hd"><h2>Players (<span id="playerCount">0</span>)</h2><div class="btnbar"><button class="btn small" id="togglePlayersBody" type="button">Expand</button><button class="btn small" id="collapseAll" type="button">Collapse all</button><button class="btn" id="addPlayer" type="button">+ Add player</button></div></div>
 <div class="bd collapsed" id="playersBody">
 <div class="rosterWrap"><div class="rosterHd" id="rosterToggle"><b>📋 Regular Players</b><span class="rChev" id="rosterChev">▼</span></div><div class="rosterBd" id="rosterBody"><div class="note" style="margin:0 0 8px">Tap a name to add to this game.</div><div class="rosterChips" id="rosterChips"></div><div class="rosterAdd" data-admin-only><input id="rosterNewName" type="text" placeholder="New regular player" autocapitalize="words"/><button class="btn small" id="rosterAddBtn" type="button">+ Save</button></div><div class="sep"></div><div class="btnbar"><button class="btn small" id="rosterAddAll" type="button">Add all to game</button><button class="btn small danger" id="rosterClearAll" type="button" data-admin-only>Clear roster</button></div></div></div>
+<!-- Step 6 reorder: banker selection lives in Step 1 so it's a deliberate first decision -->
+<div class="bankerPickCard" id="bankerPickCard">
+  <div class="bankerPickHd"><b>🎰 Banker for tonight <span class="bankerReq">*</span></b><span class="bankerHint">Required before continuing</span></div>
+  <div class="bankerPickBody">
+    <div id="bankerPickStatus" class="bankerStatus none">No banker selected yet — tap below to choose.</div>
+    <button class="btn small" id="bankerPickBtn" type="button">Choose banker</button>
+  </div>
+</div>
 <div id="jumpNav" class="jumpNav"></div><div id="players" class="players"></div>
 </div></div>
-</div><!-- /step 2 -->
+</div><!-- /step 1 (was step 2: Players) -->
 
 <!-- ===== STEP 3: GAME ===== -->
 <div class="stepPanel" data-step="3">
 <div class="card" id="onlineCard"><div class="hd"><h2>Online Session</h2><div class="btnbar"><button class="btn small live" id="startOnline" type="button">Start Online</button><button class="btn small danger" id="stopOnline" type="button" style="display:none">End Online</button></div></div>
-<div class="bd"><div id="onlineOff"><div class="note" style="margin:0;text-align:center;padding:6px 0">Let players submit cashouts from their phones.<br><b style="color:var(--warn)">1) Add & name players on Step 2  2) Click "Start Online"</b></div><div class="sep" data-admin-only></div><div class="note" style="margin:0;text-align:center" data-admin-only>Admin-only: resume a previous session</div><div class="resumeBox" data-admin-only><input id="resumeCode" type="text" placeholder="Session code" maxlength="12"/><button class="btn small" id="resumeBtn" type="button">Resume</button></div></div>
+<div class="bd"><div id="onlineOff"><div class="note" style="margin:0;text-align:center;padding:6px 0">Let players submit cashouts from their phones.<br><b style="color:var(--warn)">1) Add & name players on Step 1  2) Click "Start Online"</b></div><div class="sep" data-admin-only></div><div class="note" style="margin:0;text-align:center" data-admin-only>Admin-only: resume a previous session</div><div class="resumeBox" data-admin-only><input id="resumeCode" type="text" placeholder="Session code" maxlength="12"/><button class="btn small" id="resumeBtn" type="button">Resume</button></div></div>
 <div id="onlineOn" style="display:none"><div class="note" style="margin:0;text-align:center">Share this code:</div><div class="codeDisplay" id="sessionCodeDisplay"></div><div class="qrWrap" id="qrWrap"></div><div class="playerLink" id="playerLinkDisplay"></div><div class="btnbar" style="justify-content:center;margin-top:8px"><button class="btn small" id="copyCode" type="button">Copy code</button><button class="btn small" id="copyLink" type="button">Copy link</button></div><div class="sep"></div><div style="font-size:11px;color:var(--muted)"><b id="submitCount">0</b> / <span id="submitTotal">0</span> submitted</div><div class="statusGrid" id="statusGrid"></div></div></div></div>
 <div id="placementSection" class="hidden" style="margin-top:14px"><label style="font-weight:700;color:var(--warn);font-size:13px">🏆 Placements</label><div class="placeSelect"><div class="placeItem gold"><div class="placeLabel">🥇 1st (50%)</div><select id="place1"><option value="">Select</option></select></div><div class="placeItem silver"><div class="placeLabel">🥈 2nd (30%)</div><select id="place2"><option value="">Select</option></select></div><div class="placeItem bronze"><div class="placeLabel">🥉 3rd (20%)</div><select id="place3"><option value="">Select</option></select></div></div></div>
 </div><!-- /step 3 -->
@@ -642,7 +658,7 @@ function savePaid(){try{localStorage.setItem(PAY_KEY,JSON.stringify(paidMap))}ca
 let allSubmittedSounded=false;
 const savedCashouts=new Set();
 function makePlayer(n){return{id:uid(),name:n||"Player",buyins:[{id:uid(),counts:clone(DEFAULTS.defaultPack)}],cashout:{black:0,purple:0,yellow:0,pink:0,orange:0}}}
-function defaultState(){return{sessionName:"",buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[makePlayer("Player 1"),makePlayer("Player 2")],place1:"",place2:"",place3:"",split1:50,split2:30,split3:20,tourneyPack:{black:0,purple:0,yellow:0,pink:0,orange:0},ownerId:null}}
+function defaultState(){return{sessionName:"",buyinUsd:DEFAULTS.buyinUsd,taxRate:DEFAULTS.taxRate,chipValues:clone(DEFAULTS.chipValues),locked:false,bankId:null,players:[],place1:"",place2:"",place3:"",split1:50,split2:30,split3:20,tourneyPack:{black:0,purple:0,yellow:0,pink:0,orange:0},ownerId:null,plannedBankerId:null,plannedBankerName:null}}
 function clearStaleGameState(){
   try{localStorage.removeItem(KEY)}catch{}
   state=defaultState();
@@ -658,12 +674,12 @@ function checkStateOwnership(){
     state=defaultState();state.ownerId=currentMember.id;save();
   }
 }
-function sanitize(s){if(!s||typeof s!=="object")return defaultState();s.sessionName=typeof s.sessionName==="string"?s.sessionName:"";s.buyinUsd=Number(s.buyinUsd);if(!Number.isFinite(s.buyinUsd)||s.buyinUsd<=0)s.buyinUsd=DEFAULTS.buyinUsd;s.taxRate=Number(s.taxRate);if(!Number.isFinite(s.taxRate)||s.taxRate<0)s.taxRate=DEFAULTS.taxRate;s.locked=!!s.locked;s.bankId=typeof s.bankId==="string"?s.bankId:null;s.ownerId=typeof s.ownerId==="string"?s.ownerId:null;if(!s.chipValues)s.chipValues={};for(const c of COLORS){const v=Number(s.chipValues[c]);s.chipValues[c]=Number.isFinite(v)&&v>0?v:DEFAULTS.chipValues[c]}if(!Array.isArray(s.players)||!s.players.length)s.players=[makePlayer("Player 1")];for(const p of s.players){if(!p.id)p.id=uid();if(typeof p.name!=="string")p.name="Player";if(!Array.isArray(p.buyins)||!p.buyins.length)p.buyins=[{id:uid(),counts:clone(DEFAULTS.defaultPack)}];for(const b of p.buyins){if(!b.id)b.id=uid();if(!b.counts)b.counts=clone(DEFAULTS.defaultPack);for(const c of COLORS){const n=Number(b.counts[c]);b.counts[c]=Number.isFinite(n)&&n>=0?n:0}}if(!p.cashout)p.cashout={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(p.cashout[c]);p.cashout[c]=Number.isFinite(n)&&n>=0?n:0}}const ids=s.players.map(p=>p.id);if(!s.bankId||!ids.includes(s.bankId))s.bankId=ids[0]||null;s.place1=s.place1||"";s.place2=s.place2||"";s.place3=s.place3||"";s.split1=Number(s.split1)||50;s.split2=Number(s.split2)||30;s.split3=Number(s.split3)||20;if(!s.tourneyPack)s.tourneyPack={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(s.tourneyPack[c]);s.tourneyPack[c]=Number.isFinite(n)&&n>=0?n:0}return s}
+function sanitize(s){if(!s||typeof s!=="object")return defaultState();s.sessionName=typeof s.sessionName==="string"?s.sessionName:"";s.buyinUsd=Number(s.buyinUsd);if(!Number.isFinite(s.buyinUsd)||s.buyinUsd<=0)s.buyinUsd=DEFAULTS.buyinUsd;s.taxRate=Number(s.taxRate);if(!Number.isFinite(s.taxRate)||s.taxRate<0)s.taxRate=DEFAULTS.taxRate;s.locked=!!s.locked;s.bankId=typeof s.bankId==="string"?s.bankId:null;s.ownerId=typeof s.ownerId==="string"?s.ownerId:null;if(!s.chipValues)s.chipValues={};for(const c of COLORS){const v=Number(s.chipValues[c]);s.chipValues[c]=Number.isFinite(v)&&v>0?v:DEFAULTS.chipValues[c]}if(!Array.isArray(s.players))s.players=[];for(const p of s.players){if(!p.id)p.id=uid();if(typeof p.name!=="string")p.name="Player";if(!Array.isArray(p.buyins)||!p.buyins.length)p.buyins=[{id:uid(),counts:clone(DEFAULTS.defaultPack)}];for(const b of p.buyins){if(!b.id)b.id=uid();if(!b.counts)b.counts=clone(DEFAULTS.defaultPack);for(const c of COLORS){const n=Number(b.counts[c]);b.counts[c]=Number.isFinite(n)&&n>=0?n:0}}if(!p.cashout)p.cashout={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(p.cashout[c]);p.cashout[c]=Number.isFinite(n)&&n>=0?n:0}}const ids=s.players.map(p=>p.id);if(!s.bankId||!ids.includes(s.bankId))s.bankId=ids[0]||null;s.place1=s.place1||"";s.place2=s.place2||"";s.place3=s.place3||"";s.split1=Number(s.split1)||50;s.split2=Number(s.split2)||30;s.split3=Number(s.split3)||20;if(!s.tourneyPack)s.tourneyPack={black:0,purple:0,yellow:0,pink:0,orange:0};for(const c of COLORS){const n=Number(s.tourneyPack[c]);s.tourneyPack[c]=Number.isFinite(n)&&n>=0?n:0}s.plannedBankerId=typeof s.plannedBankerId==="string"?s.plannedBankerId:null;s.plannedBankerName=typeof s.plannedBankerName==="string"?s.plannedBankerName:null;return s}
 let state=(()=>{try{return sanitize(JSON.parse(localStorage.getItem(KEY)))}catch{return defaultState()}})();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{};syncStateToFirebase()}
 
 // ==== AUTH FLOW ====
-function showAuthScreen(id){document.querySelectorAll('.authScreen').forEach(s=>s.classList.add('hidden'));$(id).classList.remove('hidden');document.body.classList.add('auth-open')}
+function showAuthScreen(id){document.querySelectorAll('.authScreen').forEach(s=>s.classList.add('hidden'));$(id).classList.remove('hidden')}
 function setAuthMsg(id,msg,cls='err'){const el=$(id);if(el){el.textContent=msg;el.className='authMsg '+(msg?cls:'')}}
 function bindPinPad(padEl,dotsEl,length,onComplete){
   const keys=[1,2,3,4,5,6,7,8,9,"cancel",0,"back"];
@@ -749,46 +765,29 @@ function setupWelcome(){
 async function setupSignIn(){
   showAuthScreen('auth-signin');
   const list=$("memberSelectList");
-  const searchInput=$("memberSearchInput");
   setAuthMsg('signInMsg','');
-  list.classList.add('hidden');
-  list.innerHTML='';
-  searchInput.value='';
+  list.innerHTML='<div class="memberSelectEmpty">Loading members…</div>';
   $("signInBack").onclick=setupWelcome;
-  setTimeout(()=>searchInput.focus(),120);
-  let allMembers=[];
   try{
     const snap=await db.ref('league/members').once('value');
     const members=snap.val()||{};
-    if(!Object.keys(members).length){
-      setAuthMsg('signInMsg','No members yet. Use an invite code to join the league.');
+    const entries=Object.entries(members).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
+    if(!entries.length){
+      list.innerHTML='<div class="memberSelectEmpty">No members yet. Use an invite code to join the league.</div>';
       return;
     }
-    allMembers=Object.entries(members).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
-  }catch(err){
-    setAuthMsg('signInMsg','Error loading members: '+esc(err.message));
-    return;
-  }
-  function renderMatches(query){
-    const q=(query||'').trim().toLowerCase();
-    if(!q){list.classList.add('hidden');list.innerHTML='';return}
-    const matched=allMembers.filter(([,m])=>(m.name||'').toLowerCase().includes(q));
-    list.classList.remove('hidden');
-    if(!matched.length){
-      list.innerHTML='<div class="memberSelectEmpty">No match — check spelling or use an invite code.</div>';
-      return;
-    }
-    list.innerHTML=matched.map(([id,m])=>`<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span></button>`).join('');
+    list.innerHTML=entries.map(([id,m])=>{
+      const admin=m.role==='admin';
+      return `<button type="button" class="memberSelectRow" data-msid="${esc(id)}"><span>${esc(m.name||'(unnamed)')}</span><span class="msBadge${admin?'':' user'}">${admin?'Admin':'Member'}</span></button>`;
+    }).join('');
     list.querySelectorAll('[data-msid]').forEach(btn=>{
       btn.addEventListener('click',()=>{
-        setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'Not you? Try a different name'});
+        setupQuickLogin({id:btn.dataset.msid},{onSwitch:setupSignIn,switchLabel:'← Pick a different name'});
       });
     });
+  }catch(err){
+    list.innerHTML=`<div class="memberSelectEmpty">Error loading members: ${esc(err.message)}</div>`;
   }
-  searchInput.oninput=e=>renderMatches(e.target.value);
-  searchInput.onkeydown=e=>{
-    if(e.key==='Enter'){const first=list.querySelector('.memberSelectRow');if(first)first.click();}
-  };
 }
 async function setupQuickLogin(cached,opts){
   opts=opts||{};
@@ -972,7 +971,6 @@ function setupInviteComplete(code){
 function onAuthSuccess(opts){
   opts=opts||{};
   $("authOverlay").classList.add("hidden");
-  document.body.classList.remove("auth-open");  // release body scroll-lock
   $("statusStrip").classList.remove("hidden");
   $("statusUser").textContent=currentMember.name;
   $("statusRole").textContent=currentMember.role;
@@ -1678,6 +1676,12 @@ async function startOnlineSession(){
   const names=state.players.map(p=>p.name.trim()).filter(Boolean);
   if(!names.length){toast("Add players first");return}
   const dupes=names.filter((n,i)=>names.indexOf(n)!==i);if(dupes.length){toast("Fix duplicate names: "+dupes.join(", "));return}
+  // Step 6 reorder: if admin already chose a banker on Step 1, honor it directly.
+  // Only fall through to the picker / Step 4d skip-shortcut when nothing was chosen.
+  if(state.plannedBankerId&&state.plannedBankerName){
+    await doStartSession(state.plannedBankerId,state.plannedBankerName,{skippedPicker:true,reason:'plannedFromStep1'});
+    return;
+  }
   // Step 4d: Banker-chooses-themselves shortcut. Skip the picker when the choice
   // is obvious: either there's only one member in the league, or the last archived
   // session was also banked by the current user (natural continuation).
@@ -1733,9 +1737,16 @@ async function doStartSession(bankerMemberId,bankerName,opts){
     // what code the session got, (b) that they're banking, and (c) how to change it.
     let msg;
     if(opts.skippedPicker){
-      msg = opts.reason==='solo'
-        ? `🎰 Session ${code} started · You're banking (only member)`
-        : `🎰 Session ${code} started · You're banking · Change via ⚙️ Admin → Session`;
+      if(opts.reason==='solo'){
+        msg=`🎰 Session ${code} started · You're banking (only member)`;
+      }else if(opts.reason==='plannedFromStep1'){
+        msg=isSelf
+          ? `🎰 Session ${code} started · You're banking (chosen on Step 1)`
+          : `🎰 Session ${code} started · ${bankerName} is banking (chosen on Step 1)`;
+      }else{
+        // 'continuation' or other auto-skip reasons
+        msg=`🎰 Session ${code} started · You're banking · Change via ⚙️ Admin → Session`;
+      }
     }else{
       msg = isSelf?("Online: "+code):(`Session ${code} started — ${bankerName} is banking`);
     }
@@ -2037,7 +2048,36 @@ function renderPayouts(){const card=$("payoutCard");if(!state.locked){card.style
 function renderHistory(){const tb=$("historyBody"),em=$("historyEmpty");if(!tb)return;if(!sessionArchive.length){tb.innerHTML="";if(em)em.style.display="block";return}if(em)em.style.display="none";tb.innerHTML=sessionArchive.map(s=>{const d=new Date(s.date),ds=d.toLocaleDateString(undefined,{month:'short',day:'numeric'}),ts=d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});const dr=(s.players||[]).map(p=>{const cls=p.net>0?"good":(p.net<0?"bad":"muted");return`<tr class="sessionDetail" data-detail="${s.id}"><td></td><td>${esc(p.name)}</td><td class="num ${cls}">${p.net>=0?"+":""}${fmtUsd(p.net)}</td><td></td><td></td></tr>`}).join("");return`<tr class="sessionRow" data-sid="${s.id}"><td>${ds} <span class="muted" style="font-size:10px">${ts}</span></td><td>${esc(s.sessionName)}${s.archivedByName?` <span class="muted" style="font-size:9px">· by ${esc(s.archivedByName)}</span>`:''}</td><td class="num"><span class="modeBadge ${(s.mode||"cash")==="tournament"?"tourney":"cash"}">${(s.mode||"cash")==="tournament"?"🏆":"♠"}</span></td><td class="num">${s.playerCount}</td><td><button class="deleteSession" data-delsession="${s.id}" type="button">✕</button></td></tr>${dr}`}).join("")}
 function renderStats(){const sc=$("statsSessionCount"),sb=$("statsBody"),se=$("statsEmpty");if(!sb)return;if(sc)sc.textContent=`${sessionArchive.length} game${sessionArchive.length!==1?"s":""}`;if(!sessionArchive.length){sb.innerHTML="";if(se)se.style.display="block";return}if(se)se.style.display="none";const map={};for(const s of sessionArchive)for(const p of (s.players||[])){const k=p.name.trim().toLowerCase();if(!map[k])map[k]={name:p.name.trim(),sessions:0,wins:0,totalNet:0};const m=map[k];m.sessions++;m.totalNet+=p.net;if(p.net>0)m.wins++;m.name=p.name.trim()}sb.innerHTML=Object.values(map).sort((a,b)=>b.totalNet-a.totalNet).map(s=>{const wp=s.sessions?Math.round(s.wins/s.sessions*100):0,avg=s.sessions?s.totalNet/s.sessions:0,nc=s.totalNet>0?"statPositive":(s.totalNet<0?"statNegative":"statNeutral");return`<tr><td>${esc(s.name)}</td><td class="num">${s.sessions}</td><td class="num">${s.wins}</td><td class="num">${wp}%</td><td class="num ${nc}">${s.totalNet>=0?"+":""}${fmtUsd(s.totalNet)}</td><td class="num">${avg>=0?"+":""}${fmtUsd(avg)}</td></tr>`}).join("")}
 function renderRosterChips(){const cur=state.players.map(p=>p.name.trim().toLowerCase());const isAdmin=currentMember&&currentMember.role==='admin';const memberNames=new Set(Object.values(leagueMembers||{}).map(m=>(m.name||'').trim().toLowerCase()));$("rosterChips").innerHTML=leagueRoster.length?leagueRoster.map((n,i)=>{const inG=cur.includes(n.trim().toLowerCase());const isMember=memberNames.has(n.trim().toLowerCase());const star=isMember?'<span title="Registered member — can be banker for the night" style="color:var(--warn);margin-right:4px;font-size:11px">⭐</span>':'';return`<div class="rosterChip" data-ridx="${i}">${star}<div class="rc-name">${esc(n)}</div><div class="rc-add ${inG?"disabled":""}" data-radd="${esc(n)}">${inG?"✓ In game":"+ Add"}</div>${isAdmin?`<div class="rc-del" data-rdel="${esc(n)}">Delete</div>`:''}</div>`}).join(""):'<div class="note" style="margin:0">No regular players yet.'+(isAdmin?' Add below.':'')+'</div>'}
-function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderRosterChips();save()}
+function renderAllFull(){renderStatic();renderJumpNav();renderPlayersFull();renderAuditAndSummary();renderPayouts();renderRosterChips();renderBankerPickCard();save()}
+
+// Step 6 reorder: render the banker-pick card on Step 1.
+// Reads state.plannedBankerId/Name and toggles the card's visual state +
+// status text so admin sees at a glance whether banker is set.
+function renderBankerPickCard(){
+  const card=$("bankerPickCard"); if(!card)return;
+  const status=$("bankerPickStatus");
+  const btn=$("bankerPickBtn");
+  if(state.plannedBankerId&&state.plannedBankerName){
+    card.classList.add('set');
+    status.classList.remove('none'); status.classList.add('set');
+    status.textContent=`Banker: ${state.plannedBankerName}`;
+    btn.textContent='Change banker';
+  }else{
+    card.classList.remove('set');
+    status.classList.add('none'); status.classList.remove('set');
+    status.textContent='No banker selected yet — tap below to choose.';
+    btn.textContent='Choose banker';
+  }
+}
+
+// Save banker pick to local state (called by banker picker's onConfirm)
+function saveBankerToState(memberId,memberName){
+  state.plannedBankerId=memberId;
+  state.plannedBankerName=memberName;
+  save();
+  renderBankerPickCard();
+  toast(`🎰 ${memberName} will bank tonight`,2400);
+}
 function startAppUI(){state=sanitize(state);checkStateOwnership();const lastCode=localStorage.getItem(ACTIVE_KEY);if(lastCode)$("resumeCode").value=lastCode;setMode("cash");renderAllFull();applySessionRole()}
 
 // ==== EVENT HANDLERS ====
@@ -2057,6 +2097,13 @@ document.addEventListener("click",e=>{const pb=e.target.closest("[data-preset]")
 let allCollapsed=false;
 $("collapseAll").addEventListener("click",()=>{allCollapsed=!allCollapsed;if(allCollapsed)state.players.forEach(p=>collapsedPlayers.add(p.id));else collapsedPlayers.clear();$("collapseAll").textContent=allCollapsed?"Expand all":"Collapse all";document.querySelectorAll(".player").forEach(el=>{el.classList.toggle("is-collapsed",allCollapsed);el.querySelector(".pbd")?.classList.toggle("collapsed",allCollapsed)})});
 $("addPlayer").addEventListener("click",()=>{if(!state.locked){const p=makePlayer(`Player ${state.players.length+1}`);if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);state.players.push(p);renderAllFull();toast("Added")}});
+// Step 6 reorder: banker pick button on Step 1 opens the existing picker
+// (start mode, current member preselected) and saves to state on confirm.
+$("bankerPickBtn").addEventListener("click",()=>{
+  if(state.locked){toast("Session is locked");return}
+  if(!currentMember||currentMember.role!=='admin'){toast("Admin only");return}
+  openBankerPicker({mode:'start',initialSelection:state.plannedBankerId||currentMember.id,onConfirm:saveBankerToState});
+});
 $("resetAll").addEventListener("click",()=>{if(!state.locked&&confirm("Reset current session draft?")){localStorage.removeItem(KEY);state=defaultState();collapsedPlayers.clear();paidMap={};savePaid();renderAllFull();toast("Reset")}});
 $("lockSession").addEventListener("click",async()=>{const was=!state.locked;state.locked=!state.locked;save();if(state.locked&&was){const code=onlineSessionCode||localStorage.getItem(ACTIVE_KEY);if(code){onlineSessionCode=code;syncResultsToFirebase()}fireConfetti();const ok=await archiveCurrentSession();if(activeSession&&activeSession.startedBy===currentMember.id){try{await db.ref('league/active_session').remove()}catch{}}toast(ok?"Locked & archived 🔒":"Locked 🔒");renderAllFull();return}if(!state.locked)allSubmittedSounded=false;renderAllFull();toast(state.locked?"Locked 🔒":"Unlocked 🔓")});
 $("archiveSession").addEventListener("click",async()=>{const ok=await archiveCurrentSession();if(ok)toast("Archived ✓")});
@@ -2115,6 +2162,15 @@ $("stepNext").addEventListener("click",()=>{
   if(currentStep===5){
     // On Step 5, Finish button triggers lock (which archives). Reuse existing lockSession click.
     $("lockSession").click();
+    return;
+  }
+  // Step 6 reorder: block advance from Step 1 (Players) until a banker is selected.
+  // Admin must explicitly choose tonight's banker before continuing — prevents
+  // the old "everything auto-set" footgun.
+  if(currentStep===1 && currentMember?.role==='admin' && !state.plannedBankerId){
+    toast("⚠️ Pick tonight's banker before continuing",3200);
+    const card=$("bankerPickCard");
+    if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.classList.add('shake');setTimeout(()=>card.classList.remove('shake'),600)}
     return;
   }
   goToStep(currentStep+1);
