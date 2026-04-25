@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step7a.1-fixes-2026-04-21"/>
+<meta name="ipl-build" content="v2.5-step7b-late-joiners-2026-04-21"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -434,7 +434,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
     <div class="authScreen" id="auth-loading"><div class="authSpinner"></div><div class="authMsg">Connecting to league…</div></div>
     <div class="authScreen hidden" id="auth-firstrun"><h2>Welcome!</h2><p>You're the founding admin, <b>Umakanth</b>. Set a 5-digit PIN to secure your league.</p><div class="pinDots" id="firstrunDots"></div><div class="pinPad" id="firstrunPad"></div><div class="authMsg" id="firstrunMsg"></div></div>
     <div class="authScreen hidden" id="auth-welcome"><h2>Sign in</h2><p>Choose how to enter.</p><button class="btn primary" id="wSignInBtn" type="button">👤 Sign in with your name + PIN</button><button class="btn" id="wInviteBtn" type="button">🎟️ I have an invite code</button><button class="textBtn" id="wAdminBtn" type="button" style="margin-top:14px;font-size:11px;opacity:.65">Admin recovery (master PIN)</button></div>
-    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Tap your name to sign in.</p><input type="text" id="memberSearchInput" placeholder="🔎 Type at least 2 letters to filter…" autocomplete="off" autocapitalize="words" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:15px;margin-bottom:8px;box-sizing:border-box"/><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
+    <div class="authScreen hidden" id="auth-signin"><h2>Who are you?</h2><p>Type your name to sign in.</p><input type="text" id="memberSearchInput" placeholder="🔎 Type at least 2 letters of your name…" autocomplete="off" autocapitalize="words" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:15px;margin-bottom:8px;box-sizing:border-box"/><div class="memberSelectList" id="memberSelectList"></div><div class="authMsg" id="signInMsg"></div><button class="textBtn" id="signInBack" type="button" style="margin-top:12px">← Back</button></div>
     <div class="authScreen hidden" id="auth-quick"><h2 id="quickTitle">Welcome back</h2><p id="quickSub"></p><div class="pinDots" id="quickDots"></div><div class="pinPad" id="quickPad"></div><div class="authMsg" id="quickMsg"></div><button class="textBtn" id="quickSwitch" type="button">Not you? Sign in as someone else</button></div>
     <div class="authScreen hidden" id="auth-adminpin"><h2>Admin PIN</h2><p>Enter your 5-digit admin PIN.</p><div class="pinDots" id="adminDots"></div><div class="pinPad" id="adminPad"></div><div class="authMsg" id="adminMsg"></div><button class="textBtn" id="adminBack" type="button">← Back</button></div>
     <div class="authScreen hidden" id="auth-invite"><h2>Invite Code</h2><p>Enter the code from your admin.</p><input id="inviteCodeInput" class="codeInput" type="text" placeholder="IPL-XXXX" maxlength="12"/><button class="btn primary" id="inviteVerifyBtn" type="button">Continue</button><div class="authMsg" id="inviteMsg"></div><button class="textBtn" id="inviteBack" type="button">← Back</button></div>
@@ -779,12 +779,16 @@ async function setupSignIn(){
       list.innerHTML='<div class="memberSelectEmpty">No members yet. Use an invite code to join the league.</div>';
       return;
     }
-    // Step 7a fix: filtered render. Below 2 chars shows everyone; 2+ filters by
-    // case-insensitive substring match against member name. Helps when there
-    // are many members and scrolling becomes painful.
+    // Step 7a fix: filtered render. Below 2 chars shows a prompt (not the
+    // full list — on mobile, the keypad covers most rows). 2+ chars filters
+    // by case-insensitive substring match against member name.
     function renderFiltered(query){
       const q=(query||'').trim().toLowerCase();
-      const visible=q.length>=2?entries.filter(([id,m])=>(m.name||'').toLowerCase().includes(q)):entries;
+      if(q.length<2){
+        list.innerHTML=`<div class="memberSelectEmpty">Type at least 2 letters of your name to search.<br><span style="font-size:11px;opacity:.7">${entries.length} member${entries.length===1?'':'s'} in this league</span></div>`;
+        return;
+      }
+      const visible=entries.filter(([id,m])=>(m.name||'').toLowerCase().includes(q));
       if(!visible.length){
         list.innerHTML=`<div class="memberSelectEmpty">No members match "${esc(query)}"</div>`;
         return;
@@ -2153,7 +2157,115 @@ $("copyChipPack").addEventListener("click",()=>{if(state.locked)return;const pac
 document.addEventListener("click",e=>{const pb=e.target.closest("[data-preset]");if(pb&&!state.locked){const preset=CHIP_PRESETS[pb.dataset.preset];if(!preset)return;for(const p of state.players)p.buyins[0].counts=clone(preset);DEFAULTS.defaultPack=clone(preset);renderAllFull();toast("Buy-in preset applied ✓");if(currentMember.role==='admin'){db.ref('league/settings/defaultPack').set(clone(preset)).catch(()=>{})}return}const cpb=e.target.closest("[data-cashpreset]");if(cpb&&!state.locked){const pid=cpb.dataset.presetp,key=cpb.dataset.cashpreset,p=state.players.find(x=>x.id===pid);if(!p)return;if(key==="clear"){COLORS.forEach(c=>{p.cashout[c]=0})}else{const preset=CHIP_PRESETS[key];if(!preset)return;COLORS.forEach(c=>{p.cashout[c]=preset[c]||0})}save();renderPlayersFull();renderAuditAndSummary();if(onlineSessionCode)setAdminOverride(p.name.trim());toast(key==="clear"?"Cashout cleared":"Preset applied");return}});
 let allCollapsed=false;
 $("collapseAll").addEventListener("click",()=>{allCollapsed=!allCollapsed;if(allCollapsed)state.players.forEach(p=>collapsedPlayers.add(p.id));else collapsedPlayers.clear();$("collapseAll").textContent=allCollapsed?"Expand all":"Collapse all";document.querySelectorAll(".player").forEach(el=>{el.classList.toggle("is-collapsed",allCollapsed);el.querySelector(".pbd")?.classList.toggle("collapsed",allCollapsed)})});
-$("addPlayer").addEventListener("click",()=>{if(!state.locked){const p=makePlayer(`Player ${state.players.length+1}`);if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);state.players.push(p);renderAllFull();toast("Added")}});
+// Build B (Step 7b): addPlayer now handles late-joiners during a live session.
+// When onlineSessionCode is set, after pushing locally we also write the new
+// player's cashout entry, append to playerNames, and resync admin_state so
+// the late-joiner can submit from player.html and other admin devices see them.
+$("addPlayer").addEventListener("click",async()=>{
+  if(state.locked)return;
+  const newName=`Player ${state.players.length+1}`;
+  const p=makePlayer(newName);
+  if(mode==="tournament")p.buyins[0].counts=clone(state.tourneyPack);
+  state.players.push(p);
+  renderAllFull();
+  // If session isn't live, we're done — same as before
+  if(!onlineSessionCode){toast("Added");return}
+  // Live session: sync the new player to Firebase so they can submit cashouts.
+  // The default name "Player N" is a placeholder — admin will rename it on the
+  // player card. The Firebase write happens with this placeholder; if admin
+  // renames before sharing the link, syncBuyinsToFirebase + admin_state catch up.
+  try{
+    await addLateJoinerToFirebase(p,newName);
+    toast(`✓ ${newName} added — share session code/QR with them`,3200);
+  }catch(err){
+    // Roll back local push if Firebase write fails — keeps admin_state consistent
+    state.players=state.players.filter(x=>x.id!==p.id);
+    renderAllFull();
+    toast("Failed to sync — try again: "+(err.message||""),3600);
+  }
+});
+
+// Build B helper: writes a single new player into the live session's Firebase
+// state (cashouts entry + playerNames append + admin_state push). Idempotent
+// against concurrent admin writes via read-modify-write on playerNames.
+async function addLateJoinerToFirebase(player,playerName){
+  if(!onlineSessionCode||!db)throw new Error("No live session");
+  const code=onlineSessionCode;
+  const trimmed=(playerName||"").trim();
+  if(!trimmed)throw new Error("Empty name");
+  // Step 1: write the player's cashout slot (default values, not submitted)
+  const cashoutPayload={
+    submitted:false,
+    buyinCount:1,
+    timestamp:Date.now(),
+    black:0,purple:0,yellow:0,pink:0,orange:0
+  };
+  await db.ref("sessions/"+code+"/cashouts/"+trimmed).set(cashoutPayload);
+  // Step 2: read-modify-write on config/playerNames to avoid clobbering a
+  // concurrent admin write. If another admin added someone in between, we
+  // merge by deduplication.
+  const ref=db.ref("sessions/"+code+"/config/playerNames");
+  const snap=await ref.once("value");
+  const current=Array.isArray(snap.val())?snap.val():[];
+  if(!current.includes(trimmed)){
+    const merged=[...current,trimmed];
+    await ref.set(merged);
+  }
+  // Step 3: push admin_state so other admin devices pick up the new player
+  // (this is debounced via syncStateToFirebase, but for late-joiners we want
+  // an immediate write so the new player shows up on every admin's screen).
+  await db.ref("sessions/"+code+"/admin_state").set({
+    state:JSON.stringify(state),mode,updatedAt:Date.now()
+  });
+}
+
+// Build B helper: when admin renames a player during a live session, migrate
+// their Firebase cashout entry from old name to new name and update playerNames.
+// Debounced (700ms) so we don't thrash Firebase while admin types char-by-char.
+let renameDebounceTimer=null;
+const pendingRenames=new Map(); // oldName -> latest newName
+function debouncedRenameOnFirebase(oldName,newName){
+  pendingRenames.set(oldName,newName);
+  clearTimeout(renameDebounceTimer);
+  renameDebounceTimer=setTimeout(async()=>{
+    const code=onlineSessionCode;
+    if(!code||!db)return;
+    const todo=Array.from(pendingRenames.entries());
+    pendingRenames.clear();
+    for(const [from,to] of todo){
+      if(from===to||!from||!to)continue;
+      try{
+        // Read the existing cashout, write under new key, delete old key
+        const snap=await db.ref("sessions/"+code+"/cashouts/"+from).once("value");
+        const data=snap.val();
+        if(data){
+          await db.ref("sessions/"+code+"/cashouts/"+to).set(data);
+          await db.ref("sessions/"+code+"/cashouts/"+from).remove();
+        }
+        // Update playerNames array (read-modify-write to handle concurrency)
+        const ref=db.ref("sessions/"+code+"/config/playerNames");
+        const ns=await ref.once("value");
+        const arr=Array.isArray(ns.val())?ns.val():[];
+        const idx=arr.indexOf(from);
+        if(idx>=0){
+          arr[idx]=to;
+          // Dedupe in case 'to' was already in the list
+          const seen=new Set();
+          const cleaned=arr.filter(n=>{if(seen.has(n))return false;seen.add(n);return true});
+          await ref.set(cleaned);
+        }
+      }catch(err){
+        console.warn("Rename sync failed:",from,"->",to,err);
+      }
+    }
+    // Push admin_state so other admin devices see the rename in their player cards
+    try{
+      await db.ref("sessions/"+code+"/admin_state").set({
+        state:JSON.stringify(state),mode,updatedAt:Date.now()
+      });
+    }catch{}
+  },700);
+}
 // Step 6 reorder: banker pick button on Step 1 opens the existing picker
 // (start mode, current member preselected) and saves to state on confirm.
 $("bankerPickBtn").addEventListener("click",()=>{
@@ -2257,7 +2369,7 @@ document.querySelectorAll(".adminTab").forEach(t=>t.addEventListener("click",()=
 $("toTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 $("copyAll").addEventListener("click",()=>{const l=[state.sessionName.trim()];if(mode==="tournament"){const t=calcTournament();t.results.forEach((r,i)=>{if(r)l.push(`${i+1}. ${r.name}: ${fmtUsd(r.payout)} (net ${r.net>=0?"+":""}${fmtUsd(r.net)})`)})}else state.players.forEach(p=>{l.push(p.name,outputBlockText(p),"")});navigator.clipboard?.writeText(l.join("\n")).then(()=>toast("Copied"))});
 $("copyPayouts").addEventListener("click",()=>{navigator.clipboard?.writeText(buildPayoutLines().map(l=>`${l.label}: ${fmtUsd(l.amount)}${paidMap[l.key]?" ✓":""}`).join("\n")).then(()=>toast("Copied"))});
-document.addEventListener("input",e=>{if(state.locked)return;const t=e.target,kind=t?.getAttribute?.("data-kind"),pid=t?.getAttribute?.("data-p");if(kind==="tpack"){const color=t.getAttribute("data-c");if(color){state.tourneyPack[color]=Math.max(0,Number(t.value)||0);save();renderTourneyChipPack()}return}if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){p.name=t.value.slice(0,20);renderAuditAndSummary();renderJumpNav();save();return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}}if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary();if(onlineSessionCode)setAdminOverride(p.name.trim())}},{passive:true});
+document.addEventListener("input",e=>{if(state.locked)return;const t=e.target,kind=t?.getAttribute?.("data-kind"),pid=t?.getAttribute?.("data-p");if(kind==="tpack"){const color=t.getAttribute("data-c");if(color){state.tourneyPack[color]=Math.max(0,Number(t.value)||0);save();renderTourneyChipPack()}return}if(!kind||!pid)return;const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="name"){const oldName=p.name;p.name=t.value.slice(0,20);renderAuditAndSummary();renderJumpNav();save();/* Build B: if session is live and the name actually changed, migrate Firebase entries */if(onlineSessionCode&&oldName.trim()!==p.name.trim()&&oldName.trim()&&p.name.trim()){debouncedRenameOnFirebase(oldName.trim(),p.name.trim())}return}const color=t.getAttribute("data-c"),bid=t.getAttribute("data-b");if(kind==="buyin"&&color&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary()}}if(kind==="cashout"&&color){p.cashout[color]=Math.max(0,Number(t.value)||0);save();renderAuditAndSummary();if(onlineSessionCode)setAdminOverride(p.name.trim())}},{passive:true});
 document.addEventListener("click",e=>{const t=e.target.closest(".sbtn");if(!t||state.locked)return;const step=Number(t.dataset.step)||0,kind=t.dataset.kind,pid=t.dataset.p,color=t.dataset.c,bid=t.dataset.b;if(kind==="tpack"&&color){state.tourneyPack[color]=Math.max(0,(state.tourneyPack[color]||0)+step);t.parentElement.querySelector("input").value=state.tourneyPack[color];save();renderTourneyChipPack();return}const p=state.players.find(x=>x.id===pid);if(!p)return;if(kind==="buyin"&&bid){const b=p.buyins.find(x=>x.id===bid);if(b){b.counts[color]=Math.max(0,(b.counts[color]||0)+step);t.parentElement.querySelector("input").value=b.counts[color];save();renderAuditAndSummary()}}if(kind==="cashout"){p.cashout[color]=Math.max(0,(p.cashout[color]||0)+step);t.parentElement.querySelector("input").value=p.cashout[color];save();renderAuditAndSummary();if(onlineSessionCode)setAdminOverride(p.name.trim())}},true);
 document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(!t)return;const act=t.dataset.act,pid=t.dataset.p;if(act==="togglePlayer"){if(collapsedPlayers.has(pid))collapsedPlayers.delete(pid);else collapsedPlayers.add(pid);const el=document.getElementById("player_"+pid);if(el){el.classList.toggle("is-collapsed");el.querySelector(".pbd")?.classList.toggle("collapsed")}return}if(act==="delPlayer"){const p=state.players.find(x=>x.id===pid);if(p){state.players=state.players.filter(x=>x.id!==pid);if(!state.players.length)state.players=[makePlayer("Player 1")];renderAllFull();toast(`${p.name} removed`)}}if(act==="addRebuy"){const p=state.players.find(x=>x.id===pid);if(p){if(p.buyins.length>=20){toast("Max 20 buy-ins per player");return}p.buyins.push({id:uid(),counts:mode==="tournament"?clone(state.tourneyPack):{black:0,purple:0,yellow:0,pink:0,orange:0}});renderAllFull();syncBuyinsToFirebase();toast("Rebuy added")}}if(act==="removeRebuy"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins.pop();renderAllFull();syncBuyinsToFirebase();toast("Rebuy removed")}}if(act==="delBuyin"){const p=state.players.find(x=>x.id===pid);if(p&&p.buyins.length>1){p.buyins=p.buyins.filter(x=>x.id!==t.dataset.b);renderAllFull();syncBuyinsToFirebase()}}},true);
 document.addEventListener("click",e=>{const t=e.target.closest("[data-jump]");if(t){const pid=t.dataset.jump,el=document.getElementById("player_"+pid);if(el){collapsedPlayers.delete(pid);el.classList.remove("is-collapsed");el.querySelector(".pbd")?.classList.remove("collapsed");el.scrollIntoView({behavior:"smooth"})}}},true);
