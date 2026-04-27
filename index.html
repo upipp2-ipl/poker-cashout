@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step9d-workflow-fixes-2026-04-26"/>
+<meta name="ipl-build" content="v2.5-step9e-multi-device-sync-2026-04-26"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -1644,7 +1644,29 @@ document.addEventListener("click",async e=>{
 
 // ==== GAME LOGIC ====
 let syncTimer=null;
-function syncStateToFirebase(){if(!onlineSessionCode)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>{db.ref("sessions/"+onlineSessionCode+"/admin_state").set({state:JSON.stringify(state),mode,updatedAt:Date.now()}).catch(()=>{})},2000)}
+let _lastStateSyncTs=0; // timestamp of our last write, to skip our own echoes
+function syncStateToFirebase(){if(!onlineSessionCode)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>{_lastStateSyncTs=Date.now();db.ref("sessions/"+onlineSessionCode+"/admin_state").set({state:JSON.stringify(state),mode,updatedAt:_lastStateSyncTs,deviceId:localStorage.getItem('poker_device_id')||''}).catch(()=>{})},2000)}
+let _adminStateListener=null;
+function listenForAdminState(code){
+  if(_adminStateListener){db.ref("sessions/"+(onlineSessionCode||code)+"/admin_state").off("value",_adminStateListener);_adminStateListener=null}
+  _adminStateListener=db.ref("sessions/"+code+"/admin_state").on("value",snap=>{
+    const data=snap.val();if(!data||!data.state)return;
+    // Skip our own writes
+    const myDeviceId=localStorage.getItem('poker_device_id')||'';
+    if(data.deviceId&&data.deviceId===myDeviceId)return;
+    // Skip if this is older than our last write (prevents stale echo)
+    if(data.updatedAt&&data.updatedAt<=_lastStateSyncTs)return;
+    // Don't overwrite if admin is actively typing
+    if(isPlayersInputFocused())return;
+    const incoming=sanitize(JSON.parse(data.state));
+    // Merge: accept new players, names, buy-in counts from other device
+    // but preserve local cashout edits that haven't been saved yet
+    let changed=false;
+    if(incoming.players.length!==state.players.length){state=incoming;if(data.mode)mode=data.mode;changed=true}
+    else{for(let i=0;i<incoming.players.length;i++){const ip=incoming.players[i],lp=state.players[i];if(!lp||ip.id!==lp.id){state=incoming;if(data.mode)mode=data.mode;changed=true;break}if(ip.name!==lp.name){lp.name=ip.name;changed=true}if(ip.buyins.length!==lp.buyins.length){lp.buyins=ip.buyins;changed=true}}}
+    if(changed){save();safeRenderPlayersFull();renderCashoutPanel();renderAuditAndSummary();renderJumpNav()}
+  });
+}
 function syncBuyinsToFirebase(){if(!onlineSessionCode)return;const u={};for(const p of state.players){const pn=p.name.trim();if(pn)u[pn+"/buyinCount"]=p.buyins.length}db.ref("sessions/"+onlineSessionCode+"/cashouts").update(u).catch(()=>{})}
 // Step 8 hotfix: debounce per-player so admin's keystrokes don't fire one
 // Firebase write each. Also prevents the cashout listener from receiving its
@@ -1656,7 +1678,7 @@ function setAdminOverride(pn){
   clearTimeout(_adminOverrideTimers[pn]);
   _adminOverrideTimers[pn]=setTimeout(()=>{
     const p=state.players.find(x=>x.name.trim()===pn);if(!p)return;
-    const pl={adminOverride:true,submitted:true,timestamp:Date.now(),buyinCount:p.buyins.length};
+    const pl={adminOverride:true,submitted:true,timestamp:Date.now(),buyinCount:p.buyins.length,deviceId:localStorage.getItem('poker_device_id')||''};
     COLORS.forEach(c=>{pl[c]=p.cashout[c]});
     db.ref("sessions/"+onlineSessionCode+"/cashouts/"+pn).update(pl).catch(()=>{});
   },500);
@@ -1837,7 +1859,7 @@ async function doStartSession(bankerMemberId,bankerName,opts){
       msg = isSelf?("Online: "+code):(`Session ${code} started — ${bankerName} is banking`);
     }
     toast(msg, opts.skippedPicker?4200:2200);
-    listenForCashouts(code);syncBuyinsToFirebase();
+    listenForCashouts(code);listenForAdminState(code);syncBuyinsToFirebase();
   }catch(err){toast("Error: "+err.message);await db.ref('league/active_session').remove().catch(()=>{});onlineSessionCode=null}
   $("startOnline").innerHTML="Start Online";$("startOnline").disabled=false;
 }
@@ -2100,12 +2122,13 @@ async function finalizeEndSession(code){
 function showOnlineUI(code){$("onlineOff").style.display="none";$("onlineOn").style.display="block";$("sessionCodeDisplay").textContent=code;const url=getPlayerPageUrl(code);$("playerLinkDisplay").textContent=url;$("qrWrap").innerHTML="";try{const cv=document.createElement("canvas");cv.style.borderRadius="10px";new QRious({element:cv,value:url,size:180,backgroundAlpha:1,foreground:"#1a1f2e",background:"#ffffff",level:"M"});$("qrWrap").appendChild(cv)}catch(e){}$("startOnline").style.display="none";$("stopOnline").style.display="inline-flex";$("liveBadge").style.display="inline-flex";$("liveText").textContent=`LIVE: ${code}`}
 async function stopOnlineSession(){
   if(firebaseListener&&onlineSessionCode){db.ref("sessions/"+onlineSessionCode+"/cashouts").off("value",firebaseListener);firebaseListener=null}
+  if(_adminStateListener&&onlineSessionCode){db.ref("sessions/"+onlineSessionCode+"/admin_state").off("value",_adminStateListener);_adminStateListener=null}
   if(activeSession){const isStarter=activeSession.startedBy===currentMember.id;const isBanker=activeSession.banker?.memberId===currentMember.id;const isAdmin=currentMember.role==='admin';if((isStarter||isBanker||isAdmin)&&activeSession.code===onlineSessionCode){try{await db.ref('league/active_session').remove()}catch{}}}
   onlineSessionCode=null;localStorage.removeItem(ACTIVE_KEY);
   $("onlineOff").style.display="block";$("onlineOn").style.display="none";$("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";$("liveBadge").style.display="none";
   toast("Online ended");
 }
-function listenForCashouts(code){firebaseListener=db.ref("sessions/"+code+"/cashouts").on("value",snap=>{const data=snap.val();if(!data)return;const names=Object.keys(data);let sub=0;$("statusGrid").innerHTML=names.map(n=>{const d=data[n],is=!!d.submitted,ia=!!d.adminOverride;if(is||ia)sub++;return`<div class="statusItem ${(is||ia)?"submitted":"pending"}"><span class="sDot"></span>${esc(n)}${ia?' <span style="font-size:9px;color:var(--warn)">(admin)</span>':''}</div>`}).join("");$("submitCount").textContent=sub;$("submitTotal").textContent=names.length;if(sub>0&&sub===names.length&&!allSubmittedSounded){allSubmittedSounded=true;try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=f;g.gain.value=.15;o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+i*.15);o.stop(ctx.currentTime+i*.15+.2)})}catch{}toast("🎉 All submitted!")}let ch=false;for(const p of state.players){const pn=p.name.trim(),pd=data[pn];if(pd&&pd.submitted&&!pd.adminOverride){COLORS.forEach(c=>{const nv=clamp(pd[c]||0);if(p.cashout[c]!==nv){p.cashout[c]=nv;ch=true}});savedCashouts.add(p.id)}}if(ch){toast("Cashout received ✓");save();safeRenderPlayersFull();renderCashoutPanel();renderAuditAndSummary()}})}
+function listenForCashouts(code){firebaseListener=db.ref("sessions/"+code+"/cashouts").on("value",snap=>{const data=snap.val();if(!data)return;const names=Object.keys(data);let sub=0;$("statusGrid").innerHTML=names.map(n=>{const d=data[n],is=!!d.submitted,ia=!!d.adminOverride;if(is||ia)sub++;return`<div class="statusItem ${(is||ia)?"submitted":"pending"}"><span class="sDot"></span>${esc(n)}${ia?' <span style="font-size:9px;color:var(--warn)">(admin)</span>':''}</div>`}).join("");$("submitCount").textContent=sub;$("submitTotal").textContent=names.length;if(sub>0&&sub===names.length&&!allSubmittedSounded){allSubmittedSounded=true;try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=f;g.gain.value=.15;o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+i*.15);o.stop(ctx.currentTime+i*.15+.2)})}catch{}toast("🎉 All submitted!")}let ch=false;const myDeviceId=localStorage.getItem('poker_device_id')||'';for(const p of state.players){const pn=p.name.trim(),pd=data[pn];if(!pd)continue;const hasData=!!(pd.submitted||pd.adminOverride);if(!hasData)continue;const writtenByMe=pd.deviceId&&pd.deviceId===myDeviceId;if(writtenByMe)continue;COLORS.forEach(c=>{const nv=clamp(pd[c]||0);if(p.cashout[c]!==nv){p.cashout[c]=nv;ch=true}});savedCashouts.add(p.id)}if(ch){toast("Cashout received ✓");save();safeRenderPlayersFull();renderCashoutPanel();renderAuditAndSummary()}})}
 async function resumeSession(code, opts){
   opts=opts||{};
   code=(code||'').trim().toUpperCase();if(!code)return;
@@ -2118,7 +2141,7 @@ async function resumeSession(code, opts){
     onlineSessionCode=code;localStorage.setItem(ACTIVE_KEY,code);
     // Only claim startedBy on explicit takeover, not auto-resume
     if(!opts.autoResume && activeSession&&activeSession.startedBy!==currentMember.id){try{await db.ref('league/active_session').update({startedBy:currentMember.id,startedByName:currentMember.name})}catch{}}
-    showOnlineUI(code);listenForCashouts(code);setMode(mode);
+    showOnlineUI(code);listenForCashouts(code);listenForAdminState(code);setMode(mode);
     if(!opts.silent) toast("Resumed: "+code+" ✓");
     renderAllFull();
   }catch(err){if(!opts.silent) toast("Failed: "+err.message)}
@@ -2363,7 +2386,7 @@ $("bankerPickBtn").addEventListener("click",()=>{
   openBankerPicker({mode:'start',initialSelection:state.plannedBankerId||currentMember.id,onConfirm:saveBankerToState});
 });
 $("resetAll").addEventListener("click",()=>{if(!state.locked&&confirm("Reset current session draft?")){localStorage.removeItem(KEY);state=defaultState();collapsedPlayers.clear();paidMap={};savePaid();renderAllFull();toast("Reset")}});
-$("lockSession").addEventListener("click",async()=>{const was=!state.locked;state.locked=!state.locked;save();if(state.locked&&was){const code=onlineSessionCode||localStorage.getItem(ACTIVE_KEY);if(code){onlineSessionCode=code;syncResultsToFirebase()}fireConfetti();const ok=await archiveCurrentSession();if(activeSession){const isStarter=activeSession.startedBy===currentMember.id;const isBanker=activeSession.banker?.memberId===currentMember.id;const isAdmin=currentMember.role==='admin';if(isStarter||isBanker||isAdmin){try{await db.ref('league/active_session').remove()}catch{}}}if(onlineSessionCode){if(firebaseListener){db.ref('sessions/'+onlineSessionCode+'/cashouts').off('value',firebaseListener);firebaseListener=null}onlineSessionCode=null;localStorage.removeItem(ACTIVE_KEY);$("onlineOff").style.display="block";$("onlineOn").style.display="none";$("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";$("liveBadge").style.display="none"}toast(ok?"Locked & archived 🔒":"Locked 🔒");renderAllFull();return}if(!state.locked)allSubmittedSounded=false;renderAllFull();toast(state.locked?"Locked 🔒":"Unlocked 🔓")});
+$("lockSession").addEventListener("click",async()=>{const was=!state.locked;state.locked=!state.locked;save();if(state.locked&&was){const code=onlineSessionCode||localStorage.getItem(ACTIVE_KEY);if(code){onlineSessionCode=code;syncResultsToFirebase()}fireConfetti();const ok=await archiveCurrentSession();if(activeSession){const isStarter=activeSession.startedBy===currentMember.id;const isBanker=activeSession.banker?.memberId===currentMember.id;const isAdmin=currentMember.role==='admin';if(isStarter||isBanker||isAdmin){try{await db.ref('league/active_session').remove()}catch{}}}if(onlineSessionCode){if(firebaseListener){db.ref('sessions/'+onlineSessionCode+'/cashouts').off('value',firebaseListener);firebaseListener=null}if(_adminStateListener){db.ref('sessions/'+onlineSessionCode+'/admin_state').off('value',_adminStateListener);_adminStateListener=null}onlineSessionCode=null;localStorage.removeItem(ACTIVE_KEY);$("onlineOff").style.display="block";$("onlineOn").style.display="none";$("startOnline").style.display="inline-flex";$("stopOnline").style.display="none";$("liveBadge").style.display="none"}toast(ok?"Locked & archived 🔒":"Locked 🔒");renderAllFull();return}if(!state.locked)allSubmittedSounded=false;renderAllFull();toast(state.locked?"Locked 🔒":"Unlocked 🔓")});
 $("archiveSession").addEventListener("click",async()=>{const ok=await archiveCurrentSession();if(ok)toast("Archived ✓")});
 // Step 4 duplicate session action buttons — forward to Step 3 originals
 $("lockSession2").addEventListener("click",()=>$("lockSession").click());
