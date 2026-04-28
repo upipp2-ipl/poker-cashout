@@ -4,52 +4,53 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step9e-multi-device-sync-2026-04-26"/>
+<meta name="ipl-build" content="v2.5-step10b-design-2026-04-27"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="theme-color" content="#1a1f2e"/>
+<meta name="theme-color" content="#0E0F12"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-[data-theme="dark"]{--bg:#1a1f2e;--bg2:#242938;--bg3:#2d3348;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);--card:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));--card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);--hover:rgba(255,255,255,.04);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;--b:#3b4557;--p:#7c3aed;--y:#f59e0b;--pk:#ec4899;--o:#f97316;--sh:0 4px 20px rgba(0,0,0,.25)}
-[data-theme="light"]{--bg:#f0f2f7;--bg2:#ffffff;--bg3:#e8ebf0;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);--card:linear-gradient(180deg,#fff,#fafbfd);--card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);--hover:rgba(0,0,0,.03);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;--b:#6b7280;--p:#7c3aed;--y:#d97706;--pk:#db2777;--o:#ea580c;--sh:0 2px 12px rgba(0,0,0,.06)}
+[data-theme="dark"]{--bg:#0E0F12;--bg2:#16181D;--bg3:#1D2026;--text:#F4F2EE;--muted:#80807A;--muted2:#B7B5AF;--line:rgba(255,255,255,.06);--card:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));--card-border:#2A2E37;--input-bg:#1D2026;--input-border:#2A2E37;--hover:rgba(255,255,255,.04);--good:#3FB17F;--warn:#E2A437;--bad:#E15953;--accent:#6EA8FF;--felt:#1F6B4A;--felt2:#2B8C62;--felt-glow:rgba(63,177,127,.18);--gold:#C9A24A;--gold2:#E2B95A;--gold-glow:rgba(226,185,90,.18);--rouge:#C2453E;--b:#2A2A2A;--p:#6B3DB1;--y:#C9A24A;--pk:#C2459A;--o:#C9682A;--b-ring:#5A5A5A;--p-ring:#B084E0;--y-ring:#E2B95A;--pk-ring:#E07AC0;--o-ring:#E08A4A;--sh:0 1px 0 rgba(255,255,255,.02) inset, 0 1px 2px rgba(0,0,0,.4);--shadow-pop:0 12px 32px rgba(0,0,0,.5);--r-1:6px;--r-2:10px;--r-3:14px;--r-4:20px;--f-display:'Fraunces',Georgia,serif;--f-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace}
+[data-theme="light"]{--bg:#f0eee9;--bg2:#ffffff;--bg3:#e8e6e0;--text:#1a1714;--muted:#6e6b64;--muted2:#8a877f;--line:rgba(0,0,0,.08);--card:linear-gradient(180deg,#fff,#fafaf6);--card-border:rgba(0,0,0,.10);--input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);--hover:rgba(0,0,0,.03);--good:#1F6B4A;--warn:#c68a00;--bad:#C2453E;--accent:#4a7fdd;--felt:#1F6B4A;--felt2:#2B8C62;--felt-glow:rgba(63,177,127,.12);--gold:#C9A24A;--gold2:#b8932e;--gold-glow:rgba(226,185,90,.12);--rouge:#C2453E;--b:#6b7280;--p:#6B3DB1;--y:#C9A24A;--pk:#C2459A;--o:#C9682A;--b-ring:#9CA3AF;--p-ring:#B084E0;--y-ring:#E2B95A;--pk-ring:#E07AC0;--o-ring:#E08A4A;--sh:0 1px 3px rgba(0,0,0,.08);--shadow-pop:0 8px 24px rgba(0,0,0,.12);--r-1:6px;--r-2:10px;--r-3:14px;--r-4:20px;--f-display:'Fraunces',Georgia,serif;--f-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace}
 *{box-sizing:border-box}
 html{overflow-x:hidden}
-body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);transition:background .3s,color .3s;min-height:100vh;overflow-y:auto}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);transition:background .3s,color .3s;min-height:100vh;overflow-y:auto;-webkit-font-smoothing:antialiased;letter-spacing:-0.005em}
 .pullIndicator{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;background:var(--bg2);border-bottom:1px solid var(--card-border);font-size:12px;color:var(--muted);font-weight:500;transition:height .2s}
 .pullIndicator.pulling{transition:none}.pullIndicator .pullIcon{display:inline-block;margin-right:6px;transition:transform .2s}
 .pullIndicator.ready .pullIcon{transform:rotate(180deg)}.pullIndicator.refreshing .pullIcon{animation:spin .6s linear infinite}
 .iplHeader{text-align:center;padding:20px 14px 10px;padding-top:calc(20px + env(safe-area-inset-top))}
-.iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:28px;font-weight:800;letter-spacing:1px}
+.iplLogo{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-display);font-size:28px;font-weight:600;letter-spacing:-0.02em}
 .suit{font-size:20px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
 .iplSub{color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.5px}
 .wrap{max-width:1050px;margin:0 auto;padding:0 14px 0}
 .top{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh);margin-bottom:14px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .topPills{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 h1{margin:0;font-size:15px}.sub{color:var(--muted);font-size:11px;margin-top:2px}
-.pill{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);font-size:11px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;transition:all .3s;backdrop-filter:blur(8px)}
+.pill{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;border:1px solid var(--card-border);background:var(--bg3);color:var(--muted2);font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;transition:all .3s}
 @media(max-width:480px){.pill{max-width:130px;font-size:10px;padding:5px 8px}}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .pill.good .dot{background:var(--good)}.pill.warn .dot{background:var(--warn)}.pill.bad .dot{background:var(--bad)}
-.pill.secondary{background:var(--input-bg)}.pill.live{background:rgba(43,213,118,.10);border-color:rgba(43,213,118,.25);color:var(--good)}
-.pill.live .dot{background:var(--good);animation:pulse 2s infinite}
+.pill.secondary{background:var(--bg3)}.pill.live{background:var(--felt-glow);border-color:rgba(63,177,127,.3);color:var(--good)}
+.pill.live .dot{background:var(--good);animation:pulse 1.8s ease-out infinite}
 /* Step 4b: Role indicator pill in the header */
 .pill.role{cursor:pointer;font-weight:700}
-.pill.role.banker{background:rgba(43,213,118,.10);border-color:rgba(43,213,118,.28);color:var(--good)}
-.pill.role.banker .dot{background:var(--good);animation:pulse 2s infinite}
-.pill.role.playing{background:rgba(122,167,255,.10);border-color:rgba(122,167,255,.28);color:var(--accent)}
+.pill.role.banker{background:var(--felt-glow);border-color:rgba(63,177,127,.3);color:var(--good)}
+.pill.role.banker .dot{background:var(--good);animation:pulse 1.8s ease-out infinite}
+.pill.role.playing{background:rgba(110,168,255,.12);border-color:rgba(110,168,255,.25);color:var(--accent)}
 .pill.role.playing .dot{background:var(--accent)}
-.pill.role.spectator{background:var(--input-bg);border-color:var(--card-border);color:var(--muted)}
+.pill.role.spectator{background:var(--bg3);border-color:var(--card-border);color:var(--muted)}
 .pill.role.spectator .dot{background:var(--muted)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,177,127,.4)}50%{box-shadow:0 0 0 5px rgba(63,177,127,0)}}
 .themeToggle{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;touch-action:manipulation}
 .lockedOverlay{position:fixed;bottom:70px;left:12px;right:12px;z-index:40;display:none;padding:10px 12px;border-radius:14px;border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--sh);max-width:1050px;opacity:.95;cursor:pointer}
 @media(min-width:1050px){.lockedOverlay{left:50%;transform:translateX(-50%);width:1050px}}
 button[disabled],input[disabled],select[disabled]{opacity:.5;cursor:not-allowed!important}
 .grid{display:grid;gap:14px;margin-top:14px}@media(min-width:900px){.grid{grid-template-columns:1.05fr .95fr}}
-.card{border:1px solid var(--card-border);border-radius:14px;background:var(--card);box-shadow:var(--sh);overflow:hidden;transition:background .3s,transform .15s,box-shadow .15s;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.card{border:1px solid var(--card-border);border-radius:var(--r-3);background:var(--bg2);box-shadow:var(--sh);overflow:hidden;transition:background .3s,transform .15s,box-shadow .15s}
 .card:hover{box-shadow:0 6px 28px rgba(0,0,0,.3)}
 .hd{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
-.hd h2{margin:0;font-size:13px;font-weight:700}.bd{padding:14px}
+.hd h2{margin:0;font-family:var(--f-display);font-size:14px;font-weight:500}.bd{padding:14px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}.row>*{flex:1}
 label{display:block;color:var(--muted);font-size:11px;margin-bottom:5px;font-weight:500}
 input,select,button{font:inherit}
@@ -58,9 +59,9 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(12
 input[type="number"]{appearance:textfield}input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);cursor:pointer;user-select:none;touch-action:manipulation;font-size:13px;font-weight:500;transition:all .15s,transform .1s}
 .btn:hover{background:var(--hover);transform:translateY(-1px)}.btn:active{transform:translateY(0)}
-.btn.danger{color:var(--bad);border-color:rgba(255,92,122,.20)}
-.btn.small{padding:6px 10px;font-size:11px;border-radius:8px}.btn.gold{color:var(--warn);border-color:rgba(245,158,11,.25)}.btn.live{color:var(--good);border-color:rgba(43,213,118,.25)}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.primary:hover{opacity:.9;background:var(--accent)}
+.btn.danger{color:var(--bad);border-color:rgba(225,89,83,.20)}
+.btn.small{padding:6px 10px;font-size:11px;border-radius:8px}.btn.gold{color:var(--gold2);border-color:rgba(226,185,90,.25)}.btn.live{color:var(--good);border-color:rgba(63,177,127,.25)}
+.btn.primary{background:var(--felt);color:#fff;border-color:var(--felt);box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 16px -8px rgba(63,177,127,.6)}.btn.primary:hover{background:var(--felt2)}
 .btnbar{display:flex;gap:6px;flex-wrap:wrap}.sep{height:1px;background:var(--line);margin:12px 0}
 .note{color:var(--muted);font-size:11px;line-height:1.4;margin-top:6px}
 .muted{color:var(--muted)}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.hidden{display:none!important}
@@ -69,7 +70,7 @@ input[type="number"]{appearance:textfield}input::-webkit-outer-spin-button,input
 .modeBtn.active{background:var(--accent);color:#fff}.modeBtn.active.tourney{background:var(--warn);color:#1a1f2e}
 .chips{display:grid;gap:8px;grid-template-columns:repeat(5,minmax(0,1fr))}@media(max-width:560px){.chips{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .cell{border-radius:10px;padding:8px}.cell .ctop{display:flex;gap:6px;align-items:center;margin-bottom:6px}
-.sw{width:10px;height:10px;border-radius:3px}.sw.b{background:var(--b)}.sw.p{background:var(--p)}.sw.y{background:var(--y)}.sw.pk{background:var(--pk)}.sw.o{background:var(--o)}
+.sw{width:12px;height:12px;border-radius:50%;border:2px dashed rgba(255,255,255,.3);background-clip:padding-box}.sw.b{background:var(--b);box-shadow:0 0 0 1px var(--b-ring)}.sw.p{background:var(--p);box-shadow:0 0 0 1px var(--p-ring)}.sw.y{background:var(--y);box-shadow:0 0 0 1px var(--y-ring)}.sw.pk{background:var(--pk);box-shadow:0 0 0 1px var(--pk-ring)}.sw.o{background:var(--o);box-shadow:0 0 0 1px var(--o-ring)}
 .cname{color:var(--muted);font-size:11px;font-weight:600}.cval{margin-left:auto;color:var(--muted);font-size:10px;opacity:.7}
 .cell[data-color="black"]{background:rgba(59,69,87,.25);border:1px solid rgba(59,69,87,.35)}.cell[data-color="purple"]{background:rgba(124,58,237,.10);border:1px solid rgba(124,58,237,.20)}.cell[data-color="yellow"]{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.18)}.cell[data-color="pink"]{background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.18)}.cell[data-color="orange"]{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.18)}
 [data-theme="light"] .cell[data-color="black"]{background:rgba(59,69,87,.06);border-color:rgba(59,69,87,.15)}[data-theme="light"] .cell[data-color="purple"]{background:rgba(124,58,237,.05);border-color:rgba(124,58,237,.15)}[data-theme="light"] .cell[data-color="yellow"]{background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.15)}[data-theme="light"] .cell[data-color="pink"]{background:rgba(236,72,153,.05);border-color:rgba(236,72,153,.15)}[data-theme="light"] .cell[data-color="orange"]{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.15)}
@@ -84,7 +85,7 @@ input[type="number"]{appearance:textfield}input::-webkit-outer-spin-button,input
 .outblock pre{margin:0;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.4;color:var(--text)}
 .tablewrap{overflow:auto;border:1px solid var(--card-border);border-radius:12px}
 table{width:100%;border-collapse:separate;border-spacing:0}th,td{padding:8px 10px;border-bottom:1px solid var(--line);font-size:12px}
-th{background:var(--input-bg);color:var(--muted);text-align:left;font-weight:600}.num{text-align:right}
+th{background:var(--input-bg);color:var(--muted);text-align:left;font-weight:600}.num{text-align:right;font-family:var(--f-mono);font-feature-settings:"tnum"}
 td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .footer{position:sticky;bottom:0;z-index:50;margin:14px 0 0;border-radius:0;border:none;border-top:1px solid var(--card-border);background:var(--bg2);box-shadow:0 -4px 20px rgba(0,0,0,.25);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .footer .inner{max-width:1050px;margin:0 auto;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
@@ -169,7 +170,7 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .payPreview .ppDir{color:var(--muted)}.payPreview .ppAmt{font-weight:700}
 .rakeBar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .rakeStat{flex:1;min-width:100px;padding:8px 10px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);text-align:center}
-.rakeStat .rs-v{font-size:16px;font-weight:800}.rakeStat .rs-k{font-size:10px;color:var(--muted);margin-top:2px}
+.rakeStat .rs-v{font-family:var(--f-display);font-size:18px;font-weight:500}.rakeStat .rs-k{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.08em}
 .cashoutStatus{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 7px;border-radius:6px;margin-left:8px}
 .cashoutStatus.pending{background:rgba(139,149,176,.10);color:var(--muted)}
 .cashoutStatus.saved{background:rgba(43,213,118,.12);color:var(--good)}
@@ -216,9 +217,9 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .statusStrip{max-width:1050px;margin:0 auto 10px;padding:6px 14px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);gap:8px}
 .statusStrip.hidden{display:none}
 .statusStrip b{color:var(--text);font-weight:600}
-.roleBadge{display:inline-block;margin-left:4px;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
-.roleBadge.admin{background:rgba(245,158,11,.15);color:var(--warn)}
-.roleBadge.user{background:rgba(122,167,255,.12);color:var(--accent)}
+.roleBadge{display:inline-block;margin-left:4px;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.roleBadge.admin{background:rgba(63,177,127,.12);color:var(--good);border:1px solid rgba(63,177,127,.25)}
+.roleBadge.user{background:rgba(110,168,255,.12);color:var(--accent);border:1px solid rgba(110,168,255,.25)}
 .statusStrip .statusSignout{color:var(--accent);cursor:pointer;text-decoration:none;padding:4px 8px;border-radius:6px;touch-action:manipulation}
 .statusStrip .statusSignout:hover{background:var(--hover)}
 .sessionBanner{max-width:1050px;margin:0 auto 14px;padding:12px 14px;display:flex;align-items:center;gap:10px;border-radius:12px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.25);font-size:13px}
@@ -252,15 +253,15 @@ td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-spac
 .rfExpRow .rfMeta{font-size:10px;color:var(--muted);margin-top:2px}
 .rfExpRow .rfDel{padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid rgba(255,92,122,.20);background:rgba(255,92,122,.06);color:var(--bad);touch-action:manipulation}
 /* ===== Wizard ===== */
-.stepBar{display:flex;gap:6px;margin:0 0 14px;padding:10px 12px;border-radius:14px;border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--sh);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.stepBar{display:flex;gap:6px;margin:0 0 14px;padding:8px 10px;border-radius:var(--r-3);border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--sh);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .stepBar::-webkit-scrollbar{display:none}
-.stepBar .step{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;user-select:none;touch-action:manipulation;transition:all .15s;white-space:nowrap}
+.stepBar .step{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;user-select:none;touch-action:manipulation;transition:all .15s;white-space:nowrap;letter-spacing:0.03em}
 .stepBar .step:hover{background:var(--hover);color:var(--text)}
-.stepBar .step.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.stepBar .step.visited{color:var(--text)}
-.stepBar .step .stepNum{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--input-bg);color:var(--muted);font-size:11px;font-weight:800;flex-shrink:0}
-.stepBar .step.active .stepNum{background:rgba(255,255,255,.25);color:#fff}
-.stepBar .step.visited .stepNum{background:rgba(43,213,118,.15);color:var(--good)}
+.stepBar .step.active{background:var(--text);color:var(--bg);border-color:transparent}
+.stepBar .step.visited{color:var(--muted2)}
+.stepBar .step .stepNum{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:var(--bg3);color:var(--muted);font-size:10px;font-weight:700;flex-shrink:0}
+.stepBar .step.active .stepNum{background:rgba(0,0,0,.15);color:var(--bg)}
+.stepBar .step.visited .stepNum{background:var(--felt-glow);color:var(--good)}
 .stepPanel{display:none;animation:fadeIn .25s ease}
 .stepPanel.active{display:block}
 .stepNav{display:flex;gap:8px;justify-content:space-between;margin:18px 0 8px}
@@ -326,13 +327,13 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 @media(min-width:600px){.endUndoBanner{left:50%;right:auto;transform:translateX(-50%);max-width:460px}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 /* ===== Admin Modal ===== */
-.adminBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;touch-action:manipulation}
+.adminBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid var(--card-border);background:var(--bg2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;touch-action:manipulation;transition:all .15s}
 .adminBtn:hover{background:var(--hover)}
 .adminOverlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .adminOverlay.open{display:flex}
 .adminDialog{max-width:720px;width:100%;background:var(--bg);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);padding:16px;margin:auto;max-height:calc(100vh - 40px);display:flex;flex-direction:column;overflow:hidden}
 .adminDialog .adminHd{display:flex;justify-content:space-between;align-items:center;padding:4px 4px 12px;border-bottom:1px solid var(--line);margin-bottom:10px;flex-shrink:0}
-.adminDialog .adminHd h2{margin:0;font-size:16px;font-weight:700}
+.adminDialog .adminHd h2{margin:0;font-family:var(--f-display);font-size:16px;font-weight:500}
 .adminDialog .adminClose{width:32px;height:32px;border-radius:8px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .adminDialog .adminTabs{display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:8px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
 .adminDialog .adminTabs::-webkit-scrollbar{display:none}
@@ -362,8 +363,9 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 /* Step 4f: "Current" gold badge shown on the current banker in reassign mode */
 .bpOption .bpName .bpCurrent{font-size:9px;font-weight:700;color:#1a1400;background:linear-gradient(135deg,#f5c542,#e6a82e);padding:2px 6px;border-radius:4px;letter-spacing:.04em;box-shadow:0 0 0 1px rgba(245,197,66,.5)}
 /* Step 6 reorder: banker pick card on Step 1 */
-.bankerPickCard{margin:14px 0 10px;padding:14px;border:2px dashed rgba(245,197,66,.40);border-radius:12px;background:rgba(245,197,66,.05)}
-.bankerPickCard.set{border-style:solid;border-color:rgba(43,213,118,.40);background:rgba(43,213,118,.05)}
+.bankerPickCard{margin:14px 0 10px;padding:14px;border:1px solid rgba(226,185,90,.35);border-radius:var(--r-3);background:linear-gradient(180deg,var(--bg2),var(--bg3));position:relative;overflow:hidden}
+.bankerPickCard::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 0% 0%,var(--gold-glow),transparent 50%);pointer-events:none}
+.bankerPickCard.set{border-color:rgba(63,177,127,.40);background:linear-gradient(180deg,var(--bg2),var(--bg3))}
 .bankerPickHd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .bankerPickHd b{font-size:14px}
 .bankerReq{color:var(--bad);font-weight:700;margin-left:2px}
@@ -447,8 +449,8 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 <div class="wrap">
 <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
 <a href="index.html" style="padding:8px 14px;border-radius:10px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;text-decoration:none">♠ Admin</a>
-<a href="rf-fund.html" style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">💰 RF Fund</a>
-<a href="analytics.html" style="padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">📊 Analytics</a>
+<a href="rf-fund.html" style="padding:8px 14px;border-radius:999px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">💰 RF Fund</a>
+<a href="analytics.html" style="padding:8px 14px;border-radius:999px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none">📊 Analytics</a>
 <button class="adminBtn" id="openAdminModal" type="button" data-admin-only style="margin-left:auto">⚙️ Admin</button>
 </div>
 <div class="sessionBanner hidden" id="activeSessionBanner"><span class="bDot"></span><div class="bContent"><span class="bTitle" id="bannerTitle">Session in progress</span><span class="bSub" id="bannerSub"></span></div><button class="btn small primary" id="bannerCashoutBtn" type="button" style="display:none">💰 Cashout</button><button class="btn small" id="bannerResumeBtn" type="button" style="display:none">Resume</button><button class="btn small gold" id="bannerTakeoverBtn" type="button" style="display:none">Take over</button></div>
@@ -489,7 +491,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 <div class="card"><div class="hd"><h2>Players (<span id="playerCount">0</span>)</h2><div class="btnbar"><button class="btn small" id="togglePlayersBody" type="button">Expand</button><button class="btn small" id="collapseAll" type="button">Collapse all</button><button class="btn" id="addPlayer" type="button">+ Add player</button></div></div>
 <div class="bd collapsed" id="playersBody">
 <div class="row" style="margin-bottom:10px"><div><label>Session name</label><input id="sessionName" type="text" placeholder="Friday poker"/></div></div>
-<div class="rosterWrap"><div class="rosterHd" id="rosterToggle"><b>📋 Regular Players</b><span class="rChev" id="rosterChev">▼</span></div><div class="rosterBd" id="rosterBody"><div class="note" style="margin:0 0 8px">Tap a name to add to this game.</div><div class="rosterChips" id="rosterChips"></div><div class="rosterAdd" data-admin-only><input id="rosterNewName" type="text" placeholder="New regular player" autocapitalize="words"/><button class="btn small" id="rosterAddBtn" type="button">+ Save</button></div><div class="sep"></div><div class="btnbar"><button class="btn small" id="rosterAddAll" type="button">Add all to game</button><button class="btn small danger" id="rosterClearAll" type="button" data-admin-only>Clear roster</button></div></div></div>
+<div class="rosterWrap"><div class="rosterHd" id="rosterToggle"><b>📋 Regular Players</b><span class="rChev" id="rosterChev">▼</span></div><div class="rosterBd" id="rosterBody"><div class="note" style="margin:0 0 8px">Tap a name to add to this game.</div><div class="rosterChips" id="rosterChips"></div><div class="rosterAdd" data-banker-ok><input id="rosterNewName" type="text" placeholder="New regular player" autocapitalize="words"/><button class="btn small" id="rosterAddBtn" type="button">+ Save</button></div><div class="sep"></div><div class="btnbar"><button class="btn small" id="rosterAddAll" type="button">Add all to game</button><button class="btn small danger" id="rosterClearAll" type="button" data-admin-only>Clear roster</button></div></div></div>
 <!-- Banker selection — required before continuing -->
 <div class="bankerPickCard" id="bankerPickCard">
   <div class="bankerPickHd"><b>🎰 Banker for tonight <span class="bankerReq">*</span></b><span class="bankerHint">Required before continuing</span></div>
@@ -1048,8 +1050,11 @@ $("themeToggle").addEventListener("click",()=>{theme=theme==="dark"?"light":"dar
 
 function applyRoleGating(){
   const isAdmin=currentMember.role==='admin';
+  const isBanker=activeSession&&activeSession.banker&&activeSession.banker.memberId===currentMember.id;
   document.querySelectorAll('[data-admin-only]').forEach(el=>{el.style.display=isAdmin?'':'none'});
   document.querySelectorAll('[data-admin-only-hint]').forEach(el=>{el.style.display=isAdmin?'':'none'});
+  // Banker can also use certain controls: add player, start online, roster
+  document.querySelectorAll('[data-banker-ok]').forEach(el=>{el.style.display=(isAdmin||isBanker)?'':'none'});
 }
 
 // ==== LEAGUE LISTENERS ====
