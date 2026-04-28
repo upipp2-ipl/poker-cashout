@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <meta name="ipl-build" content="rf-fund-v1.3-design-2026-04-27"/>
+  <meta name="ipl-build" content="rf-fund-v1.4-currency-2026-04-27"/>
   <title>IPL – RF Fund Manager</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -171,7 +171,7 @@
 <script>
 (function(){
   const $=id=>document.getElementById(id);
-  const fmtUsd=v=>"$"+Math.abs(v).toFixed(2);
+  const fmtUsd=v=>"₥"+Math.abs(v).toFixed(2);
   let trendChartInstance=null;
   let isAdmin=false;
   let adminName="";
