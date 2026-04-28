@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <meta name="ipl-build" content="analytics-v1.3-design-2026-04-27"/>
+  <meta name="ipl-build" content="analytics-v1.4-currency-2026-04-27"/>
   <title>IPL – Player Analytics</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -182,7 +182,7 @@
 <script>
 (function(){
   const $=id=>document.getElementById(id);
-  const fmtUsd=v=>"$"+Math.abs(v).toFixed(2);
+  const fmtUsd=v=>"₥"+Math.abs(v).toFixed(2);
   const charts={};let currentSort={col:"net",dir:-1};let filteredData=null;let allSessions=[];
 
   function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
@@ -421,7 +421,7 @@
     charts.rf=new Chart($("rfDistChart").getContext("2d"),{type:"doughnut",data:{labels:rfP.map(p=>p.name),datasets:[{data:rfP.map(p=>p.totalRF),backgroundColor:rc.slice(0,rfP.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{color:txt,font:{size:10},padding:8}}}}});
 
     const profS=[...players].sort((a,b)=>a.totalNet-b.totalNet).slice(0,12);
-    charts.pb=new Chart($("profitBarChart").getContext("2d"),{type:"bar",data:{labels:profS.map(p=>p.name),datasets:[{label:"Net P/L",data:profS.map(p=>p.totalNet),backgroundColor:profS.map(p=>p.totalNet>=0?"rgba(43,213,118,.6)":"rgba(255,92,122,.6)")}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,font:{size:9},callback:v=>"$"+v},grid:{color:grid}},y:{ticks:{color:txt,font:{size:9}},grid:{display:false}}}}});
+    charts.pb=new Chart($("profitBarChart").getContext("2d"),{type:"bar",data:{labels:profS.map(p=>p.name),datasets:[{label:"Net P/L",data:profS.map(p=>p.totalNet),backgroundColor:profS.map(p=>p.totalNet>=0?"rgba(63,177,127,.6)":"rgba(255,92,122,.6)")}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,font:{size:9},callback:v=>"$"+v},grid:{color:grid}},y:{ticks:{color:txt,font:{size:9}},grid:{display:false}}}}});
   }
 
   function showDrill(name,players){
