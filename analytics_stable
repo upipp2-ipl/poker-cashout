@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="ipl-build" content="analytics-v1.1-role-gating-2026-04-19"/>
+  <title>IPL – Player Analytics</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <style>
+    [data-theme="dark"]{--bg:#1a1f2e;--bg2:#242938;--bg3:#2d3348;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);--card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--input-border:rgba(255,255,255,.10);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;--sh:0 4px 20px rgba(0,0,0,.25)}
+    [data-theme="light"]{--bg:#f0f2f7;--bg2:#ffffff;--bg3:#e8ebf0;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);--card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--input-border:rgba(0,0,0,.12);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;--sh:0 2px 12px rgba(0,0,0,.06)}
+    *{box-sizing:border-box;margin:0}
+    html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--text);background:var(--bg);transition:background .3s,color .3s;padding-bottom:80px;min-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    button,.btn,.tab,.navBtn,.themeToggle,.drillClose{touch-action:manipulation}
+    .iplHeader{text-align:center;padding:calc(18px + env(safe-area-inset-top)) 14px 6px}
+    .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:26px;font-weight:800;letter-spacing:1px}
+    .suit{font-size:18px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
+    .iplSub{color:var(--muted);font-size:11px;margin-top:2px;letter-spacing:.5px}
+    .wrap{max-width:1000px;margin:0 auto;padding:0 14px}
+    .nav{display:flex;gap:8px;margin:12px 0 16px;flex-wrap:wrap;align-items:center}
+    .navBtn{padding:8px 14px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+    .navBtn:hover{background:var(--bg3);color:var(--text)}
+    .navBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .topRight{margin-left:auto;display:flex;gap:6px;align-items:center}
+    .themeToggle{background:var(--bg2);border:1px solid var(--card-border);border-radius:10px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--text)}
+    .liveIndicator{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--good);font-weight:600}
+    .liveIndicator .dot{width:7px;height:7px;border-radius:50%;background:var(--good);animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .kpiRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+    .kpi{border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);padding:14px;box-shadow:var(--sh)}
+    .kpiLabel{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+    .kpiVal{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+    .kpiVal.good{color:var(--good)}.kpiVal.bad{color:var(--bad)}
+    .filterBar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+    .filterBar select,.filterBar input{padding:7px 10px;border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:16px;outline:none}
+    .filterBar select:focus,.filterBar input:focus{border-color:var(--accent)}
+    .filterBar label{font-size:11px;color:var(--muted);margin-right:-4px}
+    .btn{padding:8px 16px;border-radius:10px;border:none;font-weight:700;font-size:13px;cursor:pointer;transition:all .15s}
+    .btn.primary{background:var(--accent);color:#fff}
+    .btn.small{padding:6px 12px;font-size:12px}
+    .btn.outline{background:transparent;border:1px solid var(--card-border);color:var(--muted)}
+    .card{border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh);margin-bottom:16px;overflow:hidden}
+    .cardHd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+    .cardHd h2{font-size:15px;font-weight:700}
+    .cardBd{padding:16px}
+    .tabs{display:flex;gap:4px;margin-bottom:14px}
+    .tab{padding:7px 14px;border-radius:8px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+    .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .tbl{width:100%;border-collapse:collapse;font-size:13px}
+    .tbl th{text-align:left;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;padding:8px 6px;border-bottom:2px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap}
+    .tbl th:hover{color:var(--text)}
+    .tbl th.num,.tbl td.num{text-align:right}
+    .tbl td{padding:8px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+    .tbl tr:last-child td{border-bottom:none}
+    .tbl tr:hover td{background:rgba(122,167,255,.04)}
+    .rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;font-size:11px;font-weight:800}
+    .rank.g{background:rgba(255,215,0,.15);color:#ffd700}
+    .rank.s{background:rgba(192,192,192,.15);color:#c0c0c0}
+    .rank.b{background:rgba(205,127,50,.15);color:#cd7f32}
+    .chartWrap{position:relative;height:280px;margin:8px 0}
+    .chartGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .drillOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;justify-content:center;align-items:center;padding:20px}
+    .drillOverlay.open{display:flex}
+    .drillPanel{background:var(--bg2);border:1px solid var(--card-border);border-radius:16px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+    .drillClose{float:right;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+    .empty{text-align:center;padding:30px;color:var(--muted);font-size:13px}
+    .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);padding:10px 18px;border-radius:10px;background:#242938;border:1px solid var(--card-border);color:var(--text);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s}
+    .toast.show{opacity:1}
+    .migBanner{display:none;background:linear-gradient(135deg,rgba(122,167,255,.12),rgba(43,213,118,.08));border:1px solid var(--accent);border-radius:14px;padding:14px 16px;margin-bottom:16px;box-shadow:var(--sh)}
+    .migBanner.show{display:block}
+    .migBanner .migTitle{font-weight:800;font-size:14px;margin-bottom:4px;color:var(--accent)}
+    .migBanner .migMsg{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4}
+    .migBanner .migBtns{display:flex;gap:8px;flex-wrap:wrap}
+    .migBanner .migProgress{font-size:11px;color:var(--muted);margin-top:8px;display:none}
+    .migBanner.working .migProgress{display:block}
+    .migBanner.working .migBtns{opacity:.5;pointer-events:none}
+    /* ===== Unified sign-in gate ===== */
+    .signInGate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+    .signInGate.open{display:flex}
+    .signInGate .gateLogo{font-size:32px;font-weight:800;letter-spacing:1px;margin-bottom:6px}
+    .signInGate .gateSub{color:var(--muted);font-size:12px;margin-bottom:28px}
+    .signInGate h2{font-size:22px;font-weight:700;margin-bottom:10px}
+    .signInGate p{color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:22px;max-width:360px}
+    .signInGate .gateLink{display:inline-block;padding:13px 24px;background:var(--accent);color:#fff;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px}
+    .signInGate .gateLink:hover{filter:brightness(1.1)}
+    body.gated{overflow:hidden}
+    body.gated>*:not(.signInGate):not(#toast){visibility:hidden}
+    /* Step 5: role gating — regular users see analytics read-only (admin tools hidden) */
+    body.user-mode [data-admin-only]{display:none !important}
+    .roleBadge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:999px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-left:6px}
+    .roleBadge.admin{background:rgba(245,197,66,.18);color:var(--warn);border:1px solid rgba(245,197,66,.30)}
+    .roleBadge.user{background:rgba(122,167,255,.12);color:var(--accent);border:1px solid rgba(122,167,255,.22)}
+    @media(max-width:700px){.chartGrid{grid-template-columns:1fr}}
+    @media(max-width:600px){.kpiRow{grid-template-columns:1fr 1fr}.tbl{font-size:11px}.tbl th,.tbl td{padding:6px 4px}}
+  </style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<!-- Sign-in gate: shown when no valid session in localStorage. Starts hidden; JS shows if unauthenticated. -->
+<div class="signInGate" id="signInGate">
+  <div class="gateLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div>
+  <div class="gateSub">Innovation Poker League</div>
+  <h2>Sign in required</h2>
+  <p>Please sign in on the Admin page first to view Analytics. Your session will be shared across all IPL pages.</p>
+  <a class="gateLink" href="index.html">♠ Sign in on Admin page →</a>
+</div>
+<div class="iplHeader">
+  <div class="iplLogo"><span class="suit blk">♠</span><span class="suit red">♥</span> IPL <span class="suit red">♦</span><span class="suit blk">♣</span></div>
+  <div class="iplSub">Innovation Poker League</div>
+</div>
+<div class="wrap">
+  <div class="nav">
+    <a class="navBtn" href="index.html">♠ Admin</a>
+    <a class="navBtn" href="rf-fund.html">💰 RF Fund</a>
+    <a class="navBtn active" href="analytics.html">📊 Analytics</a>
+    <div class="topRight">
+      <span class="liveIndicator"><span class="dot"></span> LIVE</span>
+      <span id="signedInAs" style="font-size:11px;color:var(--muted)"></span>
+      <button class="btn small outline" id="signOutBtn" style="display:none">Sign out</button>
+      <button class="themeToggle" id="themeToggle">🌙</button>
+    </div>
+  </div>
+  <div class="migBanner" id="migBanner" data-admin-only>
+    <div class="migTitle">📦 Migrate local session history?</div>
+    <div class="migMsg">Found <span id="migCount">0</span> session(s) in this device's local storage that aren't in Firebase yet. Migrating will push them to Firebase so all your devices (and the RF Fund page) can see the full history. A safety backup is kept in this browser even after migration.</div>
+    <div class="migBtns">
+      <button class="btn small primary" id="migrateBtn" type="button">Migrate to Firebase</button>
+      <button class="btn small outline" id="migrateSkipBtn" type="button">Skip (keep local only)</button>
+    </div>
+    <div class="migProgress" id="migProgress">Uploading...</div>
+  </div>
+  <div class="kpiRow" id="kpiRow"></div>
+  <div class="filterBar">
+    <label>Player</label><select id="filterPlayer"><option value="">All Players</option></select>
+    <label>Mode</label><select id="filterMode"><option value="">All</option><option value="cash">Cash</option><option value="tournament">Tournament</option></select>
+    <label>From</label><input type="date" id="filterFrom"/>
+    <label>To</label><input type="date" id="filterTo"/>
+    <button class="btn small primary" id="applyFilters">Apply</button>
+    <button class="btn small outline" id="clearFilters">Clear</button>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-view="leaderboard">🏆 Leaderboard</div>
+    <div class="tab" data-view="sessions">📋 Sessions</div>
+    <div class="tab" data-view="charts">📈 Charts</div>
+  </div>
+  <div class="card" id="viewLeaderboard">
+    <div class="cardHd"><h2>🏆 Player Leaderboard</h2><button class="btn small outline" id="exportLeaderboard">Export CSV</button></div>
+    <div class="cardBd" style="overflow-x:auto">
+      <table class="tbl" id="leaderTable"><thead><tr>
+        <th style="width:36px">#</th><th data-sort="name">Player</th><th class="num" data-sort="sessions">Sessions</th>
+        <th class="num" data-sort="buyins">Buy-ins</th><th class="num" data-sort="gross">Gross</th>
+        <th class="num" data-sort="rf">RF Paid</th><th class="num" data-sort="cashout">Cashout</th>
+        <th class="num" data-sort="net">Net P/L</th><th class="num" data-sort="winrate">Win %</th>
+      </tr></thead><tbody id="leaderBody"></tbody></table>
+      <div class="empty" id="leaderEmpty">No session data yet — archive sessions to see analytics</div>
+    </div>
+  </div>
+  <div class="card" id="viewSessions" style="display:none">
+    <div class="cardHd"><h2>📋 Session History</h2><button class="btn small outline" id="exportSessions">Export CSV</button></div>
+    <div class="cardBd" style="overflow-x:auto">
+      <table class="tbl"><thead><tr><th>Date</th><th>Session</th><th>Mode</th><th class="num">Players</th><th class="num">RF Total</th></tr></thead><tbody id="sessionsBody"></tbody></table>
+      <div class="empty" id="sessionsEmpty" style="display:none">No sessions match filters</div>
+    </div>
+  </div>
+  <div class="card" id="viewCharts" style="display:none">
+    <div class="cardHd"><h2>📈 Visual Analytics</h2></div>
+    <div class="cardBd"><div class="chartGrid">
+      <div><div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">Buy-ins vs Payouts</div><div class="chartWrap"><canvas id="buyinPayoutChart"></canvas></div></div>
+      <div><div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">Net Profit Trend</div><div class="chartWrap"><canvas id="profitTrendChart"></canvas></div></div>
+      <div><div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">RF Distribution</div><div class="chartWrap"><canvas id="rfDistChart"></canvas></div></div>
+      <div><div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">Player Profitability</div><div class="chartWrap"><canvas id="profitBarChart"></canvas></div></div>
+    </div></div>
+  </div>
+</div>
+<div class="drillOverlay" id="drillOverlay">
+  <div class="drillPanel"><button class="drillClose" id="drillClose">&times;</button><h2 id="drillTitle" style="margin-bottom:12px"></h2><div id="drillContent"></div></div>
+</div>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmtUsd=v=>"$"+Math.abs(v).toFixed(2);
+  const charts={};let currentSort={col:"net",dir:-1};let filteredData=null;let allSessions=[];
+
+  function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+
+  // ===== Unified sign-in gate: reads same localStorage key as index.html =====
+  const MEMBER_KEY="poker_current_member_v1";
+  function loadCachedMember(){try{return JSON.parse(localStorage.getItem(MEMBER_KEY))}catch{return null}}
+  function clearCachedMember(){localStorage.removeItem(MEMBER_KEY)}
+  const _cachedMember=loadCachedMember();
+  const _isSignedIn=!!(_cachedMember&&_cachedMember.id&&_cachedMember.name);
+  if(!_isSignedIn){
+    document.body.classList.add("gated");
+    $("signInGate").classList.add("open");
+    return; // Stop the IIFE here — no Firebase, no listeners, no renders
+  }
+  // Signed in — show name + sign-out, continue normal boot
+  $("signedInAs").textContent="👤 "+_cachedMember.name;
+  // Step 5: role-gating — users get a read-only view (admin-only tools hidden via CSS)
+  const _role=(_cachedMember.role==='admin')?'admin':'user';
+  if(_role!=='admin'){document.body.classList.add("user-mode")}
+  // Append a subtle role badge next to the name so the user knows what access level they have
+  (function(){
+    const host=$("signedInAs"); if(!host)return;
+    const badge=document.createElement('span');
+    badge.className='roleBadge '+_role;
+    badge.textContent=_role==='admin'?'admin':'read-only';
+    host.appendChild(badge);
+  })();
+  $("signOutBtn").style.display="";
+  $("signOutBtn").addEventListener("click",()=>{
+    if(!confirm("Sign out?"))return;
+    clearCachedMember();
+    location.href="index.html";
+  });
+  // Cross-tab sync: if user signs out elsewhere, reload here
+  window.addEventListener("storage",e=>{if(e.key===MEMBER_KEY)location.reload()});
+
+  // Firebase — bootstrap guard waits for SDK (handles slow/blocked CDN gracefully)
+  const fbConfig={
+    apiKey:"AIzaSyCZKgCKh9qxBcW0Gf3LmQFMsFfVB16rwCM",
+    authDomain:"poker-cashout-bde23.firebaseapp.com",
+    databaseURL:"https://poker-cashout-bde23-default-rtdb.firebaseio.com",
+    projectId:"poker-cashout-bde23",
+    storageBucket:"poker-cashout-bde23.firebasestorage.app",
+    messagingSenderId:"1054875878552",
+    appId:"1:1054875878552:web:94d610f9d20a18bed07ced"
+  };
+  let db=null;
+  function bootFirebase(tries){
+    tries=tries||0;
+    if(typeof firebase==='undefined'||!firebase.initializeApp){
+      if(tries>40){toast("Firebase unavailable — showing local data only");renderFromLocalOnly();return}
+      setTimeout(()=>bootFirebase(tries+1),150);return;
+    }
+    try{
+      if(!firebase.apps.length)firebase.initializeApp(fbConfig);
+      db=firebase.database();
+      attachFirebaseListener();
+    }
+    catch(err){toast("Firebase init failed: "+err.message);renderFromLocalOnly()}
+  }
+  function renderFromLocalOnly(){
+    allSessions=getLocalHistory().map(s=>({...s,source:"local"}));
+    render();
+  }
+
+  // Theme (uses shared poker_theme key; migrate from old ipl_theme if present)
+  const savedTheme=localStorage.getItem("poker_theme")||localStorage.getItem("ipl_theme")||"dark";
+  if(localStorage.getItem("ipl_theme")&&!localStorage.getItem("poker_theme")){localStorage.setItem("poker_theme",savedTheme);localStorage.removeItem("ipl_theme")}
+  document.documentElement.setAttribute("data-theme",savedTheme);
+  $("themeToggle").textContent=savedTheme==="dark"?"🌙":"☀️";
+  $("themeToggle").addEventListener("click",()=>{
+    const t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",t);localStorage.setItem("poker_theme",t);
+    $("themeToggle").textContent=t==="dark"?"🌙":"☀️";renderCharts();
+  });
+
+  // Data
+  function getLocalHistory(){try{return JSON.parse(localStorage.getItem("poker_admin_history_v2")||localStorage.getItem("ipl_session_history")||"[]")}catch(e){return[]}}
+
+  function attachFirebaseListener(){
+    db.ref("session_archive").on("value",snap=>{
+      const data=snap.val()||{};
+      const fbSessions=Object.entries(data).map(([k,v])=>({...v,id:k,source:"firebase"}));
+      const localSessions=getLocalHistory().map(s=>({...s,source:"local"}));
+      const fbDates=new Set(fbSessions.map(s=>s.date));
+      allSessions=[...fbSessions,...localSessions.filter(s=>!fbDates.has(s.date))].sort((a,b)=>new Date(b.date)-new Date(a.date));
+      render();
+      checkMigration(fbDates);
+    },err=>{toast("Read error: "+err.message);renderFromLocalOnly()});
+  }
+
+  // One-time migration: push local-only sessions up to Firebase
+  const MIG_DISMISSED_KEY="ipl_migration_dismissed";
+  const MIG_DONE_KEY="ipl_migration_done";
+  const MIG_BACKUP_KEY="ipl_migration_backup";
+  function checkMigration(fbDates){
+    if(_role!=='admin')return; // Step 5: users can't migrate, don't bother scanning
+    if(localStorage.getItem(MIG_DISMISSED_KEY)||localStorage.getItem(MIG_DONE_KEY))return;
+    const local=getLocalHistory();
+    const missing=local.filter(s=>s&&s.date&&!fbDates.has(s.date));
+    if(!missing.length)return;
+    $("migCount").textContent=missing.length;
+    $("migBanner").classList.add("show");
+  }
+  $("migrateSkipBtn").addEventListener("click",()=>{
+    localStorage.setItem(MIG_DISMISSED_KEY,new Date().toISOString());
+    $("migBanner").classList.remove("show");
+    toast("Skipped — local data kept as-is");
+  });
+  $("migrateBtn").addEventListener("click",async()=>{
+    if(!db){toast("Not connected to Firebase yet");return}
+    const banner=$("migBanner");
+    banner.classList.add("working");
+    $("migProgress").textContent="Checking current Firebase state...";
+    try{
+      // Re-read Firebase right now to avoid racing duplicates
+      const snap=await db.ref("session_archive").once("value");
+      const fbData=snap.val()||{};
+      const fbDates=new Set(Object.values(fbData).map(v=>v&&v.date).filter(Boolean));
+      const local=getLocalHistory();
+      const missing=local.filter(s=>s&&s.date&&!fbDates.has(s.date));
+      if(!missing.length){
+        localStorage.setItem(MIG_DONE_KEY,new Date().toISOString());
+        banner.classList.remove("show","working");
+        toast("Already up to date ✓");
+        return;
+      }
+      // Backup before any destructive action
+      localStorage.setItem(MIG_BACKUP_KEY,JSON.stringify({backedUpAt:new Date().toISOString(),sessions:local}));
+      let done=0;
+      for(const s of missing){
+        $("migProgress").textContent=`Uploading ${done+1} of ${missing.length}...`;
+        const payload={...s,migratedFromLocal:true,migratedAt:new Date().toISOString()};
+        delete payload.source;delete payload.id;
+        await db.ref("session_archive").push(payload);
+        done++;
+      }
+      localStorage.setItem(MIG_DONE_KEY,new Date().toISOString());
+      banner.classList.remove("show","working");
+      toast(`Migrated ${done} session${done===1?"":"s"} ✓`);
+    }catch(err){
+      $("migProgress").textContent="Error: "+err.message;
+      banner.classList.remove("working");
+      toast("Migration failed — local data untouched");
+    }
+  });
+  // safety net: if Firebase takes too long to respond with data, render local while waiting
+  setTimeout(()=>{if(!allSessions.length)renderFromLocalOnly()},2000);
+
+  function getFilteredSessions(){
+    let s=[...allSessions];
+    const player=$("filterPlayer").value,mode=$("filterMode").value,from=$("filterFrom").value,to=$("filterTo").value;
+    if(mode)s=s.filter(x=>(x.mode||"cash")===mode);
+    if(from)s=s.filter(x=>new Date(x.date)>=new Date(from));
+    if(to)s=s.filter(x=>new Date(x.date)<=new Date(to+"T23:59:59"));
+    if(player)s=s.filter(x=>x.players.some(p=>p.name.toLowerCase()===player.toLowerCase()));
+    return s;
+  }
+
+  function aggregatePlayers(sessions){
+    const map=new Map();
+    sessions.forEach(s=>{(s.players||[]).forEach(p=>{
+      const key=p.name.toLowerCase();
+      if(!map.has(key))map.set(key,{name:p.name,sessions:0,wins:0,totalBuyins:0,totalGross:0,totalRF:0,totalCashout:0,totalNet:0,best:-Infinity,worst:Infinity,history:[]});
+      const a=map.get(key);a.name=p.name;a.sessions++;
+      if(p.net>0.001)a.wins++;
+      const buyinAmt=(p.buyins||1)*(s.buyinUsd||50);
+      a.totalBuyins+=buyinAmt;a.totalGross+=(p.gross||0);a.totalRF+=(p.rfTax||0);a.totalCashout+=(p.final||0);a.totalNet+=(p.net||0);
+      if(p.net>a.best)a.best=p.net;if(p.net<a.worst)a.worst=p.net;
+      a.history.push({date:s.date,session:s.sessionName,mode:s.mode||"cash",buyinUsd:s.buyinUsd||50,buyins:p.buyins||1,gross:p.gross||0,rf:p.rfTax||0,cashout:p.final||0,net:p.net||0});
+    })});
+    return[...map.values()];
+  }
+
+  function populatePlayerFilter(){
+    const names=new Set();allSessions.forEach(s=>(s.players||[]).forEach(p=>names.add(p.name)));
+    const sel=$("filterPlayer");const cur=sel.value;
+    sel.innerHTML='<option value="">All Players</option>';
+    [...names].sort().forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o)});
+    sel.value=cur;
+  }
+
+  function renderKPIs(sessions,players){
+    const totalRF=players.reduce((s,p)=>s+p.totalRF,0);
+    const bigWin=players.length?players.reduce((a,b)=>a.totalNet>b.totalNet?a:b):null;
+    const totalBuyins=players.reduce((s,p)=>s+p.totalBuyins,0);
+    $("kpiRow").innerHTML=`
+      <div class="kpi"><div class="kpiLabel">Sessions</div><div class="kpiVal">${sessions.length}</div></div>
+      <div class="kpi"><div class="kpiLabel">Players</div><div class="kpiVal">${players.length}</div></div>
+      <div class="kpi"><div class="kpiLabel">Total RF</div><div class="kpiVal good">${fmtUsd(totalRF)}</div></div>
+      <div class="kpi"><div class="kpiLabel">Top Player</div><div class="kpiVal" style="font-size:16px">${bigWin?bigWin.name:"—"}</div></div>
+      <div class="kpi"><div class="kpiLabel">Biggest Win</div><div class="kpiVal good">${bigWin&&bigWin.totalNet>0?"+"+fmtUsd(bigWin.totalNet):"—"}</div></div>
+      <div class="kpi"><div class="kpiLabel">RF Rate</div><div class="kpiVal">${totalBuyins?(totalRF/totalBuyins*100).toFixed(1)+"%":"—"}</div></div>`;
+  }
+
+  function renderLeaderboard(players){
+    if(!players.length){$("leaderEmpty").style.display="block";$("leaderBody").innerHTML="";return}
+    $("leaderEmpty").style.display="none";
+    const sortFn=(a,b)=>{const c=currentSort.col;const av=c==="name"?a.name.toLowerCase():c==="sessions"?a.sessions:c==="buyins"?a.totalBuyins:c==="gross"?a.totalGross:c==="rf"?a.totalRF:c==="cashout"?a.totalCashout:c==="net"?a.totalNet:c==="winrate"?(a.wins/Math.max(a.sessions,1)):a.totalNet;const bv=c==="name"?b.name.toLowerCase():c==="sessions"?b.sessions:c==="buyins"?b.totalBuyins:c==="gross"?b.totalGross:c==="rf"?b.totalRF:c==="cashout"?b.totalCashout:c==="net"?b.totalNet:c==="winrate"?(b.wins/Math.max(b.sessions,1)):b.totalNet;return typeof av==="string"?currentSort.dir*(av<bv?-1:av>bv?1:0):currentSort.dir*(av-bv)};
+    const sorted=[...players].sort(sortFn);
+    $("leaderBody").innerHTML=sorted.map((p,i)=>{
+      const cls=p.totalNet>0.001?"good":(p.totalNet<-0.001?"bad":"");const sign=p.totalNet>=0?"+":"−";
+      const rc=i===0?"g":(i===1?"s":(i===2?"b":""));const wr=p.sessions?Math.round(p.wins/p.sessions*100):0;
+      return`<tr data-player="${p.name}" style="cursor:pointer"><td><span class="rank ${rc}">${i+1}</span></td><td style="font-weight:600">${p.name}</td><td class="num">${p.sessions}</td><td class="num">${fmtUsd(p.totalBuyins)}</td><td class="num">${fmtUsd(p.totalGross)}</td><td class="num">${fmtUsd(p.totalRF)}</td><td class="num">${fmtUsd(p.totalCashout)}</td><td class="num ${cls}" style="font-weight:700">${sign}${fmtUsd(p.totalNet)}</td><td class="num">${wr}%</td></tr>`}).join("");
+  }
+
+  function renderSessions(sessions){
+    if(!sessions.length){$("sessionsEmpty").style.display="block";$("sessionsBody").innerHTML="";return}
+    $("sessionsEmpty").style.display="none";
+    $("sessionsBody").innerHTML=sessions.map(s=>{
+      const d=new Date(s.date);const mode=s.mode||"cash";
+      const badge=mode==="tournament"?'<span style="color:var(--warn)">🏆</span>':'<span style="color:var(--accent)">♠</span>';
+      return`<tr data-sid="${s.id}" style="cursor:pointer"><td>${d.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td style="font-weight:600">${s.sessionName||"Untitled"}</td><td>${badge} ${mode}</td><td class="num">${s.playerCount||s.players.length}</td><td class="num" style="color:var(--good)">${fmtUsd(s.totalRF||0)}</td></tr>`}).join("");
+  }
+
+  function renderCharts(){
+    const sessions=getFilteredSessions().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const players=aggregatePlayers(sessions);const isDark=document.documentElement.getAttribute("data-theme")==="dark";
+    const grid=isDark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)";const txt=isDark?"#8b95b0":"#5a6278";
+    Object.values(charts).forEach(c=>{if(c)c.destroy()});
+
+    const top10=[...players].sort((a,b)=>b.totalNet-a.totalNet).slice(0,10);
+    charts.bp=new Chart($("buyinPayoutChart").getContext("2d"),{type:"bar",data:{labels:top10.map(p=>p.name),datasets:[{label:"Buy-ins",data:top10.map(p=>p.totalBuyins),backgroundColor:"rgba(255,92,122,.6)"},{label:"Payouts",data:top10.map(p=>p.totalCashout),backgroundColor:"rgba(43,213,118,.6)"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:txt,font:{size:10}}}},scales:{x:{ticks:{color:txt,font:{size:9}},grid:{display:false}},y:{ticks:{color:txt,font:{size:9},callback:v=>"$"+v},grid:{color:grid}}}}});
+
+    const pf=$("filterPlayer").value;
+    if(pf){const cum=[];let run=0;sessions.forEach(s=>{const p=(s.players||[]).find(x=>x.name.toLowerCase()===pf.toLowerCase());if(p){run+=p.net||0;cum.push({date:new Date(s.date),net:run})}});
+      charts.pt=new Chart($("profitTrendChart").getContext("2d"),{type:"line",data:{labels:cum.map(c=>c.date.toLocaleDateString("en-US",{month:"short",day:"numeric"})),datasets:[{label:"Cumulative Net",data:cum.map(c=>c.net),borderColor:"#7aa7ff",backgroundColor:"rgba(122,167,255,.1)",fill:true,tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:txt,font:{size:10}}}},scales:{x:{ticks:{color:txt,font:{size:9}},grid:{display:false}},y:{ticks:{color:txt,font:{size:9},callback:v=>"$"+v},grid:{color:grid}}}}});
+    }else{const topN=[...players].sort((a,b)=>b.sessions-a.sessions).slice(0,5);const colors=["#7aa7ff","#2bd576","#f5c542","#ff5c7a","#ec4899"];
+      const ds=topN.map((pl,idx)=>{let run=0;const pts=sessions.map(s=>{const p=(s.players||[]).find(x=>x.name.toLowerCase()===pl.name.toLowerCase());if(p)run+=p.net||0;return run});return{label:pl.name,data:pts,borderColor:colors[idx],backgroundColor:"transparent",tension:.3,pointRadius:2,borderWidth:2}});
+      charts.pt=new Chart($("profitTrendChart").getContext("2d"),{type:"line",data:{labels:sessions.map(s=>new Date(s.date).toLocaleDateString("en-US",{month:"short",day:"numeric"})),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:txt,font:{size:9}}}},scales:{x:{ticks:{color:txt,font:{size:8},maxTicksLimit:10},grid:{display:false}},y:{ticks:{color:txt,font:{size:9},callback:v=>"$"+v},grid:{color:grid}}}}});
+    }
+
+    const rfP=players.filter(p=>p.totalRF>0).sort((a,b)=>b.totalRF-a.totalRF).slice(0,8);
+    const rc=["#7aa7ff","#2bd576","#f5c542","#ff5c7a","#ec4899","#f97316","#7c3aed","#06b6d4"];
+    charts.rf=new Chart($("rfDistChart").getContext("2d"),{type:"doughnut",data:{labels:rfP.map(p=>p.name),datasets:[{data:rfP.map(p=>p.totalRF),backgroundColor:rc.slice(0,rfP.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{color:txt,font:{size:10},padding:8}}}}});
+
+    const profS=[...players].sort((a,b)=>a.totalNet-b.totalNet).slice(0,12);
+    charts.pb=new Chart($("profitBarChart").getContext("2d"),{type:"bar",data:{labels:profS.map(p=>p.name),datasets:[{label:"Net P/L",data:profS.map(p=>p.totalNet),backgroundColor:profS.map(p=>p.totalNet>=0?"rgba(43,213,118,.6)":"rgba(255,92,122,.6)")}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,font:{size:9},callback:v=>"$"+v},grid:{color:grid}},y:{ticks:{color:txt,font:{size:9}},grid:{display:false}}}}});
+  }
+
+  function showDrill(name,players){
+    const p=players.find(x=>x.name===name);if(!p)return;
+    $("drillTitle").textContent=p.name+" — History";const cls=p.totalNet>0?"good":(p.totalNet<0?"bad":"");const sign=p.totalNet>=0?"+":"−";
+    $("drillContent").innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+      <div class="kpi" style="padding:10px"><div class="kpiLabel">Sessions</div><div class="kpiVal" style="font-size:18px">${p.sessions}</div></div>
+      <div class="kpi" style="padding:10px"><div class="kpiLabel">Win Rate</div><div class="kpiVal" style="font-size:18px">${Math.round(p.wins/p.sessions*100)}%</div></div>
+      <div class="kpi" style="padding:10px"><div class="kpiLabel">Total Net</div><div class="kpiVal ${cls}" style="font-size:18px">${sign}${fmtUsd(p.totalNet)}</div></div>
+    </div><table class="tbl"><thead><tr><th>Date</th><th>Session</th><th class="num">Buy-in</th><th class="num">Cashout</th><th class="num">RF</th><th class="num">Net</th></tr></thead>
+    <tbody>${p.history.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(h=>{const d=new Date(h.date);const nc=h.net>0?"good":(h.net<0?"bad":"");const ns=h.net>=0?"+":"−";
+      return`<tr><td>${d.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${h.session}</td><td class="num">${fmtUsd(h.buyins*(h.buyinUsd||50))}</td><td class="num">${fmtUsd(h.cashout)}</td><td class="num">${fmtUsd(h.rf)}</td><td class="num ${nc}" style="font-weight:700">${ns}${fmtUsd(h.net)}</td></tr>`}).join("")}</tbody></table>`;
+    $("drillOverlay").classList.add("open");
+  }
+
+  function render(){
+    const sessions=getFilteredSessions();const players=aggregatePlayers(sessions);
+    filteredData={sessions,players};populatePlayerFilter();renderKPIs(sessions,players);renderLeaderboard(players);renderSessions(sessions);
+    if($("viewCharts").style.display!=="none")renderCharts();
+  }
+
+  $("applyFilters").addEventListener("click",render);
+  $("clearFilters").addEventListener("click",()=>{$("filterPlayer").value="";$("filterMode").value="";$("filterFrom").value="";$("filterTo").value="";render()});
+  document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");
+    $("viewLeaderboard").style.display=t.dataset.view==="leaderboard"?"":"none";
+    $("viewSessions").style.display=t.dataset.view==="sessions"?"":"none";
+    $("viewCharts").style.display=t.dataset.view==="charts"?"":"none";
+    if(t.dataset.view==="charts")renderCharts();
+  }));
+  document.querySelectorAll("#leaderTable th[data-sort]").forEach(th=>th.addEventListener("click",()=>{const c=th.dataset.sort;if(currentSort.col===c)currentSort.dir*=-1;else{currentSort.col=c;currentSort.dir=-1}if(filteredData)renderLeaderboard(filteredData.players)}));
+  $("leaderBody").addEventListener("click",e=>{const r=e.target.closest("tr[data-player]");if(r&&filteredData)showDrill(r.dataset.player,filteredData.players)});
+  $("drillClose").addEventListener("click",()=>$("drillOverlay").classList.remove("open"));
+  $("drillOverlay").addEventListener("click",e=>{if(e.target===$("drillOverlay"))$("drillOverlay").classList.remove("open")});
+  $("sessionsBody").addEventListener("click",e=>{
+    const r=e.target.closest("tr[data-sid]");if(!r||!filteredData)return;
+    const s=filteredData.sessions.find(x=>x.id===r.dataset.sid);if(!s)return;
+    $("drillTitle").textContent=s.sessionName||"Session";
+    $("drillContent").innerHTML=`<div style="margin-bottom:10px;color:var(--muted);font-size:12px">${new Date(s.date).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})} · ${(s.mode||"cash")==="tournament"?"🏆 Tournament":"♠ Cash"} · Buy-in $${s.buyinUsd||50}${s.archivedByName?' · Archived by '+s.archivedByName:''}</div>
+    <table class="tbl"><thead><tr><th>Player</th><th class="num">Buy-ins</th><th class="num">Gross</th><th class="num">RF</th><th class="num">Cashout</th><th class="num">Net</th></tr></thead>
+    <tbody>${(s.players||[]).map(p=>{const nc=p.net>0?"good":(p.net<0?"bad":"");const ns=p.net>=0?"+":"−";
+      return`<tr><td style="font-weight:600">${p.name}</td><td class="num">${p.buyins||1}</td><td class="num">${fmtUsd(p.gross||0)}</td><td class="num">${fmtUsd(p.rfTax||0)}</td><td class="num">${fmtUsd(p.final||0)}</td><td class="num ${nc}" style="font-weight:700">${ns}${fmtUsd(p.net||0)}</td></tr>`}).join("")}</tbody></table>`;
+    $("drillOverlay").classList.add("open");
+  });
+
+  function downloadCSV(fn,rows){const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=fn;a.click()}
+  $("exportLeaderboard").addEventListener("click",()=>{if(!filteredData)return;const rows=[["Rank","Player","Sessions","Buy-ins","Gross","RF","Cashout","Net","Win%"]];filteredData.players.sort((a,b)=>b.totalNet-a.totalNet).forEach((p,i)=>rows.push([i+1,p.name,p.sessions,p.totalBuyins.toFixed(2),p.totalGross.toFixed(2),p.totalRF.toFixed(2),p.totalCashout.toFixed(2),p.totalNet.toFixed(2),Math.round(p.wins/p.sessions*100)+"%"]));downloadCSV("ipl_leaderboard.csv",rows);toast("Exported ✓")});
+  $("exportSessions").addEventListener("click",()=>{if(!filteredData)return;const rows=[["Date","Session","Mode","Players","RF"]];filteredData.sessions.forEach(s=>rows.push([new Date(s.date).toLocaleDateString(),s.sessionName||"Untitled",s.mode||"cash",s.playerCount||s.players.length,(s.totalRF||0).toFixed(2)]));downloadCSV("ipl_sessions.csv",rows);toast("Exported ✓")});
+  render();
+  bootFirebase();
+})();
+</script>
+</body>
+</html>
