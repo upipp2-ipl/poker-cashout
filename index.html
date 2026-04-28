@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>IPL – Admin</title>
-<meta name="ipl-build" content="v2.5-step10b-design-2026-04-27"/>
+<meta name="ipl-build" content="v2.5-step11-banker-flow-2026-04-27"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -512,7 +512,7 @@ body.participant-mode #participantHome{display:block;animation:fadeIn .25s ease}
 <div id="onlineOn" style="display:none"><div class="note" style="margin:0;text-align:center">Share this code:</div><div class="codeDisplay" id="sessionCodeDisplay"></div><div class="qrWrap" id="qrWrap"></div><div class="playerLink" id="playerLinkDisplay"></div><div class="btnbar" style="justify-content:center;margin-top:8px"><button class="btn small" id="copyCode" type="button">Copy code</button><button class="btn small" id="copyLink" type="button">Copy link</button></div><div class="sep"></div><div style="font-size:11px;color:var(--muted)"><b id="submitCount">0</b> / <span id="submitTotal">0</span> submitted</div><div class="statusGrid" id="statusGrid"></div></div></div></div>
 <div id="placementSection" class="hidden" style="margin-top:14px"><label style="font-weight:700;color:var(--warn);font-size:13px">🏆 Placements</label><div class="placeSelect"><div class="placeItem gold"><div class="placeLabel">🥇 1st (50%)</div><select id="place1"><option value="">Select</option></select></div><div class="placeItem silver"><div class="placeLabel">🥈 2nd (30%)</div><select id="place2"><option value="">Select</option></select></div><div class="placeItem bronze"><div class="placeLabel">🥉 3rd (20%)</div><select id="place3"><option value="">Select</option></select></div></div></div>
 <!-- Cashout panel: renders each player's cashout chip grid inline on Game step -->
-<div class="card" style="margin-top:14px" id="cashoutCard"><div class="hd"><h2>💰 Cashout Entry</h2><div class="btnbar"><button class="btn small" id="collapseAllCashout" type="button">Collapse all</button></div></div>
+<div class="card" style="margin-top:14px" id="cashoutCard"><div class="hd"><h2>💰 Cashout Entry</h2><div class="btnbar"><button class="btn small" id="addPlayerStep2" type="button" style="display:none">+ Add Player</button><button class="btn small" id="collapseAllCashout" type="button">Collapse all</button></div></div>
 <div class="bd">
 <div class="note" style="margin:0 0 8px">Enter each player's cashout chips below, or they submit via their phone.</div>
 <div id="cashoutJumpNav" class="jumpNav"></div>
@@ -1538,8 +1538,14 @@ function applySessionRole(){
   // an empty wizard because state only lives in the starter's localStorage.
   if(role==='banker' && code && onlineSessionCode!==code && !_autoResumeInFlight){
     _autoResumeInFlight=true;
-    resumeSession(code, {autoResume: true, silent: false}).finally(()=>{_autoResumeInFlight=false});
+    resumeSession(code, {autoResume: true, silent: false}).finally(()=>{
+      _autoResumeInFlight=false;
+      // Non-admin bankers start on Step 2 (Game) — skip players setup
+      if(isBankerNotAdmin()) goToStep(2);
+    });
   }
+  // If banker already resumed but navigated, ensure Step 1 stays hidden
+  if(role==='banker' && isBankerNotAdmin() && currentStep===1) goToStep(2);
 }
 
 $("bannerResumeBtn").addEventListener("click",async()=>{const code=$("bannerResumeBtn").dataset.code;if(code)await resumeSession(code)});
@@ -2252,6 +2258,8 @@ function saveBankerToState(memberId,memberName){
   if(matchedPlayer)state.bankId=matchedPlayer.id;
   save();
   renderBankerPickCard();
+  // Refresh step nav to update "Assign to Banker" button text
+  goToStep(currentStep);
   toast(`🎰 ${memberName} will bank tonight`,2400);
 }
 function startAppUI(){state=sanitize(state);checkStateOwnership();const lastCode=localStorage.getItem(ACTIVE_KEY);if(lastCode)$("resumeCode").value=lastCode;setMode("cash");renderAllFull();applySessionRole()}
@@ -2287,20 +2295,17 @@ $("addPlayer").addEventListener("click",async()=>{
   renderAllFull();
   // If session isn't live, we're done — same as before
   if(!onlineSessionCode){toast("Added");return}
-  // Live session: sync the new player to Firebase so they can submit cashouts.
-  // The default name "Player N" is a placeholder — admin will rename it on the
-  // player card. The Firebase write happens with this placeholder; if admin
-  // renames before sharing the link, syncBuyinsToFirebase + admin_state catch up.
   try{
     await addLateJoinerToFirebase(p,newName);
     toast(`✓ ${newName} added — share session code/QR with them`,3200);
   }catch(err){
-    // Roll back local push if Firebase write fails — keeps admin_state consistent
     state.players=state.players.filter(x=>x.id!==p.id);
     renderAllFull();
     toast("Failed to sync — try again: "+(err.message||""),3600);
   }
 });
+// Step 2 Add Player button — forwards to the same logic
+$("addPlayerStep2").addEventListener("click",()=>$("addPlayer").click());
 
 // Build B helper: writes a single new player into the live session's Firebase
 // state (cashouts entry + playerNames append + admin_state push). Idempotent
@@ -2442,24 +2447,35 @@ $("togglePlayersBody").textContent=playersOpen?"Collapse":"Expand";
 $("togglePlayersBody").addEventListener("click",()=>{playersOpen=!playersOpen;$("playersBody").classList.toggle("collapsed",!playersOpen);$("togglePlayersBody").textContent=playersOpen?"Collapse":"Expand";setCollapseState("playersBody",playersOpen)});
 // ===== Wizard step controller =====
 let currentStep=1;const visitedSteps=new Set([1]);
+function isBankerNotAdmin(){
+  return currentMember && currentMember.role!=='admin' && activeSession && activeSession.banker && activeSession.banker.memberId===currentMember.id;
+}
 function goToStep(n){
   n=Math.max(1,Math.min(4,Number(n)||1));
+  // Non-admin bankers skip Step 1 — redirect to Step 2
+  if(n===1 && isBankerNotAdmin()) n=2;
   currentStep=n;visitedSteps.add(n);
   document.querySelectorAll(".stepPanel").forEach(p=>p.classList.toggle("active",Number(p.dataset.step)===n));
   document.querySelectorAll("#stepBar .step").forEach(b=>{
     const s=Number(b.dataset.step);
     b.classList.toggle("active",s===n);
     b.classList.toggle("visited",visitedSteps.has(s)&&s!==n);
+    // Hide Step 1 tab for non-admin bankers
+    if(s===1) b.style.display=isBankerNotAdmin()?'none':'';
   });
-  $("stepPrev").style.visibility=n===1?"hidden":"visible";
-  $("stepNext").textContent=n===4?"🏁 Finish":"Next →";
+  $("stepPrev").style.visibility=(n===1||(n===2 && isBankerNotAdmin()))?"hidden":"visible";
+  // Dynamic button text
+  if(n===4) $("stepNext").textContent="🏁 Finish";
+  else if(n===1 && currentMember?.role==='admin' && state.plannedBankerId && state.plannedBankerId!==currentMember.id) $("stepNext").textContent="✅ Assign to Banker";
+  else $("stepNext").textContent="Next →";
+  // Show/hide Add Player on Step 2
+  const ap2=$("addPlayerStep2");if(ap2)ap2.style.display=(n===2)?'inline-flex':'none';
   window.scrollTo({top:0,behavior:"smooth"});
 }
 document.querySelectorAll("#stepBar .step").forEach(b=>b.addEventListener("click",()=>goToStep(b.dataset.step)));
 $("stepPrev").addEventListener("click",()=>goToStep(currentStep-1));
 $("stepNext").addEventListener("click",()=>{
   if(currentStep===4){
-    // On Step 4 (Settlement), Finish resets for next session
     toast("✅ Session complete! Ready for next game.",3200);
     return;
   }
@@ -2469,6 +2485,12 @@ $("stepNext").addEventListener("click",()=>{
     const card=$("bankerPickCard");
     if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.classList.add('shake');setTimeout(()=>card.classList.remove('shake'),600)}
     return;
+  }
+  // When admin advances from Step 1 with a non-admin banker assigned,
+  // sync state to Firebase so the banker's device picks it up immediately
+  if(currentStep===1 && currentMember?.role==='admin' && state.plannedBankerId && state.plannedBankerId!==currentMember.id){
+    syncStateToFirebase();
+    toast("✅ Players assigned to banker — they'll see them now",2500);
   }
   goToStep(currentStep+1);
 });
