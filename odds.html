@@ -6,33 +6,33 @@
   <title>IPL – Poker Odds Calculator</title>
   <link rel="manifest" href="manifest.json"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="theme-color" content="#1a1f2e"/>
+  <meta name="theme-color" content="#0E0F12"/>
   <style>
-    [data-theme="dark"]{--bg:#1a1f2e;--bg2:#242938;--text:#e8eefc;--muted:#8b95b0;--line:rgba(255,255,255,.08);--card-border:rgba(255,255,255,.08);--input-bg:rgba(0,0,0,.15);--hover:rgba(255,255,255,.04);--good:#2bd576;--warn:#f5c542;--bad:#ff5c7a;--accent:#7aa7ff;--sh:0 4px 20px rgba(0,0,0,.25);--card-bg:#fff;--card-text:#1a1f2e}
-    [data-theme="light"]{--bg:#f0f2f7;--bg2:#fff;--text:#1a1f2e;--muted:#5a6278;--line:rgba(0,0,0,.08);--card-border:rgba(0,0,0,.08);--input-bg:rgba(0,0,0,.03);--hover:rgba(0,0,0,.03);--good:#0d9f4f;--warn:#c68a00;--bad:#dc2f4a;--accent:#4a7fdd;--sh:0 2px 12px rgba(0,0,0,.06);--card-bg:#fff;--card-text:#1a1f2e}
+    [data-theme="dark"]{--bg:#0E0F12;--bg2:#16181D;--bg3:#1D2026;--text:#F4F2EE;--muted:#80807A;--muted2:#B7B5AF;--line:rgba(255,255,255,.06);--card-border:#2A2E37;--input-bg:#1D2026;--hover:rgba(255,255,255,.04);--good:#3FB17F;--warn:#E2A437;--bad:#E15953;--accent:#6EA8FF;--felt:#1F6B4A;--felt2:#2B8C62;--felt-glow:rgba(63,177,127,.18);--gold:#C9A24A;--gold2:#E2B95A;--rouge:#C2453E;--sh:0 1px 0 rgba(255,255,255,.02) inset,0 1px 2px rgba(0,0,0,.4);--card-bg:#F4F2EE;--card-text:#1a1714;--f-display:'Fraunces',Georgia,serif;--f-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace}
+    [data-theme="light"]{--bg:#f0eee9;--bg2:#fff;--bg3:#e8e6e0;--text:#1a1714;--muted:#6e6b64;--muted2:#8a877f;--line:rgba(0,0,0,.08);--card-border:rgba(0,0,0,.10);--input-bg:rgba(0,0,0,.03);--hover:rgba(0,0,0,.03);--good:#1F6B4A;--warn:#c68a00;--bad:#C2453E;--accent:#4a7fdd;--felt:#1F6B4A;--felt2:#2B8C62;--felt-glow:rgba(63,177,127,.12);--gold:#C9A24A;--gold2:#b8932e;--rouge:#C2453E;--sh:0 1px 3px rgba(0,0,0,.08);--card-bg:#fff;--card-text:#1a1714;--f-display:'Fraunces',Georgia,serif;--f-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace}
     *{box-sizing:border-box}
     html{overflow-x:hidden}
-    body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);min-height:100vh;overflow-y:auto;padding-bottom:40px}
+    body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;letter-spacing:-0.005em;min-height:100vh;overflow-y:auto;padding-bottom:40px}
     .iplHeader{text-align:center;padding:20px 14px 10px;padding-top:calc(20px + env(safe-area-inset-top))}
-    .iplLogo{display:inline-flex;align-items:center;gap:6px;font-size:28px;font-weight:800;letter-spacing:1px}
+    .iplLogo{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-display);font-size:28px;font-weight:600;letter-spacing:-0.02em}
     .suit{font-size:20px;opacity:.7}.suit.red{color:var(--bad)}.suit.blk{color:var(--muted)}
     .iplSub{color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.5px}
     .wrap{max-width:600px;margin:0 auto;padding:0 14px 20px}
     .themeToggle{position:fixed;top:12px;right:12px;z-index:100;width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:var(--sh)}
-    .backLink{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:12px;text-decoration:none;margin-bottom:10px;opacity:.7}
+    .backLink{display:inline-flex;align-items:center;gap:4px;color:var(--good);font-size:12px;text-decoration:none;margin-bottom:10px;opacity:.7}
     .backLink:hover{opacity:1}
     .panel{border:1px solid var(--card-border);border-radius:14px;background:var(--bg2);box-shadow:var(--sh);overflow:hidden;margin-bottom:14px}
     .panelHd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-    .panelHd h2{margin:0;font-size:14px;font-weight:700}.panelBd{padding:14px}
+    .panelHd h2{margin:0;font-family:var(--f-display);font-size:15px;font-weight:500}.panelBd{padding:14px}
     .note{color:var(--muted);font-size:11px;line-height:1.4;margin-top:6px}
     .sep{height:1px;background:var(--line);margin:14px 0}
     .muted{color:var(--muted)}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);cursor:pointer;user-select:none;touch-action:manipulation;font-size:14px;font-weight:600;transition:all .15s}
-    .btn:hover{background:var(--hover)}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .btn:hover{background:var(--hover)}.btn.primary{background:var(--felt);color:#fff;border-color:var(--felt);box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 16px -8px rgba(63,177,127,.6)}
     .btn.small{padding:6px 10px;font-size:11px}.btn.danger{color:var(--bad)}
     .btnbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
     label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-    .toastBox{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+    .toastBox{position:fixed;top:calc(16px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;max-width:90vw}
     .toast{padding:9px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--card-border);color:var(--text);font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(-8px) scale(.96);animation:toastIn .25s ease forwards;pointer-events:auto}
     .toast.out{animation:toastOut .2s ease forwards}
     @keyframes toastIn{to{opacity:1;transform:translateY(0) scale(1)}}
@@ -42,7 +42,7 @@
     .cardSlots{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}
     .pcard{width:60px;height:84px;border-radius:8px;border:2px solid var(--card-border);background:var(--card-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;cursor:pointer;user-select:none;transition:all .2s;position:relative;overflow:hidden}
     .pcard.empty{border-style:dashed;background:var(--input-bg);color:var(--muted);font-size:24px}
-    .pcard.empty:hover{border-color:var(--accent);background:rgba(122,167,255,.06)}
+    .pcard.empty:hover{border-color:var(--good);background:var(--felt-glow)}
     .pcard.filled{box-shadow:0 2px 10px rgba(0,0,0,.2)}
     .pcard.filled:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.3)}
     .pcard .rank{font-size:18px;line-height:1;color:var(--card-text)}.pcard .suitChar{font-size:22px;line-height:1}
@@ -59,34 +59,34 @@
     .pickerLabel{font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center;font-weight:600}
     .rankRow{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
     .rankBtn{width:36px;height:36px;border-radius:8px;border:1px solid var(--card-border);background:var(--hover);color:var(--text);font-weight:700;font-size:14px;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center}
-    .rankBtn:hover{border-color:var(--accent);background:rgba(122,167,255,.1)}
-    .rankBtn.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .rankBtn:hover{border-color:var(--good);background:var(--felt-glow)}
+    .rankBtn.selected{background:var(--felt);color:#fff;border-color:var(--felt)}
     .suitRow{display:flex;gap:8px;justify-content:center;margin-top:8px}
     .suitBtn{width:48px;height:48px;border-radius:10px;border:2px solid var(--card-border);background:var(--hover);font-size:24px;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center}
-    .suitBtn:hover{border-color:var(--accent)}.suitBtn.red{color:#dc2626}.suitBtn.blk{color:#222}
-    .suitBtn.selected{border-color:var(--accent);background:rgba(122,167,255,.12);transform:scale(1.1)}
+    .suitBtn:hover{border-color:var(--good)}.suitBtn.red{color:var(--rouge)}.suitBtn.blk{color:#222}
+    .suitBtn.selected{border-color:var(--good);background:var(--felt-glow);transform:scale(1.1)}
     .suitBtn.used{opacity:.25;cursor:not-allowed;pointer-events:none}
 
     /* ── Opponents ── */
     .oppRow{display:flex;align-items:center;gap:12px;justify-content:center;margin:10px 0}
     .oppBtn{width:40px;height:40px;border-radius:10px;border:1px solid var(--card-border);background:var(--input-bg);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
     .oppBtn:hover{background:var(--hover)}.oppBtn:active{background:rgba(122,167,255,.15)}
-    .oppNum{font-size:32px;font-weight:800;min-width:50px;text-align:center}
+    .oppNum{font-family:var(--f-display);font-size:32px;font-weight:600;min-width:50px;text-align:center}
 
     /* ── Results ── */
     .resultsWrap{text-align:center}
-    .bigPct{font-size:48px;font-weight:900;line-height:1}
-    .bigLabel{font-size:12px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+    .bigPct{font-family:var(--f-display);font-size:48px;font-weight:600;line-height:1}
+    .bigLabel{font-size:10px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.12em;font-weight:600}
     .barWrap{height:28px;border-radius:14px;overflow:hidden;display:flex;margin:16px 0;background:var(--input-bg);border:1px solid var(--card-border)}
     .barWin{background:var(--good);transition:width .6s ease}.barTie{background:var(--warn);transition:width .6s ease}.barLose{background:var(--bad);transition:width .6s ease}
     .statRow{display:flex;justify-content:space-around;gap:10px;margin:14px 0}
-    .statBox{text-align:center;flex:1}.statBox .sv{font-size:22px;font-weight:800}.statBox .sl{font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+    .statBox{text-align:center;flex:1}.statBox .sv{font-family:var(--f-mono);font-size:22px;font-weight:600;font-feature-settings:"tnum"}.statBox .sl{font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px;letter-spacing:.08em}
 
     /* ── Hand Strength ── */
-    .handBadge{display:inline-block;padding:6px 14px;border-radius:8px;font-size:14px;font-weight:700;margin:8px 0}
-    .handBadge.strong{background:rgba(43,213,118,.15);color:var(--good);border:1px solid rgba(43,213,118,.3)}
-    .handBadge.medium{background:rgba(245,158,11,.12);color:var(--warn);border:1px solid rgba(245,158,11,.25)}
-    .handBadge.weak{background:rgba(255,92,122,.12);color:var(--bad);border:1px solid rgba(255,92,122,.25)}
+    .handBadge{display:inline-block;padding:6px 14px;border-radius:8px;font-size:14px;font-weight:600;margin:8px 0;font-family:var(--f-display)}
+    .handBadge.strong{background:var(--felt-glow);color:var(--good);border:1px solid rgba(63,177,127,.3)}
+    .handBadge.medium{background:rgba(226,164,55,.12);color:var(--warn);border:1px solid rgba(226,164,55,.25)}
+    .handBadge.weak{background:rgba(225,89,83,.12);color:var(--bad);border:1px solid rgba(225,89,83,.25)}
 
     /* ── Outs ── */
     .outsGrid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0}
@@ -101,6 +101,7 @@
 
     .disclaimer{text-align:center;padding:20px 14px;color:var(--muted);font-size:11px;line-height:1.5;opacity:.5}
   </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="toastBox" id="toastBox"></div>
